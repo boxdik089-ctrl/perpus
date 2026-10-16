@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { readFile, stat } from "fs/promises";
 import path from "path";
+import { isSafePath } from "@/lib/security";
 
 const MIME_MAP: Record<string, string> = {
   ".jpg": "image/jpeg",
@@ -9,7 +10,6 @@ const MIME_MAP: Record<string, string> = {
   ".webp": "image/webp",
   ".gif": "image/gif",
   ".avif": "image/avif",
-  ".svg": "image/svg+xml",
   ".pdf": "application/pdf",
   ".mp3": "audio/mpeg",
   ".wav": "audio/wav",
@@ -28,10 +28,16 @@ export async function GET(
       return new NextResponse("Not Found", { status: 404 });
     }
 
-    // Cegah path traversal
+    // Validasi ketat untuk mencegah serangan Path Traversal
     for (const segment of segments) {
-      if (segment.includes("..") || segment.includes("/") || segment.includes("\\")) {
-        return new NextResponse("Invalid Path", { status: 400 });
+      if (
+        segment.includes("..") ||
+        segment.includes("/") ||
+        segment.includes("\\") ||
+        segment.includes("\0") ||
+        segment.startsWith(".")
+      ) {
+        return new NextResponse("Invalid File Path", { status: 400 });
       }
     }
 
@@ -39,9 +45,9 @@ export async function GET(
     const uploadsDir = path.resolve(process.cwd(), "public", "uploads");
     const fullPath = path.resolve(uploadsDir, relativePath);
 
-    // Pastikan berada di dalam folder public/uploads
-    if (!fullPath.startsWith(uploadsDir)) {
-      return new NextResponse("Forbidden", { status: 403 });
+    // Pastikan path target berada aman di dalam folder uploads
+    if (!isSafePath(uploadsDir, fullPath)) {
+      return new NextResponse("Forbidden: Access Denied", { status: 403 });
     }
 
     const fileStat = await stat(fullPath);
@@ -50,7 +56,12 @@ export async function GET(
     }
 
     const ext = path.extname(fullPath).toLowerCase();
-    const contentType = MIME_MAP[ext] || "application/octet-stream";
+    // Hanya izinkan ekstensi yang terdaftar di MIME_MAP
+    if (!MIME_MAP[ext]) {
+      return new NextResponse("Forbidden: Unsupported File Type", { status: 403 });
+    }
+
+    const contentType = MIME_MAP[ext];
     const fileBuffer = await readFile(fullPath);
 
     return new NextResponse(fileBuffer, {
@@ -58,6 +69,8 @@ export async function GET(
       headers: {
         "Content-Type": contentType,
         "Content-Length": fileStat.size.toString(),
+        "X-Content-Type-Options": "nosniff",
+        "Content-Security-Policy": "default-src 'none'; sandbox",
         "Cache-Control": "public, max-age=31536000, immutable",
       },
     });

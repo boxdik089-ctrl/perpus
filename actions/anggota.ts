@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { generateNoAnggota } from "@/lib/generators";
-import { requireAdminSession, checkRateLimit } from "@/lib/security";
+import { requireAdminSession, checkRateLimit, sanitizeInput } from "@/lib/security";
 
 /**
  * CRUD Anggota (SISWA / GURU / STAF). no_anggota auto-generate sequential.
@@ -142,7 +142,7 @@ export async function getAnggotaForKartu(query: string) {
 }
 
 export async function getKartuDigitalSiswa(query: string) {
-  const value = query.trim();
+  const value = sanitizeInput(query || "", 80);
   if (!value || value.length < 3) return null;
 
   // 1. Cari di Anggota

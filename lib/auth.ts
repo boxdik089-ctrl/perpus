@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-import { checkRateLimit } from "@/lib/security";
+import { checkRateLimit, clearRateLimit, sanitizeInput } from "@/lib/security";
 
 export const authOptions: NextAuthOptions = {
   useSecureCookies: process.env.NODE_ENV === "production",
@@ -19,7 +19,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Username dan password harus diisi");
         }
 
-        const username = credentials.username.trim();
+        const username = sanitizeInput(credentials.username.trim(), 100);
+        if (!username) {
+          throw new Error("Username tidak valid");
+        }
 
         // Perlindungan terhadap Brute-Force: Maksimal 5 percobaan gagal per 5 menit
         const rateCheck = checkRateLimit(`login:${username.toLowerCase()}`, 5, 5 * 60 * 1000);
@@ -61,6 +64,9 @@ export const authOptions: NextAuthOptions = {
         if (!isPasswordValid) {
           throw new Error("Username atau password salah");
         }
+
+        // Bersihkan rate limit saat login sukses
+        clearRateLimit(`login:${username.toLowerCase()}`);
 
         return {
           id: admin.id,

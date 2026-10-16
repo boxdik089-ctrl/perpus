@@ -6,6 +6,8 @@ import { authOptions } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 
+import { validatePasswordStrength, sanitizeInput } from "@/lib/security";
+
 export type UbahPasswordState = {
   ok: boolean;
   message: string;
@@ -34,10 +36,11 @@ export async function ubahPasswordAdmin(formData: {
     };
   }
 
-  if (newPassword.length < 6) {
+  const pwdValidation = validatePasswordStrength(newPassword);
+  if (!pwdValidation.valid) {
     return {
       ok: false,
-      message: "Password baru minimal 6 karakter.",
+      message: pwdValidation.message || "Password tidak memenuhi standar keamanan.",
     };
   }
 
@@ -48,11 +51,11 @@ export async function ubahPasswordAdmin(formData: {
     };
   }
 
-  // Cari admin berdasarkan session (id atau username/email)
-  const username = session.user.email || "";
+  // Cari admin berdasarkan session akun yang sedang aktif
+  const username = sanitizeInput(session.user.email || "", 100);
   const adminId = (session.user as any)?.id;
 
-  let admin = await prisma.admin.findFirst({
+  const admin = await prisma.admin.findFirst({
     where: {
       OR: [
         ...(adminId ? [{ id: adminId }] : []),
@@ -61,26 +64,33 @@ export async function ubahPasswordAdmin(formData: {
     },
   });
 
-  // Fallback jika tidak ditemukan spesifik, ambil admin yang sesuai username "admin" atau yang pertama
-  if (!admin) {
-    admin = await prisma.admin.findFirst({
-      where: { username: "admin" },
-    });
-  }
-  if (!admin) {
-    admin = await prisma.admin.findFirst({
-      orderBy: { createdAt: "asc" },
-    });
-  }
-
   if (!admin) {
     return {
       ok: false,
-      message: "Akun petugas tidak ditemukan di database.",
+      message: "Akun petugas yang sedang aktif tidak ditemukan di database.",
     };
   }
 
-  // Hash password baru dengan bcrypt
+  // Validasi password saat ini jika dikirimkan oleh pengguna
+  if (currentPassword) {
+    let isCurrentValid = false;
+    try {
+      isCurrentValid = await bcrypt.compare(currentPassword, admin.password);
+    } catch {
+      isCurrentValid = false;
+    }
+    if (!isCurrentValid && admin.password === currentPassword) {
+      isCurrentValid = true;
+    }
+    if (!isCurrentValid) {
+      return {
+        ok: false,
+        message: "Password saat ini yang Anda masukkan salah.",
+      };
+    }
+  }
+
+  // Hash password baru dengan bcrypt (cost factor 10)
   const hashedNewPassword = await bcrypt.hash(newPassword, 10);
 
   // Update password di database

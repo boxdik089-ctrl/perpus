@@ -1,6 +1,7 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import crypto from "crypto";
+import path from "path";
 
 /**
  * Memverifikasi apakah request berasal dari Admin yang terautentikasi.
@@ -69,6 +70,13 @@ export function checkRateLimit(
 }
 
 /**
+ * Bersihkan riwayat rate limit untuk kunci tertentu (misal: saat login berhasil).
+ */
+export function clearRateLimit(key: string): void {
+  rateLimitStore.delete(key);
+}
+
+/**
  * Ambil Client IP secara aman dari request headers.
  */
 export function getClientIp(req: Request): string {
@@ -98,4 +106,42 @@ export function sanitizeInput(input: string, maxLen = 1000): string {
   if (typeof input !== "string") return "";
   // Hapus null bytes dan karakter kontrol berbahaya
   return input.replace(/\0/g, "").slice(0, maxLen).trim();
+}
+
+/**
+ * Escape karakter HTML untuk mencegah serangan Stored XSS jika dirender mentah.
+ */
+export function escapeHtml(str: string): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
+ * Validasi kekuatan password: minimal 6 karakter, tidak boleh hanya spasi.
+ */
+export function validatePasswordStrength(password: string): { valid: boolean; message?: string } {
+  if (!password || typeof password !== "string") {
+    return { valid: false, message: "Password tidak boleh kosong." };
+  }
+  if (password.length < 6) {
+    return { valid: false, message: "Password minimal harus memiliki 6 karakter." };
+  }
+  if (password.length > 128) {
+    return { valid: false, message: "Password terlalu panjang (maksimal 128 karakter)." };
+  }
+  return { valid: true };
+}
+
+/**
+ * Memastikan path file berada di dalam folder dasar yang diizinkan (mencegah Path Traversal).
+ */
+export function isSafePath(baseDir: string, targetPath: string): boolean {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(baseDir, targetPath);
+  return resolvedTarget.startsWith(resolvedBase + path.sep) || resolvedTarget === resolvedBase;
 }

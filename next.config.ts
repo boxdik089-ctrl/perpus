@@ -1,5 +1,22 @@
 import type { NextConfig } from "next";
 
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-eval' 'unsafe-inline' blob:;
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  font-src 'self' https://fonts.gstatic.com data:;
+  img-src 'self' blob: data: https://*.google.com https://*.googleapis.com https://images.unsplash.com https://covers.openlibrary.org;
+  media-src 'self' blob: data:;
+  connect-src 'self' https://generativelanguage.googleapis.com https://openlibrary.org https://www.googleapis.com;
+  frame-src 'self';
+  worker-src 'self' blob:;
+  object-src 'none';
+  base-uri 'self';
+  form-action 'self';
+  frame-ancestors 'self';
+  upgrade-insecure-requests;
+`.replace(/\s{2,}/g, " ").trim();
+
 const securityHeaders = [
   {
     key: "X-Frame-Options",
@@ -29,6 +46,14 @@ const securityHeaders = [
     key: "Strict-Transport-Security",
     value: "max-age=63072000; includeSubDomains; preload",
   },
+  {
+    key: "Cross-Origin-Opener-Policy",
+    value: "same-origin-allow-popups",
+  },
+  {
+    key: "Content-Security-Policy",
+    value: cspHeader,
+  },
 ];
 
 const nextConfig: NextConfig = {
@@ -44,6 +69,16 @@ const nextConfig: NextConfig = {
           {
             key: "Cache-Control",
             value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+        ],
+      },
+      {
+        source: "/api/:path*",
+        headers: [
+          ...securityHeaders,
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, max-age=0",
           },
         ],
       },

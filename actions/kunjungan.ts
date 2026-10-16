@@ -3,10 +3,10 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdminSession } from "@/lib/security";
+import { requireAdminSession, sanitizeInput } from "@/lib/security";
 
 export async function createKunjunganByScan(kode: string, keperluanCustom?: string) {
-  const raw = kode.trim();
+  const raw = sanitizeInput(kode || "", 255);
   if (!raw) return { ok: false as const, pesan: "Kode kartu kosong" };
 
   // Parse QR code jika berisi JSON atau URL
@@ -22,6 +22,8 @@ export async function createKunjunganByScan(kode: string, keperluanCustom?: stri
       cleanValue = url.searchParams.get("id") || cleanValue;
     } catch {}
   }
+  cleanValue = sanitizeInput(cleanValue, 100);
+  const keperluanAman = sanitizeInput(keperluanCustom || "", 150);
 
   // Validasi: Tolak barcode buku / ISBN agar tidak salah tercatat sebagai presensi anggota
   const cleanDigits = raw.replace(/[-\s]/g, "");
@@ -133,7 +135,7 @@ export async function createKunjunganByScan(kode: string, keperluanCustom?: stri
     };
   }
 
-  const keperluan = keperluanCustom || "Membaca & Meminjam Buku";
+  const keperluan = keperluanAman || "Membaca & Meminjam Buku";
 
   const kunjungan = await prisma.kunjungan.create({
     data: {
