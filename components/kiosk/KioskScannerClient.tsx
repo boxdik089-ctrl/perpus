@@ -862,7 +862,17 @@ export default function KioskScannerClient({
 
       {/* Footer */}
       <footer className="relative z-10 border-t border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/90 py-3 px-4 text-center text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2 max-w-7xl mx-auto w-full">
-        <span>© {new Date().getFullYear()} Sistem Perpustakaan SMK Negeri 1 Beringin</span>
+        <span>
+          © {new Date().getFullYear()} SMK Negeri 1 Beringin • Ciptaan &amp; Hak Cipta oleh{" "}
+          <a
+            href="https://instagram.com/dprxz_"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
+          >
+            <span>Dimas Ahnaf (@dprxz_)</span>
+          </a>
+        </span>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
           <span>Scanner QR &amp; Barcode Kunjungan Aktif</span>
