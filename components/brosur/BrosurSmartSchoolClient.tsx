@@ -19,16 +19,32 @@ import {
   Award,
   ShieldCheck,
   ExternalLink,
+  Maximize2,
+  X,
+  ZoomIn,
 } from "lucide-react";
+
+interface SystemItem {
+  id: string;
+  title: string;
+  tagline: string;
+  image: string;
+  badge: string;
+  badgeColor: string;
+  accent: string;
+  desc: string;
+  features: string[];
+}
 
 export function BrosurSmartSchoolClient() {
   const [printMode, setPrintMode] = useState<"standard" | "compact">("standard");
+  const [activeModalImg, setActiveModalImg] = useState<SystemItem | null>(null);
 
   const handlePrint = () => {
     window.print();
   };
 
-  const systems = [
+  const systems: SystemItem[] = [
     {
       id: "portal",
       title: "1. Portal Utama Smart School",
@@ -40,7 +56,7 @@ export function BrosurSmartSchoolClient() {
       desc: "Platform gerbang utama yang menyatukan seluruh kanal informasi, profil sekolah, data jurusan, agenda sekolah, dan navigasi aplikasi.",
       features: [
         "Akses cepat ke 5 aplikasi pendukung sekolah",
-        "Statistik real-time siswa (1.440+ Siswa, 135+ Guru, 7 Jurusan)",
+        "Statistik real-time sekolah (1.440+ Siswa, 135+ Guru, 7 Jurusan)",
         "Dokumentasi kegiatan resmi & agenda gladi bersih",
         "Fitur live chat asisten sekolah interaktif",
       ],
@@ -79,18 +95,18 @@ export function BrosurSmartSchoolClient() {
     },
     {
       id: "perpus",
-      title: "4. Perpustakaan Digital & Kios Mandiri",
-      tagline: "Sirkulasi Buku Cepat, AI Pustakawan, & E-Book Reader",
-      image: "/assets/perpustakaan-hero.jpg",
-      badge: "Literasi Modern",
+      title: "4. E-Perpustakaan & Command Center Sirkulasi",
+      tagline: "Sirkulasi Scanner Mandiri, Kios Presensi, & WhatsApp Notifier",
+      image: "/assets/showcase/perpus-digital.png",
+      badge: "Command Center Literasi",
       badgeColor: "bg-violet-500/10 text-violet-700 border-violet-200",
       accent: "from-violet-600 to-purple-600",
-      desc: "Sistem perpustakaan modern dengan meja sirkulasi scanner instan, pencetakan kartu QR, katalog buku digital, dan peringatan WhatsApp otomatis.",
+      desc: "Command Center manajemen buku terpadu dengan sirkulasi scanner instan, transaksi peminjaman & pengembalian, kios presensi mandiri, serta pengingat WhatsApp otomatis.",
       features: [
-        "Sirkulasi kilat: scan kartu anggota ➔ scan buku instan",
-        "Kios presensi mandiri pengunjung perpustakaan",
-        "AI Pustakawan cerdas pemberi rekomendasi literasi",
-        "Notifikasi WhatsApp otomatis bagi peminjam terlambat",
+        "Sirkulasi scanner cepat: scan kartu anggota ➔ scan buku instan",
+        "Transaksi peminjaman, pengembalian buku, & kelola denda",
+        "Layar Kios Presensi mandiri pengunjung perpustakaan",
+        "Notifikasi & pengingat WhatsApp otomatis bagi peminjam",
       ],
     },
     {
@@ -176,7 +192,7 @@ export function BrosurSmartSchoolClient() {
 
       {/* Main Printable Document Sheet (Standard A4 Dimensions on Print) */}
       <main className="max-w-5xl mx-auto my-6 sm:my-10 p-6 sm:p-12 bg-white rounded-3xl shadow-xl border border-slate-200/80 print:my-0 print:p-0 print:border-none print:shadow-none print:rounded-none">
-        {/* KOP RESMI LEMBAGA */}
+        {/* KOP RESMI LEMBAGA DENGAN LOGO SMKN 1 BERINGIN & LOGO SUMUT BERKAH */}
         <section className="border-b-4 border-double border-slate-800 pb-5 mb-8">
           <div className="flex items-center justify-between gap-4">
             {/* Logo SMKN 1 Beringin */}
@@ -255,7 +271,7 @@ export function BrosurSmartSchoolClient() {
             <div className="text-[10px] sm:text-xs text-slate-600 font-medium">Program Keahlian</div>
           </div>
           <div className="p-2">
-            <div className="text-xl sm:text-2xl font-black text-emerald-700">6 Sistem</div>
+            <div className="text-xl sm:text-2xl font-black text-emerald-700">6 Pilar Sistem</div>
             <div className="text-[10px] sm:text-xs text-slate-600 font-medium">Terintegrasi Penuh</div>
           </div>
         </section>
@@ -283,18 +299,50 @@ export function BrosurSmartSchoolClient() {
                 className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between print:break-inside-avoid print:shadow-none"
               >
                 <div>
+                  {/* HEADER DI ATAS FOTO: LOGO SMKN 1 BERINGIN & LOGO KOLABORASI SUMUT BERKAH */}
+                  <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white border-b border-slate-700">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="/assets/logo.png"
+                        alt="SMKN 1 Beringin"
+                        className="w-5 h-5 object-contain"
+                      />
+                      <span className="text-[11px] font-bold tracking-wide uppercase text-slate-100">
+                        SMKN 1 BERINGIN
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <img
+                        src="/assets/logo-kolaborasi.png"
+                        alt="Kolaborasi Sumut Berkah"
+                        className="h-3.5 w-auto object-contain brightness-0 invert"
+                      />
+                      <span className="text-[10px] font-semibold text-emerald-400 tracking-wider uppercase">
+                        SUMUT BERKAH
+                      </span>
+                    </div>
+                  </div>
+
                   {/* Screenshot Mockup Container */}
-                  <div className="relative aspect-[16/9] w-full bg-slate-950/5 border-b border-slate-200 overflow-hidden group">
+                  <div
+                    onClick={() => setActiveModalImg(sys)}
+                    className="relative aspect-[16/9] w-full bg-slate-950/5 border-b border-slate-200 overflow-hidden group cursor-pointer"
+                  >
                     <img
                       src={sys.image}
                       alt={sys.title}
                       loading="lazy"
-                      className="w-full h-full object-cover object-top group-hover:scale-102 transition-transform duration-300"
+                      className="w-full h-full object-cover object-top group-hover:scale-103 transition-transform duration-300"
                     />
                     <div className="absolute top-2 right-2">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md border bg-white/95 shadow-xs ${sys.badgeColor}`}>
                         {sys.badge}
                       </span>
+                    </div>
+                    {/* Hover Zoom Overlay (Hidden in print) */}
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-white print:hidden">
+                      <ZoomIn className="w-5 h-5" />
+                      <span className="text-xs font-semibold">Klik untuk Perbesar</span>
                     </div>
                   </div>
 
@@ -349,7 +397,7 @@ export function BrosurSmartSchoolClient() {
               </div>
               <h4 className="font-bold text-sm text-slate-100">100% Realtime &amp; Otomatis</h4>
               <p className="text-xs text-slate-400 mt-1 leading-snug">
-                Data presensi, peminjaman buku, dan transaksi kantin sinkron seketika ke database pusat.
+                Data presensi, peminjaman buku perpustakaan, dan transaksi kantin sinkron seketika ke database pusat.
               </p>
             </div>
 
@@ -386,7 +434,7 @@ export function BrosurSmartSchoolClient() {
             <div className="text-right text-[11px]">
               <span className="font-bold text-slate-800">Hak Cipta &amp; Lisensi Perangkat Lunak:</span>
               <p className="text-slate-600">
-                Inisiator: <strong>Dika Armadana</strong> • Instagram:{" "}
+                Inisiator &amp; Lead Developer: <strong>Dika Armadana</strong> • Instagram:{" "}
                 <a
                   href="https://instagram.com/dprxz_"
                   target="_blank"
@@ -403,6 +451,86 @@ export function BrosurSmartSchoolClient() {
           </div>
         </footer>
       </main>
+
+      {/* FULLSCREEN LIGHTBOX MODAL (Interactive view) */}
+      {activeModalImg && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 print:hidden animate-fade-in"
+          onClick={() => setActiveModalImg(null)}
+        >
+          <div
+            className="relative bg-white rounded-3xl max-w-4xl w-full overflow-hidden shadow-2xl border border-slate-700"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-5 py-3.5 bg-slate-900 text-white border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <img
+                  src="/assets/logo.png"
+                  alt="SMKN 1 Beringin"
+                  className="w-6 h-6 object-contain"
+                />
+                <div>
+                  <h3 className="text-sm font-bold text-white leading-tight">
+                    {activeModalImg.title}
+                  </h3>
+                  <p className="text-[11px] text-emerald-400 font-medium">
+                    {activeModalImg.tagline}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <img
+                  src="/assets/logo-kolaborasi.png"
+                  alt="Sumut Berkah"
+                  className="h-4 w-auto object-contain brightness-0 invert hidden sm:block"
+                />
+                <button
+                  onClick={() => setActiveModalImg(null)}
+                  className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Image */}
+            <div className="relative aspect-[16/9] w-full bg-slate-950">
+              <img
+                src={activeModalImg.image}
+                alt={activeModalImg.title}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Modal Footer info */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-slate-600">
+              <div>
+                <p className="font-medium text-slate-800">{activeModalImg.desc}</p>
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {activeModalImg.features.map((f, i) => (
+                    <span
+                      key={i}
+                      className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-semibold text-slate-700"
+                    >
+                      ✓ {f}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveModalImg(null)}
+                className="shrink-0 px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-xl hover:bg-slate-800 transition-colors"
+              >
+                Tutup Pratinjau
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
