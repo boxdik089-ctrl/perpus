@@ -109,13 +109,14 @@ export default function InstallPwaBanner() {
     sessionStorage.setItem("perpus_pwa_dismissed", "true");
   };
 
-  // Jangan tampilkan banner atau modal di halaman login atau standalone
-  if (isStandalone || pathname === "/login" || pathname?.startsWith("/login")) return null;
+  // Jangan tampilkan banner atau modal di halaman login, brosur, atau standalone
+  if (isStandalone || pathname === "/login" || pathname?.startsWith("/login") || pathname === "/brosur" || pathname?.startsWith("/brosur")) return null;
 
   const isAdmin = pathname === "/admin" || pathname?.startsWith("/admin");
 
   return (
-    <>
+    <div className="print:hidden">
+
       {/* Banner Mengambang di Bawah Layar */}
       {!isAdmin && showBanner && (
         <aside
@@ -372,6 +373,6 @@ export default function InstallPwaBanner() {
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

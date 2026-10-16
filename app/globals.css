@@ -564,3 +564,71 @@ html[data-theme="dark"] {
 .footer-adaptive-padding {
   padding-bottom: calc(clamp(5.25rem, 9.5dvh, 7.5rem) + env(safe-area-inset-bottom, 0px));
 }
+
+/* ==========================================================================
+   Dedicated High-Precision Print Styles (A4 Standard)
+   ========================================================================== */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm 8mm 8mm 8mm;
+  }
+
+  html, body {
+    background: #ffffff !important;
+    background-image: none !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Sembunyikan elemen dekorasi & interaksi web */
+  header.print-hide,
+  nav.print-hide,
+  aside,
+  button,
+  .floating-adaptive-left,
+  .floating-adaptive-right,
+  .floating-banner-adaptive,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Kontrol halaman cetak presisi */
+  .a4-print-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .a4-page-1 {
+    page-break-after: always !important;
+    break-after: page !important;
+    margin-bottom: 0 !important;
+  }
+
+  .a4-page-2 {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 0 !important;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Pastikan gambar tajam dan tidak kepotong */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid !important;
+  }
+}
