@@ -362,6 +362,19 @@ export default function KatalogBukuClient({
                 <span>E-Book ({ebookCount})</span>
               </button>
               <Link
+                href="/brosur"
+                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 border ${
+                  isDark
+                    ? "text-amber-300 bg-amber-950/40 hover:bg-amber-900/60 border-amber-500/40"
+                    : "text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-300"
+                }`}
+                title="Brosur Resmi Acara Smart School"
+              >
+                <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-500" />
+                <span className="hidden md:inline">Brosur Smart School</span>
+                <span className="md:hidden">Brosur</span>
+              </Link>
+              <Link
                 href="/kartu"
                 className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 border ${
                   isDark

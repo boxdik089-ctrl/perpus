@@ -314,22 +314,30 @@ export function AdminMobileNav() {
               ))}
 
               {/* Extra External & Utility Links */}
-              <div className="pt-2 border-t border-stone-200 dark:border-slate-800 grid grid-cols-2 gap-2">
+              <div className="pt-2 border-t border-stone-200 dark:border-slate-800 grid grid-cols-3 gap-2">
                 <Link
                   href="/"
-                  className="flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700 text-xs font-semibold"
+                  className="flex items-center justify-center gap-1 h-10 px-2 rounded-xl bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700 text-[11px] font-semibold"
                 >
-                  <ExternalLink className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>Katalog Publik</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="truncate">Katalog</span>
+                </Link>
+
+                <Link
+                  href="/brosur"
+                  className="flex items-center justify-center gap-1 h-10 px-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[11px] font-semibold"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                  <span className="truncate">Brosur</span>
                 </Link>
 
                 <button
                   type="button"
                   onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="flex items-center justify-center gap-1.5 h-10 px-3 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-semibold cursor-pointer"
+                  className="flex items-center justify-center gap-1 h-10 px-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-semibold cursor-pointer"
                 >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Keluar Akun</span>
+                  <LogOut className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">Keluar</span>
                 </button>
               </div>
 
