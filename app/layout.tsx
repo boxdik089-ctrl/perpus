@@ -24,8 +24,8 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: "Perpustakaan Digital - SMK Negeri 1 Beringin",
   description: "Sistem informasi perpustakaan digital resmi dan katalog e-book SMK Negeri 1 Beringin",
-  authors: [{ name: "Dimas Ahnaf (@dprxz_)", url: "https://instagram.com/dprxz_" }],
-  creator: "Dimas Ahnaf (@dprxz_)",
+  authors: [{ name: "Dika Armadana (@dprxz_)", url: "https://instagram.com/dprxz_" }],
+  creator: "Dika Armadana (@dprxz_)",
   publisher: "SMK Negeri 1 Beringin",
   manifest: "/manifest.json",
   appleWebApp: {
@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     title: "Perpus SMKN1",
   },
   other: {
-    copyright: "Hak Cipta (c) 2026 Dimas Ahnaf (@dprxz_ / boxdik089-ctrl). Seluruh Hak Cipta Dilindungi Undang-Undang.",
+    copyright: "Hak Cipta (c) 2026 Dika Armadana (@dprxz_ / boxdik089-ctrl). Seluruh Hak Cipta Dilindungi Undang-Undang.",
   },
   icons: {
     icon: [

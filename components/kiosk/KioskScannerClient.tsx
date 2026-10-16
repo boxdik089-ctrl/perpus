@@ -870,7 +870,7 @@ export default function KioskScannerClient({
             rel="noopener noreferrer"
             className="font-bold text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
           >
-            <span>Dimas Ahnaf (@dprxz_)</span>
+            <span>Dika Armadana (@dprxz_)</span>
           </a>
         </span>
         <div className="flex items-center gap-2">

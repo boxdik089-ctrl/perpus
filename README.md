@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://instagram.com/dprxz_"><img src="https://img.shields.io/badge/Developer-Dimas%20Ahnaf%20(@dprxz_)-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram" /></a>
+  <a href="https://instagram.com/dprxz_"><img src="https://img.shields.io/badge/Developer-Dika%20Armadana%20(@dprxz_)-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram" /></a>
   <a href="https://github.com/boxdik089-ctrl"><img src="https://img.shields.io/badge/GitHub-boxdik089--ctrl-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
   <img src="https://img.shields.io/badge/License-Proprietary%20%7C%20All%20Rights%20Reserved-red?style=for-the-badge" alt="License" />
   <img src="https://img.shields.io/badge/Next.js-16%20%7C%20React%2019-black?style=for-the-badge&logo=next.js" alt="Tech" />
@@ -22,7 +22,7 @@
 > ### ⚠️ PERINGATAN HAK KEKAYAAN INTELEKTUAL (HAKI)
 > **Seluruh hak cipta, kepemilikan kode sumber, arsitektur sistem, desain antarmuka, dan dokumentasi proyek ini dilindungi secara hukum.**
 >
-> - **Pencipta / Pengembang Eksklusif**: **Dimas Ahnaf**
+> - **Pencipta / Pengembang Eksklusif**: **Dika Armadana**
 > - **Akun Instagram Resmi**: [@dprxz_](https://instagram.com/dprxz_)
 > - **Akun GitHub**: [boxdik089-ctrl](https://github.com/boxdik089-ctrl)
 > - **Institusi**: SMK Negeri 1 Beringin
@@ -89,7 +89,7 @@
 
 Segala bentuk pertanyaan, kerjasama resmi sekolah, permohonan lisensi, atau perizinan penggunaan perangkat lunak ini dapat menghubungi langsung pengembang:
 
-- **Nama**: Dimas Ahnaf
+- **Nama**: Dika Armadana
 - **Instagram**: [@dprxz_](https://instagram.com/dprxz_)
 - **GitHub**: [boxdik089-ctrl](https://github.com/boxdik089-ctrl)
 - **Repository Resmi**: [github.com/boxdik089-ctrl/perpus](https://github.com/boxdik089-ctrl/perpus)
@@ -97,5 +97,5 @@ Segala bentuk pertanyaan, kerjasama resmi sekolah, permohonan lisensi, atau peri
 ---
 
 <p align="center">
-  <sub>Hak Cipta &copy; 2026 Dimas Ahnaf (@dprxz_). Seluruh Hak Cipta Dilindungi Undang-Undang.</sub>
+  <sub>Hak Cipta &copy; 2026 Dika Armadana (@dprxz_). Seluruh Hak Cipta Dilindungi Undang-Undang.</sub>
 </p>
