@@ -332,6 +332,20 @@ export function AdminMobileNav() {
                   <span>Keluar Akun</span>
                 </button>
               </div>
+
+              {/* Developer Copyright Notice */}
+              <div className="pt-2 pb-1 text-center text-[10px] text-stone-500 dark:text-slate-400">
+                <span>© {new Date().getFullYear()} Dika Armadana (</span>
+                <a
+                  href="https://instagram.com/dprxz_"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
+                >
+                  @dprxz_
+                </a>
+                <span>) • All Rights Reserved</span>
+              </div>
             </div>
           </div>
         </div>

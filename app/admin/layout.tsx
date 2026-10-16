@@ -11,8 +11,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div className="min-h-screen flex flex-col justify-between">
-      <div className="flex-1 pb-20 sm:pb-6">{children}</div>
-      <footer className="hidden sm:flex border-t border-slate-200 dark:border-slate-800/80 bg-white/70 dark:bg-slate-950/70 py-3 px-6 text-center text-[11px] text-slate-500 items-center justify-between gap-2">
+      <div className="flex-1 pb-4 sm:pb-6">{children}</div>
+      <footer className="flex flex-col sm:flex-row border-t border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-950/80 py-3 px-4 sm:px-6 text-center text-[10px] sm:text-[11px] text-slate-500 items-center justify-between gap-1 mb-16 sm:mb-0">
         <span>© {new Date().getFullYear()} Sistem Perpustakaan SMK Negeri 1 Beringin</span>
         <span>
           Ciptaan &amp; Hak Cipta dilindungi:{" "}
