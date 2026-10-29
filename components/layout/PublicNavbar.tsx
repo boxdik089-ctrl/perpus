@@ -42,7 +42,6 @@ export function PublicNavbar({
   const navItems = [
     { id: "katalog", label: "Katalog", href: "/" },
     { id: "kartu", label: "Kartu", href: "/kartu" },
-    { id: "kios", label: "Presensi", href: "/kios" },
     ...(status === "authenticated" && session?.user ? [{ id: "admin", label: "Admin", href: "/admin" }] : []),
   ];
 
