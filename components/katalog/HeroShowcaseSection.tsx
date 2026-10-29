@@ -311,7 +311,7 @@ export default function HeroShowcaseSection({
             <div className="flex items-center gap-6 sm:gap-8">
               {[
                 { num: "500+", label: "Koleksi Buku" },
-                { num: "4 Jurusan", label: "Referensi Lengkap" },
+                { num: "7 Jurusan", label: "Referensi Lengkap" },
                 { num: "24/7", label: "Akses Digital" },
               ].map(({ num, label }) => (
                 <div key={label} className="flex flex-col gap-0.5">
