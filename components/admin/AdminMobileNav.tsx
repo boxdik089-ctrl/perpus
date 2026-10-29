@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { performLogout } from "@/lib/logout";
 import {
   LayoutDashboard,
@@ -28,11 +28,14 @@ import {
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 export function AdminMobileNav() {
+  const router = useRouter();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
 
-  // Close drawer on path change
+  // Close drawer and reset pending navigation on path change
   useEffect(() => {
+    setPendingPath(null);
     setDrawerOpen(false);
   }, [pathname]);
 
@@ -74,6 +77,17 @@ export function AdminMobileNav() {
       isActive: pathname.startsWith("/admin/anggota") || pathname.startsWith("/admin/siswa"),
     },
   ];
+
+  // Aggressively prefetch all bottom tabs on mount so transitions are instant
+  useEffect(() => {
+    navItems.forEach((item) => {
+      try {
+        router.prefetch(item.href);
+      } catch {
+        // ignore
+      }
+    });
+  }, [router]);
 
   const quickLinks = [
     {
@@ -180,37 +194,59 @@ export function AdminMobileNav() {
 
   return (
     <>
+      {/* Top micro progress bar when navigating */}
+      {pendingPath && (
+        <div className="fixed top-0 inset-x-0 h-0.5 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 z-[70] animate-pulse pointer-events-none" />
+      )}
+
       {/* Bottom Safe Spacing Provider (Prevents page content from being clipped) */}
       <div className="h-18 md:hidden pointer-events-none" aria-hidden="true" />
 
-      {/* Floating Bottom Nav Dock */}
+      {/* Floating Bottom Nav Dock (Ultra-responsive, instant tactile tap, zero-delay touch-manipulation) */}
       <nav
-        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-stone-200/90 dark:border-slate-800/90 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] pb-[env(safe-area-inset-bottom,0px)]"
+        className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-t border-stone-200/90 dark:border-slate-800/90 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] pb-[env(safe-area-inset-bottom,0px)] touch-manipulation select-none"
         aria-label="Navigasi Menu Mobile"
       >
-        <div className="grid grid-cols-5 items-center h-14 max-w-lg mx-auto px-1">
+        <div className="grid grid-cols-5 items-stretch h-14 max-w-lg mx-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
+            const isCurrent = pendingPath
+              ? (item.href === "/admin" ? pendingPath === "/admin" : pendingPath.startsWith(item.href))
+              : item.isActive;
+
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center py-1 rounded-xl transition-all duration-200 ${
-                  item.isActive
-                    ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                prefetch={true}
+                onTouchStart={() => {
+                  try {
+                    router.prefetch(item.href);
+                  } catch {
+                    // ignore
+                  }
+                }}
+                onClick={() => {
+                  if (pathname !== item.href) {
+                    setPendingPath(item.href);
+                  }
+                }}
+                className={`w-full h-full flex flex-col items-center justify-center py-1 transition-transform duration-100 active:scale-90 select-none touch-manipulation cursor-pointer ${
+                  isCurrent
+                    ? "text-sky-600 dark:text-sky-400 font-bold"
                     : "text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-slate-200 font-medium"
                 }`}
               >
                 <div
-                  className={`relative p-1 rounded-xl transition-all ${
-                    item.isActive
-                      ? "bg-emerald-500/15 dark:bg-emerald-500/20 scale-105"
+                  className={`relative p-1 rounded-xl transition-all duration-150 ${
+                    isCurrent
+                      ? "bg-sky-500/15 dark:bg-sky-500/20 scale-105"
                       : "hover:bg-stone-100 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  {item.isActive && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-xs" />
+                  {isCurrent && (
+                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-sky-500 shadow-xs" />
                   )}
                 </div>
                 <span className="text-[10px] leading-tight mt-0.5 tracking-tight truncate max-w-[58px]">
@@ -224,16 +260,16 @@ export function AdminMobileNav() {
           <button
             type="button"
             onClick={() => setDrawerOpen(true)}
-            className={`flex flex-col items-center justify-center py-1 rounded-xl transition-all duration-200 cursor-pointer ${
+            className={`w-full h-full flex flex-col items-center justify-center py-1 transition-transform duration-100 active:scale-90 select-none touch-manipulation cursor-pointer ${
               drawerOpen
-                ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                ? "text-sky-600 dark:text-sky-400 font-bold"
                 : "text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-slate-200 font-medium"
             }`}
           >
             <div
-              className={`p-1 rounded-xl transition-all ${
+              className={`p-1 rounded-xl transition-all duration-150 ${
                 drawerOpen
-                  ? "bg-emerald-500/15 dark:bg-emerald-500/20 scale-105"
+                  ? "bg-sky-500/15 dark:bg-sky-500/20 scale-105"
                   : "hover:bg-stone-100 dark:hover:bg-slate-800/60"
               }`}
             >
@@ -299,10 +335,17 @@ export function AdminMobileNav() {
                         <Link
                           key={item.href}
                           href={item.href}
+                          prefetch={true}
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            if (pathname !== item.href && !item.external) {
+                              setPendingPath(item.href);
+                            }
+                          }}
                           target={item.external ? "_blank" : undefined}
-                          className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all text-xs font-semibold ${
+                          className={`flex items-center gap-2.5 p-2.5 rounded-2xl border transition-all text-xs font-semibold active:scale-95 touch-manipulation ${
                             active
-                              ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/40 shadow-xs"
+                              ? "bg-sky-500/15 text-sky-700 dark:text-sky-300 border-sky-500/40 shadow-xs"
                               : "bg-stone-50 dark:bg-slate-800/60 text-stone-700 dark:text-slate-200 border-stone-200/80 dark:border-slate-800 hover:bg-stone-100 dark:hover:bg-slate-800"
                           }`}
                         >
