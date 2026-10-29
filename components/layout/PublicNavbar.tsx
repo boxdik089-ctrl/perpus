@@ -1,9 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
-import { AdminProfileDropdown } from "@/components/admin/AdminProfileDropdown";
 import { useState, useEffect } from "react";
 
 export interface PublicNavbarProps {
@@ -17,7 +15,6 @@ export function PublicNavbar({
   className = "",
   autoHideOnScroll = true,
 }: PublicNavbarProps) {
-  const { data: session, status } = useSession();
   const [isNavVisible, setIsNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [hoveredTab, setHoveredTab] = useState<string | null>(null);
@@ -42,7 +39,6 @@ export function PublicNavbar({
   const navItems = [
     { id: "katalog", label: "Katalog", href: "/" },
     { id: "kartu", label: "Kartu", href: "/kartu" },
-    ...(status === "authenticated" && session?.user ? [{ id: "admin", label: "Admin", href: "/admin" }] : []),
   ];
 
   return (
@@ -120,15 +116,9 @@ export function PublicNavbar({
         {/* Vertical Divider */}
         <div className="w-px h-5 bg-slate-200 dark:bg-white/10 hidden sm:block shrink-0" />
 
-        {/* Right Actions: Authenticated Profile & Theme Toggle */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 pl-0.5">
-          {status === "authenticated" && session?.user ? (
-            <AdminProfileDropdown userName={session.user.name || "Administrator"} />
-          ) : null}
-
-          <div className="shrink-0 flex items-center justify-center">
-            <ThemeToggle />
-          </div>
+        {/* Right Actions: Theme Toggle */}
+        <div className="flex items-center shrink-0 pl-0.5">
+          <ThemeToggle />
         </div>
       </nav>
     </header>
