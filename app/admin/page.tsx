@@ -11,8 +11,6 @@ import {
   AlertCircle,
   Clock,
   ScanLine,
-  PlusCircle,
-  UserPlus,
   QrCode,
   ExternalLink,
   ChevronRight,
@@ -20,7 +18,6 @@ import {
   AlertTriangle,
   CheckCircle2,
   FileText,
-  Sparkles,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { AdminProfileDropdown } from "@/components/admin/AdminProfileDropdown";
@@ -142,62 +139,6 @@ export default async function AdminDashboard() {
 
       {/* Banner Peringatan Keamanan jika masih password default */}
       {isDefaultPassword && <SecurityAlertBanner userName={adminName} />}
-
-      {/* Welcome & Quick Action Bar */}
-      <div className="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-700 rounded-2xl p-4 sm:p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 text-[11px] font-medium backdrop-blur-xs">
-            <Sparkles className="w-3 h-3 text-sky-200" />
-            <span>Panel Operasional Sirkulasi &amp; Katalog</span>
-          </div>
-          <h2 className="text-lg sm:text-xl font-bold tracking-tight">
-            Selamat Bertugas, {adminName}!
-          </h2>
-          <p className="text-xs sm:text-sm text-sky-100/90 max-w-xl">
-            Kelola transaksi peminjaman siswa, scan barcode kartu anggota, dan periksa ketersediaan buku secara langsung.
-          </p>
-        </div>
-
-        {/* Quick Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2 shrink-0">
-          <Link
-            href="/admin/sirkulasi"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-bold text-xs shadow-xs transition-all hover:scale-[1.02]"
-          >
-            <ScanLine className="w-3.5 h-3.5 text-sky-600" />
-            <span>Scan Cepat</span>
-          </Link>
-          <Link
-            href="/admin/transaksi"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
-          >
-            <ArrowLeftRight className="w-3.5 h-3.5" />
-            <span>Pinjam / Kembali</span>
-          </Link>
-          <Link
-            href="/admin/buku/create"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
-          >
-            <PlusCircle className="w-3.5 h-3.5" />
-            <span>Tambah Buku</span>
-          </Link>
-          <Link
-            href="/admin/anggota/create"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Tambah Anggota</span>
-          </Link>
-          <Link
-            href="/kiosk"
-            target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
-          >
-            <QrCode className="w-3.5 h-3.5" />
-            <span>Layar Kios</span>
-          </Link>
-        </div>
-      </div>
 
       {/* KPI Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 animate-fade-up">
