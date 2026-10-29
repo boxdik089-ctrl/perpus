@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminMobileNav } from "./AdminMobileNav";
 
@@ -13,15 +13,48 @@ interface AdminShellClientProps {
 }
 
 export function AdminShellClient({ user, children }: AdminShellClientProps) {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("admin_sidebar_collapsed");
+      if (saved !== null) {
+        setIsCollapsed(saved === "true");
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const handleToggleCollapse = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem("admin_sidebar_collapsed", String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
   return (
-    <div className="min-h-screen flex bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-200 antialiased selection:bg-sky-500 selection:text-white">
-      {/* Persistent Left Sidebar on Desktop */}
-      <aside className="hidden md:flex flex-col w-64 lg:w-72 shrink-0 border-r border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 h-screen overflow-hidden z-30">
-        <AdminSidebar user={user} />
+    <div className="h-screen w-full flex overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 font-sans transition-colors duration-200 antialiased selection:bg-sky-500 selection:text-white print:h-auto print:overflow-visible">
+      {/* Persistent Stationary Left Sidebar on Desktop (Does NOT scroll with page & can be minimized) */}
+      <aside
+        className={`hidden md:flex flex-col h-full shrink-0 border-r border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 z-30 transition-all duration-300 ease-in-out print:hidden ${
+          isCollapsed ? "w-[72px]" : "w-64 lg:w-72"
+        }`}
+      >
+        <AdminSidebar
+          user={user}
+          isCollapsed={isCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+        />
       </aside>
 
-      {/* Main Content Area */}
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen overflow-x-hidden">
+      {/* Main Content Area (Only this section scrolls) */}
+      <div className="flex-1 min-w-0 flex flex-col h-full overflow-y-auto overflow-x-hidden print:h-auto print:overflow-visible">
         <main className="flex-1 min-w-0">
           {children}
         </main>
