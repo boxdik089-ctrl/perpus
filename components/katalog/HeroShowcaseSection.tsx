@@ -101,7 +101,7 @@ export default function HeroShowcaseSection({
   };
 
   return (
-    <section className="relative w-full min-h-[620px] sm:min-h-[700px] lg:min-h-[780px] xl:min-h-[840px] flex items-center overflow-hidden select-none">
+    <section className="relative w-full min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] xl:min-h-[660px] flex items-center overflow-hidden select-none">
 
       {/* ─── BACKGROUND ─────────────────────────────────────── */}
       <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
@@ -138,16 +138,16 @@ export default function HeroShowcaseSection({
       </div>
 
       {/* ─── MAIN CONTENT ───────────────────────────────────── */}
-      <div className="w-full max-w-[1520px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-14 relative z-10 pt-16 sm:pt-20 lg:pt-12 pb-12 lg:pb-8">
+      <div className="w-full max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10 pt-8 sm:pt-12 lg:pt-4 pb-6 lg:pb-4">
 
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
-        <div className="lg:hidden flex flex-col items-center gap-6 w-full">
-          {/* Mobile Open Book Preview */}
-          <div className="relative w-full max-w-[380px] aspect-[705/585] flex items-center justify-center my-1 drop-shadow-xl">
+        <div className="lg:hidden flex flex-col items-center gap-5 w-full">
+          {/* Mobile Open Book Preview - Enlarged & prominent */}
+          <div className="relative w-full max-w-[520px] sm:max-w-[600px] aspect-[1664/1208] flex items-center justify-center my-1 drop-shadow-2xl">
             <img
               src="/assets/showcase/buku-smkn1-beringin.png"
               alt="Buku Profil SMKN 1 Beringin"
-              className="w-full h-full object-contain select-none pointer-events-none"
+              className="w-full h-full object-contain select-none pointer-events-none scale-110 sm:scale-115"
               draggable={false}
             />
           </div>
@@ -156,12 +156,12 @@ export default function HeroShowcaseSection({
           <button
             type="button"
             onClick={() => onSelectBook?.(activeBook)}
-            className={`group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md border shadow-xs cursor-pointer active:scale-95 ${
+            className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border shadow-xs cursor-pointer active:scale-95 ${
               isDark ? "bg-white/[0.08] border-white/12 text-slate-200" : "bg-white border-sky-200/80 text-slate-800 shadow-sm"
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
-            <span className="truncate max-w-[210px]">
+            <span className="truncate max-w-[240px]">
               <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
               <span className="opacity-75 font-normal"> — {activeBook.penulis}</span>
             </span>
@@ -237,10 +237,10 @@ export default function HeroShowcaseSection({
         </div>
 
         {/* ─── DESKTOP LAYOUT (>=1024px) ─── */}
-        <div className="hidden lg:flex items-center justify-between gap-8 xl:gap-14 w-full">
+        <div className="hidden lg:flex items-center justify-between gap-6 xl:gap-10 w-full">
 
-          {/* ═══ LEFT COLUMN: 3D OPEN BOOK SHOWCASE ═══ */}
-          <div className="flex-1 flex flex-col items-center lg:items-start shrink-0 max-w-[620px] xl:max-w-[720px] 2xl:max-w-[780px]">
+          {/* ═══ LEFT COLUMN: 3D OPEN BOOK SHOWCASE (ENLARGED & MAJESTIC) ═══ */}
+          <div className="w-[60%] lg:w-[62%] xl:w-[64%] 2xl:w-[66%] max-w-[920px] xl:max-w-[1020px] 2xl:max-w-[1120px] lg:-ml-4 xl:-ml-8 flex flex-col items-center lg:items-start shrink-0">
             <div
               ref={containerRef}
               onMouseMove={handleMouseMove}
@@ -254,44 +254,44 @@ export default function HeroShowcaseSection({
                 className="relative transition-all duration-300 ease-out"
                 style={{
                   transformStyle: "preserve-3d",
-                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-10px" : "0px"}) scale(${isHovered ? 1.02 : 1})`,
+                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-10px" : "0px"}) scale(${isHovered ? 1.025 : 1})`,
                   animation: mounted ? "openBookFloat 6s ease-in-out infinite" : "none",
                 }}
               >
-                {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo */}
+                {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo - Enlarged */}
                 <img
                   src="/assets/showcase/buku-smkn1-beringin.png"
                   alt="Buku Profil Perpustakaan SMKN 1 Beringin"
-                  className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
+                  className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl scale-[1.18] lg:scale-[1.20] xl:scale-[1.24] 2xl:scale-[1.28] origin-left"
                   draggable={false}
                 />
 
                 {/* Soft interactive floor shadow */}
                 <div
-                  className={`absolute -bottom-6 left-8 right-8 h-8 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
-                    isDark ? "bg-black/60" : "bg-blue-950/20"
+                  className={`absolute -bottom-6 left-6 right-6 h-10 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
+                    isDark ? "bg-black/65" : "bg-blue-950/22"
                   }`}
                   style={{
-                    transform: `scale(${isHovered ? 1.05 : 0.95})`,
+                    transform: `scale(${isHovered ? 1.06 : 0.94})`,
                   }}
                 />
               </div>
             </div>
 
             {/* Active book pill under the book */}
-            <div className="mt-2 pl-4">
+            <div className="mt-3 pl-2">
               <button
                 type="button"
                 onClick={() => onSelectBook?.(activeBook)}
-                className={`group inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md transition-all duration-300 border shadow-xs cursor-pointer active:scale-95 ${
+                className={`group inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-md transition-all duration-300 border shadow-md cursor-pointer active:scale-95 ${
                   isDark
-                    ? "bg-white/[0.08] hover:bg-white/[0.14] border-white/12 text-slate-200 hover:border-sky-400/50"
-                    : "bg-white hover:bg-slate-50 border-sky-200/80 text-slate-800 shadow-sm hover:border-blue-400"
+                    ? "bg-white/[0.08] hover:bg-white/[0.14] border-white/12 text-slate-200 hover:border-sky-400/50 shadow-black/40"
+                    : "bg-white hover:bg-slate-50 border-sky-200/80 text-slate-800 shadow-slate-300/40 hover:border-blue-400"
                 }`}
                 title={`Buka detail dan peminjaman buku ${activeBook.judul}`}
               >
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
-                <span className="truncate max-w-[240px] xl:max-w-[280px]">
+                <span className="truncate max-w-[260px] xl:max-w-[320px]">
                   <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
                   <span className="opacity-75 font-normal"> — {activeBook.penulis}</span>
                 </span>
@@ -301,7 +301,7 @@ export default function HeroShowcaseSection({
           </div>
 
           {/* ═══ RIGHT COLUMN: TYPOGRAPHY, STATS, CTAs ═══ */}
-          <div className="flex-1 flex flex-col items-start gap-6 xl:gap-7 max-w-lg xl:max-w-xl">
+          <div className="w-[40%] lg:w-[38%] xl:w-[36%] 2xl:w-[34%] flex flex-col items-start gap-6 xl:gap-7 shrink-0">
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
