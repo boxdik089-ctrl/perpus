@@ -172,208 +172,275 @@ export default function HeroShowcaseSection({
       </div>
 
       {/* ─── CONTENT WRAPPER ────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-14 w-full pt-24 sm:pt-28 lg:pt-14 pb-16 lg:pb-6">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-14 w-full pt-20 sm:pt-24 lg:pt-14 pb-12 lg:pb-6">
         <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 sm:gap-8 lg:gap-16 xl:gap-20">
 
           {/* ══════════════════════════════════════════════════
-              LEFT COLUMN – 3-D BIG HARDCOVER BOOK (order-2 on mobile, order-1 on desktop)
+              COLUMN 1 – BOOK SHOWCASE
+              Mobile: 4-Book Interactive Fan Showcase (Top of screen)
+              Desktop: Big 3D Hardcover Book with Tilt (Left of screen)
               ══════════════════════════════════════════════════ */}
-          <div className="order-2 lg:order-1 flex flex-col items-center w-full lg:w-auto">
-            <div
-              ref={containerRef}
-              onMouseMove={handleMouseMove}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={handleMouseLeave}
-              onClick={() => onSelectBook?.(activeBook)}
-              title={`Klik untuk melihat detail & ketersediaan ${activeBook.judul}`}
-              className="relative flex-shrink-0 flex items-center justify-center cursor-pointer touch-manipulation group"
-              style={{ perspective: 1400 }}
-            >
-              {/* Glow aura */}
-              <div className={`absolute w-56 h-56 sm:w-80 sm:h-80 lg:w-[480px] lg:h-[480px] rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-700 ${
-                isDark ? "bg-blue-600/35" : "bg-sky-400/50"
-              }`} />
+          <div className="flex flex-col items-center w-full lg:w-auto">
 
-              {/* ── 3-D Book ── */}
-              <div
-                className="relative transition-all duration-300 ease-out"
-                style={{
-                  transformStyle: "preserve-3d",
-                  transform: `rotateZ(${rotateZ}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-10px" : "0px"}) scale(${isHovered ? 1.025 : 1})`,
-                  animation: mounted ? "heroFloat 5s ease-in-out infinite" : "none",
-                }}
-              >
-                {/* Book wrapper – authentic A4 1:1.414 */}
-                <div
-                  className="book-3d-wrapper relative w-[160px] h-[226px] sm:w-[230px] sm:h-[325px] lg:w-[370px] lg:h-[523px]"
-                  style={{ transformStyle: "preserve-3d" }}
-                >
+            {/* ─── MOBILE / TABLET 4-BOOK INTERACTIVE FAN SHOWCASE (lg:hidden) ─── */}
+            <div className="lg:hidden flex flex-col items-center w-full">
+              {/* Fan Stage Wrapper */}
+              <div className="relative w-full max-w-[340px] h-[195px] flex items-center justify-center my-2">
+                {/* Radial glow background */}
+                <div className={`absolute w-64 h-64 rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-700 ${
+                  isDark ? "bg-blue-600/35" : "bg-sky-400/40"
+                }`} />
 
-                  {/* FRONT COVER – displays active book cover */}
-                  <div
-                    className="absolute inset-0 rounded-l-md rounded-r-xl lg:rounded-r-2xl overflow-hidden select-none bg-slate-900"
-                    style={{
-                      border: "1px solid rgba(255,255,255,0.28)",
-                      boxShadow: "0 30px 70px -15px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    {/* Book cover photo */}
-                    <img
-                      key={activeBook.cover_url}
-                      src={activeBook.cover_url}
-                      alt={activeBook.judul}
-                      className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-500 animate-fadeIn"
-                      draggable={false}
-                    />
-
-                    {/* 21st.dev tactile paper texture overlay */}
-                    <div
-                      className="absolute inset-0 pointer-events-none opacity-25 mix-blend-overlay bg-cover bg-center"
-                      style={{ backgroundImage: "url('https://cdn.21st.dev/assets/mirror/1a/1a2ecfcafab4d36898151e5960d2bddd8c13c8b5e3721538ce626d366810e518.avif')" }}
-                    />
-
-                    {/* Spine binding shadow */}
-                    <div className="absolute inset-y-0 left-0 w-[9%] pointer-events-none"
-                      style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.08) 100%)" }} />
-
-                    {/* Dynamic specular sheen that reacts to mouse tilt */}
-                    <div className="absolute inset-0 pointer-events-none transition-all duration-300"
-                      style={{ background: `linear-gradient(${110 + rotateY}deg, rgba(255,255,255,0.14) 0%, transparent 50%)` }} />
-                  </div>
-
-                  {/* PAGE STACK – right */}
-                  <div className="book-page-right absolute top-[4px] bottom-[4px] pointer-events-none"
-                    style={{
-                      transformOrigin: "left center",
-                      transform: "rotateY(90deg)",
-                      background: "repeating-linear-gradient(to bottom, #f8fafc 0px, #f1f5f9 2px, #e2e8f0 3.5px, #cbd5e1 5px)",
-                      boxShadow: "inset 3px 0 10px rgba(0,0,0,0.3), inset -2px 0 6px rgba(0,0,0,0.15)",
-                    }} />
-
-                  {/* PAGE EDGE – top */}
-                  <div className="book-page-top absolute left-[5px] right-[5px] pointer-events-none"
-                    style={{
-                      transformOrigin: "bottom center",
-                      transform: "rotateX(90deg)",
-                      background: "linear-gradient(to right, #94a3b8, #dde6f0 12%, #f1f5f9 88%, #c8d5e2)",
-                      boxShadow: "inset 0 4px 8px rgba(0,0,0,0.22)",
-                    }} />
-
-                  {/* PAGE EDGE – bottom */}
-                  <div className="book-page-bottom absolute left-[5px] right-[5px] pointer-events-none"
-                    style={{
-                      transformOrigin: "top center",
-                      transform: "rotateX(-90deg)",
-                      background: "linear-gradient(to right, #94a3b8, #dde6f0 12%, #f1f5f9 88%, #c8d5e2)",
-                      boxShadow: "inset 0 -4px 8px rgba(0,0,0,0.22)",
-                    }} />
-
-                  {/* BACK COVER */}
-                  <div className="book-back-cover absolute inset-0 rounded-l-md rounded-r-xl lg:rounded-r-2xl pointer-events-none"
-                    style={{
-                      background: isDark ? "#060d20" : "#1e3a8a",
-                      border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.22)"}`,
-                      boxShadow: "-22px 32px 60px rgba(0,0,0,0.5)",
-                    }} />
-
-                  {/* BOOKMARK RIBBON */}
-                  <div className="book-bookmark absolute bottom-0 right-7 lg:right-12 pointer-events-none"
-                    style={{ transform: `translateZ(calc(-0.45 * var(--book-d))) translateY(${isHovered ? "22px" : "15px"}) rotate(3deg)`, transition: "transform 0.5s ease" }}>
-                    <div className="w-3.5 sm:w-4.5 lg:w-5 h-11 sm:h-14 lg:h-18 bg-gradient-to-b from-amber-500 via-amber-400 to-amber-600 shadow"
-                      style={{ clipPath: "polygon(0 0,100% 0,100% 100%,50% 82%,0 100%)" }} />
-                  </div>
-                </div>
-
-                {/* Floor shadow */}
-                <div className="absolute -bottom-6 lg:-bottom-8 left-4 right-4 h-6 lg:h-8 rounded-full blur-2xl pointer-events-none"
-                  style={{
-                    background: isDark ? "rgba(0,0,0,0.75)" : "rgba(14,30,80,0.25)",
-                    transform: `scale(${isHovered ? 1.08 : 0.9})`,
-                    transition: "transform 0.3s ease",
-                  }} />
-              </div>
-            </div>
-
-            {/* Mobile / Tablet Book Switcher strip (under the 3D book) */}
-            <div className="lg:hidden flex flex-col items-center gap-2.5 mt-5 w-full max-w-sm px-2">
-              {/* Active book title badge (clickable to open modal) */}
-              <button
-                type="button"
-                onClick={() => onSelectBook?.(activeBook)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-all duration-300 border shadow-xs cursor-pointer active:scale-95 ${
-                  isDark
-                    ? "bg-white/[0.06] hover:bg-white/[0.12] border-white/10 text-slate-200"
-                    : "bg-white/90 hover:bg-white border-sky-200/80 text-slate-800 shadow-sm"
-                }`}
-                title="Buka detail dan peminjaman buku"
-              >
-                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
-                <span className="truncate max-w-[220px]">
-                  <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
-                  <span className="opacity-75"> — {activeBook.penulis}</span>
-                </span>
-                <ArrowUpRight className="w-3 h-3 text-blue-500 shrink-0" />
-              </button>
-
-              {/* 4 Interactive Book Thumbnail Buttons */}
-              <div className="flex items-center justify-center gap-2 w-full">
-                {catalogFeaturedBooks.map((b, idx) => {
+                {/* The 4 fanned books */}
+                {catalogFeaturedBooks.slice(0, 4).map((book, idx) => {
                   const isActive = idx === activeBookIndex;
+                  const offsets = [
+                    { x: -92, y: 12, rot: -14 },
+                    { x: -30, y: 4,  rot: -5 },
+                    { x: 30,  y: 4,  rot: 5 },
+                    { x: 92,  y: 12, rot: 14 },
+                  ];
+                  const slot = offsets[idx] || { x: 0, y: 0, rot: 0 };
+                  
+                  const currentX = slot.x;
+                  const currentY = isActive ? slot.y - 14 : slot.y;
+                  const currentRot = isActive ? slot.rot * 0.35 : slot.rot;
+                  const currentScale = isActive ? 1.08 : 0.92;
+                  const zIndex = isActive ? 35 : (idx === 1 || idx === 2 ? 20 : 10);
+
                   return (
-                    <button
-                      key={b.id}
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActiveBookIndex(idx);
+                    <div
+                      key={book.id}
+                      onClick={() => {
+                        if (isActive) {
+                          onSelectBook?.(book);
+                        } else {
+                          setActiveBookIndex(idx);
+                        }
                       }}
-                      className={`group flex-1 flex flex-col items-center p-1.5 rounded-xl transition-all duration-200 cursor-pointer touch-manipulation active:scale-95 ${
-                        isActive
-                          ? isDark
-                            ? "bg-blue-600/25 ring-2 ring-blue-500 shadow-md shadow-blue-500/20 scale-105"
-                            : "bg-blue-50 ring-2 ring-blue-600 shadow-md shadow-blue-500/15 scale-105"
-                          : isDark
-                            ? "bg-white/[0.04] hover:bg-white/[0.08] opacity-65 hover:opacity-100"
-                            : "bg-white/80 hover:bg-white border border-slate-200/80 opacity-70 hover:opacity-100 shadow-xs"
-                      }`}
-                      title={b.judul}
+                      className="absolute cursor-pointer touch-manipulation select-none"
+                      style={{
+                        transform: `translate3d(${currentX}px, ${currentY}px, 0px) rotate(${currentRot}deg) scale(${currentScale})`,
+                        zIndex,
+                        transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      }}
+                      title={isActive ? `Buka detail ${book.judul}` : `Tampilkan ${book.judul}`}
                     >
-                      <div className="relative w-full aspect-[1/1.414] max-w-[48px] sm:max-w-[56px] rounded overflow-hidden bg-slate-800 shadow-sm">
-                        <img
-                          src={b.cover_url}
-                          alt={b.judul}
-                          className="w-full h-full object-cover select-none pointer-events-none"
-                          loading="lazy"
-                        />
-                      </div>
-                      <span
-                        className={`text-[10px] font-semibold mt-1 w-full truncate text-center leading-tight ${
+                      {/* Book card wrapper */}
+                      <div
+                        className={`relative w-[105px] h-[148px] rounded-l-xs rounded-r-lg overflow-hidden transition-all duration-300 ${
                           isActive
-                            ? isDark ? "text-blue-400 font-bold" : "text-blue-600 font-bold"
-                            : isDark ? "text-slate-400" : "text-slate-600"
+                            ? "ring-2 ring-sky-400/70 shadow-2xl shadow-sky-500/30"
+                            : "hover:scale-102 hover:-translate-y-1"
                         }`}
+                        style={{
+                          boxShadow: isActive
+                            ? (isDark ? "0 24px 50px -10px rgba(0,0,0,0.85), 0 0 20px rgba(56,189,248,0.3)" : "0 22px 45px -8px rgba(14,30,80,0.35), 0 0 15px rgba(14,165,233,0.25)")
+                            : (isDark ? "0 16px 35px -8px rgba(0,0,0,0.75)" : "0 14px 30px -6px rgba(14,30,80,0.2)"),
+                          border: isActive ? "1px solid rgba(255,255,255,0.4)" : "1px solid rgba(255,255,255,0.2)",
+                        }}
                       >
-                        {b.judul}
-                      </span>
-                    </button>
+                        {/* Cover image */}
+                        <img
+                          src={book.cover_url}
+                          alt={book.judul}
+                          className="w-full h-full object-cover object-center select-none pointer-events-none"
+                          loading="lazy"
+                          draggable={false}
+                        />
+
+                        {/* Inactive overlay */}
+                        {!isActive && (
+                          <div className="absolute inset-0 bg-black/25 transition-opacity" />
+                        )}
+
+                        {/* Spine shadow on left */}
+                        <div
+                          className="absolute inset-y-0 left-0 w-[11%] pointer-events-none"
+                          style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.6) 0%, transparent 100%)" }}
+                        />
+
+                        {/* Right page thickness edge */}
+                        <div className="absolute inset-y-0 right-0 w-[3px] bg-gradient-to-r from-slate-300 to-slate-100 opacity-80" />
+
+                        {/* Dynamic sheen on active book */}
+                        {isActive && (
+                          <div
+                            className="absolute inset-0 pointer-events-none"
+                            style={{ background: "linear-gradient(115deg, rgba(255,255,255,0.22) 0%, transparent 55%)" }}
+                          />
+                        )}
+
+                        {/* Bookmark ribbon on active book */}
+                        {isActive && (
+                          <div className="absolute bottom-0 right-3.5 pointer-events-none">
+                            <div
+                              className="w-3 h-8 bg-gradient-to-b from-amber-500 via-amber-400 to-amber-600 shadow"
+                              style={{ clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% 80%, 0 100%)" }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   );
                 })}
               </div>
-              <p className={`text-[11px] font-medium text-center ${
-                isDark ? "text-slate-400" : "text-slate-500"
-              }`}>
-                Pilih cover buku untuk preview 3D
-              </p>
+
+              {/* Active book title pill & detail button */}
+              <div className="flex flex-col items-center gap-1.5 mt-2 px-3 w-full">
+                <button
+                  type="button"
+                  onClick={() => onSelectBook?.(activeBook)}
+                  className={`group inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-all duration-300 border shadow-xs cursor-pointer active:scale-95 ${
+                    isDark
+                      ? "bg-white/[0.08] hover:bg-white/[0.14] border-white/12 text-slate-200 hover:border-sky-400/50"
+                      : "bg-white hover:bg-slate-50 border-sky-200/80 text-slate-800 shadow-sm hover:border-blue-400"
+                  }`}
+                  title="Buka detail dan peminjaman buku"
+                >
+                  <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
+                  <span className="truncate max-w-[210px]">
+                    <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
+                    <span className="opacity-75 font-normal"> — {activeBook.penulis}</span>
+                  </span>
+                  <ArrowUpRight className="w-3.5 h-3.5 text-blue-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
+                </button>
+                <span className={`text-[11px] font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  Ketuk cover untuk memilih • Ketuk lagi untuk detail
+                </span>
+              </div>
+            </div>
+
+            {/* ─── DESKTOP BIG 3D HARDCOVER BOOK (hidden lg:flex) ─── */}
+            <div className="hidden lg:flex flex-col items-center">
+              <div
+                ref={containerRef}
+                onMouseMove={handleMouseMove}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={handleMouseLeave}
+                onClick={() => onSelectBook?.(activeBook)}
+                title={`Klik untuk melihat detail & ketersediaan ${activeBook.judul}`}
+                className="relative flex-shrink-0 flex items-center justify-center cursor-pointer group"
+                style={{ perspective: 1400 }}
+              >
+                {/* Glow aura */}
+                <div className={`absolute w-[480px] h-[480px] rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-700 ${
+                  isDark ? "bg-blue-600/35" : "bg-sky-400/50"
+                }`} />
+
+                {/* ── 3-D Book ── */}
+                <div
+                  className="relative transition-all duration-300 ease-out"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    transform: `rotateZ(${rotateZ}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-10px" : "0px"}) scale(${isHovered ? 1.025 : 1})`,
+                    animation: mounted ? "heroFloat 5s ease-in-out infinite" : "none",
+                  }}
+                >
+                  {/* Book wrapper – authentic A4 1:1.414 */}
+                  <div
+                    className="relative w-[370px] h-[523px]"
+                    style={{ transformStyle: "preserve-3d" }}
+                  >
+
+                    {/* FRONT COVER – displays active book cover */}
+                    <div
+                      className="absolute inset-0 rounded-l-md rounded-r-2xl overflow-hidden select-none bg-slate-900"
+                      style={{
+                        border: "1px solid rgba(255,255,255,0.28)",
+                        boxShadow: "0 40px 90px -20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      {/* Book cover photo */}
+                      <img
+                        key={activeBook.cover_url}
+                        src={activeBook.cover_url}
+                        alt={activeBook.judul}
+                        className="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-500 animate-fadeIn"
+                        draggable={false}
+                      />
+
+                      {/* 21st.dev tactile paper texture overlay */}
+                      <div
+                        className="absolute inset-0 pointer-events-none opacity-25 mix-blend-overlay bg-cover bg-center"
+                        style={{ backgroundImage: "url('https://cdn.21st.dev/assets/mirror/1a/1a2ecfcafab4d36898151e5960d2bddd8c13c8b5e3721538ce626d366810e518.avif')" }}
+                      />
+
+                      {/* Spine binding shadow */}
+                      <div className="absolute inset-y-0 left-0 w-[9%] pointer-events-none"
+                        style={{ background: "linear-gradient(90deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.08) 100%)" }} />
+
+                      {/* Dynamic specular sheen that reacts to mouse tilt */}
+                      <div className="absolute inset-0 pointer-events-none transition-all duration-300"
+                        style={{ background: `linear-gradient(${110 + rotateY}deg, rgba(255,255,255,0.14) 0%, transparent 50%)` }} />
+                    </div>
+
+                    {/* PAGE STACK – right */}
+                    <div className="absolute top-[5px] bottom-[5px] pointer-events-none"
+                      style={{
+                        width: 36, right: -36,
+                        transformOrigin: "left center",
+                        transform: "rotateY(90deg)",
+                        background: "repeating-linear-gradient(to bottom, #f8fafc 0px, #f1f5f9 2px, #e2e8f0 3.5px, #cbd5e1 5px)",
+                        boxShadow: "inset 3px 0 10px rgba(0,0,0,0.3), inset -2px 0 6px rgba(0,0,0,0.15)",
+                      }} />
+
+                    {/* PAGE EDGE – top */}
+                    <div className="absolute left-[7px] right-[7px] pointer-events-none"
+                      style={{
+                        height: 36, top: -36,
+                        transformOrigin: "bottom center",
+                        transform: "rotateX(90deg)",
+                        background: "linear-gradient(to right, #94a3b8, #dde6f0 12%, #f1f5f9 88%, #c8d5e2)",
+                        boxShadow: "inset 0 4px 8px rgba(0,0,0,0.22)",
+                      }} />
+
+                    {/* PAGE EDGE – bottom */}
+                    <div className="absolute left-[7px] right-[7px] pointer-events-none"
+                      style={{
+                        height: 36, bottom: -36,
+                        transformOrigin: "top center",
+                        transform: "rotateX(-90deg)",
+                        background: "linear-gradient(to right, #94a3b8, #dde6f0 12%, #f1f5f9 88%, #c8d5e2)",
+                        boxShadow: "inset 0 -4px 8px rgba(0,0,0,0.22)",
+                      }} />
+
+                    {/* BACK COVER */}
+                    <div className="absolute inset-0 rounded-l-md rounded-r-2xl pointer-events-none"
+                      style={{
+                        transform: "translateZ(-36px)",
+                        background: isDark ? "#060d20" : "#1e3a8a",
+                        border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.22)"}`,
+                        boxShadow: "-22px 32px 60px rgba(0,0,0,0.5)",
+                      }} />
+
+                    {/* BOOKMARK RIBBON */}
+                    <div className="absolute bottom-0 right-12 pointer-events-none"
+                      style={{ transform: `translateZ(-16px) translateY(${isHovered ? "28px" : "20px"}) rotate(3deg)`, transition: "transform 0.5s ease" }}>
+                      <div className="w-5 h-18 bg-gradient-to-b from-amber-500 via-amber-400 to-amber-600 shadow"
+                        style={{ clipPath: "polygon(0 0,100% 0,100% 100%,50% 82%,0 100%)" }} />
+                    </div>
+                  </div>
+
+                  {/* Floor shadow */}
+                  <div className="absolute -bottom-8 left-4 right-4 h-8 rounded-full blur-2xl pointer-events-none"
+                    style={{
+                      background: isDark ? "rgba(0,0,0,0.75)" : "rgba(14,30,80,0.25)",
+                      transform: `scale(${isHovered ? 1.08 : 0.9})`,
+                      transition: "transform 0.3s ease",
+                    }} />
+                </div>
+              </div>
             </div>
 
           </div>
 
           {/* ══════════════════════════════════════════════════
-              RIGHT COLUMN – HEADLINE + CTA + FLOATING CATALOG BOOKS (order-1 on mobile, order-2 on desktop)
+              COLUMN 2 – HEADLINE + CTA + FLOATING CATALOG BOOKS
+              Mobile: Below the book fan showcase
+              Desktop: Right of the big 3D hardcover book
               ══════════════════════════════════════════════════ */}
-          <div className="order-1 lg:order-2 flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-5 sm:gap-6 lg:gap-8 relative lg:min-h-[580px] lg:justify-center w-full">
+          <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-5 sm:gap-6 lg:gap-8 relative lg:min-h-[580px] lg:justify-center w-full">
 
             {/* Main headline */}
             <div className="flex flex-col gap-2.5 sm:gap-3">
