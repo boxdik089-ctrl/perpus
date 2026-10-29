@@ -110,6 +110,22 @@ export default function HeroShowcaseSection({
     setRotateZ(-6);
   };
 
+  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (!containerRef.current || e.touches.length === 0) return;
+    const touch = e.touches[0];
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = touch.clientX - rect.left - rect.width / 2;
+    const y = touch.clientY - rect.top - rect.height / 2;
+    setRotateY(-6 + (x / rect.width) * 10);
+    setRotateX(12 - (y / rect.height) * 8);
+  };
+
+  const handleTouchEnd = () => {
+    setRotateX(12);
+    setRotateY(-6);
+    setRotateZ(-6);
+  };
+
   const handleSwitchBook = (bookId: string) => {
     const newIdx = catalogFeaturedBooks.findIndex((b) => b.id === bookId);
     if (newIdx !== -1) {
@@ -118,7 +134,7 @@ export default function HeroShowcaseSection({
   };
 
   return (
-    <section className="relative w-full min-h-[680px] sm:min-h-[740px] lg:min-h-[820px] flex items-center overflow-hidden select-none">
+    <section className="relative w-full min-h-[600px] sm:min-h-[700px] lg:min-h-[820px] flex items-center overflow-hidden select-none">
 
       {/* ─── BACKGROUND ─────────────────────────────────────── */}
       <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
@@ -156,23 +172,27 @@ export default function HeroShowcaseSection({
       </div>
 
       {/* ─── CONTENT WRAPPER ────────────────────────────────── */}
-      <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-14 w-full pt-10 pb-4">
-        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-10 lg:gap-16 xl:gap-20">
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-14 w-full pt-24 sm:pt-28 lg:pt-14 pb-16 lg:pb-6">
+        <div className="flex flex-col lg:flex-row items-center lg:items-center gap-6 sm:gap-8 lg:gap-16 xl:gap-20">
 
           {/* ══════════════════════════════════════════════════
-              LEFT COLUMN – 3-D BIG HARDCOVER BOOK
+              LEFT COLUMN – 3-D BIG HARDCOVER BOOK (order-2 on mobile, order-1 on desktop)
               ══════════════════════════════════════════════════ */}
-          <div className="flex flex-col items-center">
+          <div className="order-2 lg:order-1 flex flex-col items-center w-full lg:w-auto">
             <div
               ref={containerRef}
               onMouseMove={handleMouseMove}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={handleMouseLeave}
-              className="relative flex-shrink-0 flex items-center justify-center cursor-pointer"
+              onClick={() => onSelectBook?.(activeBook)}
+              title={`Klik untuk melihat detail & ketersediaan ${activeBook.judul}`}
+              className="relative flex-shrink-0 flex items-center justify-center cursor-pointer touch-manipulation group"
               style={{ perspective: 1400 }}
             >
               {/* Glow aura */}
-              <div className={`absolute w-72 h-72 sm:w-96 sm:h-96 lg:w-[480px] lg:h-[480px] rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-700 ${
+              <div className={`absolute w-56 h-56 sm:w-80 sm:h-80 lg:w-[480px] lg:h-[480px] rounded-full blur-3xl -z-10 pointer-events-none transition-colors duration-700 ${
                 isDark ? "bg-blue-600/35" : "bg-sky-400/50"
               }`} />
 
@@ -187,16 +207,16 @@ export default function HeroShowcaseSection({
               >
                 {/* Book wrapper – authentic A4 1:1.414 */}
                 <div
-                  className="relative w-[256px] h-[362px] sm:w-[310px] sm:h-[438px] lg:w-[370px] lg:h-[523px]"
+                  className="book-3d-wrapper relative w-[160px] h-[226px] sm:w-[230px] sm:h-[325px] lg:w-[370px] lg:h-[523px]"
                   style={{ transformStyle: "preserve-3d" }}
                 >
 
                   {/* FRONT COVER – displays active book cover */}
                   <div
-                    className="absolute inset-0 rounded-l-md rounded-r-2xl overflow-hidden select-none bg-slate-900"
+                    className="absolute inset-0 rounded-l-md rounded-r-xl lg:rounded-r-2xl overflow-hidden select-none bg-slate-900"
                     style={{
                       border: "1px solid rgba(255,255,255,0.28)",
-                      boxShadow: "0 40px 90px -20px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.08)",
+                      boxShadow: "0 30px 70px -15px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.2), 0 0 0 1px rgba(255,255,255,0.08)",
                     }}
                   >
                     {/* Book cover photo */}
@@ -224,9 +244,8 @@ export default function HeroShowcaseSection({
                   </div>
 
                   {/* PAGE STACK – right */}
-                  <div className="absolute top-[5px] bottom-[5px] pointer-events-none"
+                  <div className="book-page-right absolute top-[4px] bottom-[4px] pointer-events-none"
                     style={{
-                      width: 36, right: -36,
                       transformOrigin: "left center",
                       transform: "rotateY(90deg)",
                       background: "repeating-linear-gradient(to bottom, #f8fafc 0px, #f1f5f9 2px, #e2e8f0 3.5px, #cbd5e1 5px)",
@@ -234,9 +253,8 @@ export default function HeroShowcaseSection({
                     }} />
 
                   {/* PAGE EDGE – top */}
-                  <div className="absolute left-[7px] right-[7px] pointer-events-none"
+                  <div className="book-page-top absolute left-[5px] right-[5px] pointer-events-none"
                     style={{
-                      height: 36, top: -36,
                       transformOrigin: "bottom center",
                       transform: "rotateX(90deg)",
                       background: "linear-gradient(to right, #94a3b8, #dde6f0 12%, #f1f5f9 88%, #c8d5e2)",
@@ -244,9 +262,8 @@ export default function HeroShowcaseSection({
                     }} />
 
                   {/* PAGE EDGE – bottom */}
-                  <div className="absolute left-[7px] right-[7px] pointer-events-none"
+                  <div className="book-page-bottom absolute left-[5px] right-[5px] pointer-events-none"
                     style={{
-                      height: 36, bottom: -36,
                       transformOrigin: "top center",
                       transform: "rotateX(-90deg)",
                       background: "linear-gradient(to right, #94a3b8, #dde6f0 12%, #f1f5f9 88%, #c8d5e2)",
@@ -254,24 +271,23 @@ export default function HeroShowcaseSection({
                     }} />
 
                   {/* BACK COVER */}
-                  <div className="absolute inset-0 rounded-l-md rounded-r-2xl pointer-events-none"
+                  <div className="book-back-cover absolute inset-0 rounded-l-md rounded-r-xl lg:rounded-r-2xl pointer-events-none"
                     style={{
-                      transform: "translateZ(-36px)",
                       background: isDark ? "#060d20" : "#1e3a8a",
                       border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.22)"}`,
                       boxShadow: "-22px 32px 60px rgba(0,0,0,0.5)",
                     }} />
 
                   {/* BOOKMARK RIBBON */}
-                  <div className="absolute bottom-0 right-12 pointer-events-none"
-                    style={{ transform: `translateZ(-16px) translateY(${isHovered ? "28px" : "20px"}) rotate(3deg)`, transition: "transform 0.5s ease" }}>
-                    <div className="w-4 sm:w-5 h-14 sm:h-18 bg-gradient-to-b from-amber-500 via-amber-400 to-amber-600 shadow"
+                  <div className="book-bookmark absolute bottom-0 right-7 lg:right-12 pointer-events-none"
+                    style={{ transform: `translateZ(calc(-0.45 * var(--book-d))) translateY(${isHovered ? "22px" : "15px"}) rotate(3deg)`, transition: "transform 0.5s ease" }}>
+                    <div className="w-3.5 sm:w-4.5 lg:w-5 h-11 sm:h-14 lg:h-18 bg-gradient-to-b from-amber-500 via-amber-400 to-amber-600 shadow"
                       style={{ clipPath: "polygon(0 0,100% 0,100% 100%,50% 82%,0 100%)" }} />
                   </div>
                 </div>
 
                 {/* Floor shadow */}
-                <div className="absolute -bottom-8 left-4 right-4 h-8 rounded-full blur-2xl pointer-events-none"
+                <div className="absolute -bottom-6 lg:-bottom-8 left-4 right-4 h-6 lg:h-8 rounded-full blur-2xl pointer-events-none"
                   style={{
                     background: isDark ? "rgba(0,0,0,0.75)" : "rgba(14,30,80,0.25)",
                     transform: `scale(${isHovered ? 1.08 : 0.9})`,
@@ -280,17 +296,88 @@ export default function HeroShowcaseSection({
               </div>
             </div>
 
+            {/* Mobile / Tablet Book Switcher strip (under the 3D book) */}
+            <div className="lg:hidden flex flex-col items-center gap-2.5 mt-5 w-full max-w-sm px-2">
+              {/* Active book title badge (clickable to open modal) */}
+              <button
+                type="button"
+                onClick={() => onSelectBook?.(activeBook)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold backdrop-blur-md transition-all duration-300 border shadow-xs cursor-pointer active:scale-95 ${
+                  isDark
+                    ? "bg-white/[0.06] hover:bg-white/[0.12] border-white/10 text-slate-200"
+                    : "bg-white/90 hover:bg-white border-sky-200/80 text-slate-800 shadow-sm"
+                }`}
+                title="Buka detail dan peminjaman buku"
+              >
+                <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
+                <span className="truncate max-w-[220px]">
+                  <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
+                  <span className="opacity-75"> — {activeBook.penulis}</span>
+                </span>
+                <ArrowUpRight className="w-3 h-3 text-blue-500 shrink-0" />
+              </button>
+
+              {/* 4 Interactive Book Thumbnail Buttons */}
+              <div className="flex items-center justify-center gap-2 w-full">
+                {catalogFeaturedBooks.map((b, idx) => {
+                  const isActive = idx === activeBookIndex;
+                  return (
+                    <button
+                      key={b.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveBookIndex(idx);
+                      }}
+                      className={`group flex-1 flex flex-col items-center p-1.5 rounded-xl transition-all duration-200 cursor-pointer touch-manipulation active:scale-95 ${
+                        isActive
+                          ? isDark
+                            ? "bg-blue-600/25 ring-2 ring-blue-500 shadow-md shadow-blue-500/20 scale-105"
+                            : "bg-blue-50 ring-2 ring-blue-600 shadow-md shadow-blue-500/15 scale-105"
+                          : isDark
+                            ? "bg-white/[0.04] hover:bg-white/[0.08] opacity-65 hover:opacity-100"
+                            : "bg-white/80 hover:bg-white border border-slate-200/80 opacity-70 hover:opacity-100 shadow-xs"
+                      }`}
+                      title={b.judul}
+                    >
+                      <div className="relative w-full aspect-[1/1.414] max-w-[48px] sm:max-w-[56px] rounded overflow-hidden bg-slate-800 shadow-sm">
+                        <img
+                          src={b.cover_url}
+                          alt={b.judul}
+                          className="w-full h-full object-cover select-none pointer-events-none"
+                          loading="lazy"
+                        />
+                      </div>
+                      <span
+                        className={`text-[10px] font-semibold mt-1 w-full truncate text-center leading-tight ${
+                          isActive
+                            ? isDark ? "text-blue-400 font-bold" : "text-blue-600 font-bold"
+                            : isDark ? "text-slate-400" : "text-slate-600"
+                        }`}
+                      >
+                        {b.judul}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              <p className={`text-[11px] font-medium text-center ${
+                isDark ? "text-slate-400" : "text-slate-500"
+              }`}>
+                Pilih cover buku untuk preview 3D
+              </p>
+            </div>
 
           </div>
 
           {/* ══════════════════════════════════════════════════
-              RIGHT COLUMN – HEADLINE + CTA + FLOATING CATALOG BOOKS
+              RIGHT COLUMN – HEADLINE + CTA + FLOATING CATALOG BOOKS (order-1 on mobile, order-2 on desktop)
               ══════════════════════════════════════════════════ */}
-          <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-6 lg:gap-8 relative lg:min-h-[580px] lg:justify-center">
+          <div className="order-1 lg:order-2 flex-1 flex flex-col items-center lg:items-start text-center lg:text-left gap-5 sm:gap-6 lg:gap-8 relative lg:min-h-[580px] lg:justify-center w-full">
 
             {/* Main headline */}
-            <div className="flex flex-col gap-3">
-              <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-[1.04] ${
+            <div className="flex flex-col gap-2.5 sm:gap-3">
+              <h1 className={`text-3xl sm:text-4xl lg:text-6xl font-black tracking-tight leading-[1.08] ${
                 isDark ? "text-white" : "text-slate-900"
               }`}>
                 Baca.{" "}
@@ -300,7 +387,7 @@ export default function HeroShowcaseSection({
                 <br />
                 <span className={isDark ? "text-white" : "text-slate-900"}>Berkembang.</span>
               </h1>
-              <p className={`text-base sm:text-lg leading-relaxed max-w-md ${
+              <p className={`text-sm sm:text-base lg:text-lg leading-relaxed max-w-md ${
                 isDark ? "text-slate-300" : "text-slate-600"
               }`}>
                 Ribuan koleksi buku tersedia digital. Temukan buku pelajaran, novel, dan referensi kejuruan untuk mendukung belajarmu.
@@ -308,7 +395,7 @@ export default function HeroShowcaseSection({
             </div>
 
             {/* Stats strip */}
-            <div className="flex items-center gap-6 sm:gap-8">
+            <div className="flex items-center justify-center lg:justify-start gap-5 sm:gap-8">
               {[
                 { num: "500+", label: "Koleksi Buku" },
                 { num: "7 Jurusan", label: "Referensi Lengkap" },
@@ -326,22 +413,22 @@ export default function HeroShowcaseSection({
             </div>
 
             {/* CTA buttons */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3.5">
+            <div className="flex items-center justify-center lg:justify-start gap-2.5 sm:gap-3.5">
               <a
                 href="#katalog-section"
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById("katalog-section")?.scrollIntoView({ behavior: "smooth" });
                 }}
-                className="group inline-flex items-center gap-2.5 px-7 py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm tracking-wide shadow-lg shadow-blue-600/35 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
+                className="group inline-flex items-center gap-2 px-5 sm:px-7 py-2.5 sm:py-3.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-blue-600/35 hover:shadow-blue-500/40 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>Lihat Koleksi</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </a>
               <Link
                 href="/kartu"
-                className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm border transition-all active:scale-95 hover:scale-[1.02] ${
+                className={`inline-flex items-center gap-1.5 px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full font-bold text-xs sm:text-sm border transition-all active:scale-95 hover:scale-[1.02] ${
                   isDark
                     ? "bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 border-white/10 hover:border-white/20"
                     : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 hover:border-slate-300 shadow-sm"
@@ -497,6 +584,35 @@ export default function HeroShowcaseSection({
 
       {/* Keyframe animations via style tag */}
       <style>{`
+        .book-3d-wrapper {
+          --book-d: 22px;
+        }
+        @media (min-width: 640px) {
+          .book-3d-wrapper {
+            --book-d: 28px;
+          }
+        }
+        @media (min-width: 1024px) {
+          .book-3d-wrapper {
+            --book-d: 36px;
+          }
+        }
+        .book-page-right {
+          width: var(--book-d);
+          right: calc(-1 * var(--book-d));
+        }
+        .book-page-top {
+          height: var(--book-d);
+          top: calc(-1 * var(--book-d));
+        }
+        .book-page-bottom {
+          height: var(--book-d);
+          bottom: calc(-1 * var(--book-d));
+        }
+        .book-back-cover {
+          transform: translateZ(calc(-1 * var(--book-d)));
+        }
+
         @keyframes heroFloat {
           0%, 100% { transform: rotateZ(${rotateZ}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(0px); }
           50%       { transform: rotateZ(${rotateZ}deg) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-10px); }
