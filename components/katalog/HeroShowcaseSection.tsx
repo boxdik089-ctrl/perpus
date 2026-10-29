@@ -101,7 +101,7 @@ export default function HeroShowcaseSection({
   };
 
   return (
-    <section className="relative w-full min-h-[520px] sm:min-h-[580px] lg:min-h-[620px] xl:min-h-[660px] flex items-center overflow-hidden select-none">
+    <section className="relative w-full min-h-[580px] sm:min-h-[640px] lg:min-h-[680px] xl:min-h-[720px] flex items-center overflow-hidden select-none">
 
       {/* ─── BACKGROUND ─────────────────────────────────────── */}
       <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
@@ -138,16 +138,16 @@ export default function HeroShowcaseSection({
       </div>
 
       {/* ─── MAIN CONTENT ───────────────────────────────────── */}
-      <div className="w-full max-w-[1560px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12 relative z-10 pt-8 sm:pt-12 lg:pt-4 pb-6 lg:pb-4">
+      <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-14 relative z-10 pt-12 sm:pt-16 lg:pt-8 pb-10 lg:pb-8">
 
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
-          {/* Mobile Open Book Preview - Enlarged & prominent */}
-          <div className="relative w-full max-w-[520px] sm:max-w-[600px] aspect-[1664/1208] flex items-center justify-center my-1 drop-shadow-2xl">
+          {/* Mobile Open Book Preview - Well proportioned */}
+          <div className="relative w-full max-w-[360px] sm:max-w-[420px] aspect-[1664/1208] flex items-center justify-center my-1 drop-shadow-2xl">
             <img
               src="/assets/showcase/buku-smkn1-beringin.png"
               alt="Buku Profil SMKN 1 Beringin"
-              className="w-full h-full object-contain select-none pointer-events-none scale-110 sm:scale-115"
+              className="w-full h-full object-contain select-none pointer-events-none"
               draggable={false}
             />
           </div>
@@ -237,10 +237,10 @@ export default function HeroShowcaseSection({
         </div>
 
         {/* ─── DESKTOP LAYOUT (>=1024px) ─── */}
-        <div className="hidden lg:flex items-center justify-between gap-6 xl:gap-10 w-full">
+        <div className="hidden lg:flex items-center justify-between gap-8 xl:gap-14 w-full">
 
-          {/* ═══ LEFT COLUMN: 3D OPEN BOOK SHOWCASE (ENLARGED & MAJESTIC) ═══ */}
-          <div className="w-[60%] lg:w-[62%] xl:w-[64%] 2xl:w-[66%] max-w-[920px] xl:max-w-[1020px] 2xl:max-w-[1120px] lg:-ml-4 xl:-ml-8 flex flex-col items-center lg:items-start shrink-0">
+          {/* ═══ LEFT COLUMN: 3D OPEN BOOK SHOWCASE (BALANCED & ELEGANT) ═══ */}
+          <div className="w-[50%] xl:w-[52%] 2xl:w-[54%] max-w-[680px] xl:max-w-[760px] 2xl:max-w-[820px] flex flex-col items-center lg:items-start shrink-0">
             <div
               ref={containerRef}
               onMouseMove={handleMouseMove}
@@ -254,25 +254,25 @@ export default function HeroShowcaseSection({
                 className="relative transition-all duration-300 ease-out"
                 style={{
                   transformStyle: "preserve-3d",
-                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-10px" : "0px"}) scale(${isHovered ? 1.025 : 1})`,
+                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-8px" : "0px"}) scale(${isHovered ? 1.02 : 1})`,
                   animation: mounted ? "openBookFloat 6s ease-in-out infinite" : "none",
                 }}
               >
-                {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo - Enlarged */}
+                {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo */}
                 <img
                   src="/assets/showcase/buku-smkn1-beringin.png"
                   alt="Buku Profil Perpustakaan SMKN 1 Beringin"
-                  className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl scale-[1.18] lg:scale-[1.20] xl:scale-[1.24] 2xl:scale-[1.28] origin-left"
+                  className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
                   draggable={false}
                 />
 
                 {/* Soft interactive floor shadow */}
                 <div
-                  className={`absolute -bottom-6 left-6 right-6 h-10 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
-                    isDark ? "bg-black/65" : "bg-blue-950/22"
+                  className={`absolute -bottom-6 left-6 right-6 h-8 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
+                    isDark ? "bg-black/65" : "bg-blue-950/20"
                   }`}
                   style={{
-                    transform: `scale(${isHovered ? 1.06 : 0.94})`,
+                    transform: `scale(${isHovered ? 1.05 : 0.95})`,
                   }}
                 />
               </div>
@@ -301,7 +301,7 @@ export default function HeroShowcaseSection({
           </div>
 
           {/* ═══ RIGHT COLUMN: TYPOGRAPHY, STATS, CTAs ═══ */}
-          <div className="w-[40%] lg:w-[38%] xl:w-[36%] 2xl:w-[34%] flex flex-col items-start gap-6 xl:gap-7 shrink-0">
+          <div className="w-[50%] xl:w-[48%] 2xl:w-[46%] flex flex-col items-start gap-6 xl:gap-7 shrink-0">
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
