@@ -1,44 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Outfit:wght@500;600;700;800;900&display=swap');
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *, [data-theme="dark"], [data-theme="dark"] *));
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
-  --card-bg: #ffffff;
-  --card-border: #e2e8f0;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card-bg: #111218;
+  --card-border: #27272a;
+
+  /* 3D Realistic Book Tokens */
+  --context-card-border: hsla(0, 0%, 92%, 1);
+  --ds-amber-600: oklch(80.25% 0.1953 73.59);
+  --ds-gray-200: hsla(0, 0%, 92%, 1);
+  --ds-gray-1000: hsla(0, 0%, 9%, 1);
+  --ds-gray-alpha-400: hsla(0, 0%, 0%, 0.08);
+  --ds-background-200: hsla(0, 0%, 98%, 1);
+  --ds-book-bind: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0) 12%, rgba(255, 255, 255, 0.25) 29.25%, rgba(255, 255, 255, 0) 50.5%, rgba(255, 255, 255, 0) 75.25%, rgba(255, 255, 255, 0.25) 91%, rgba(255, 255, 255, 0)), linear-gradient(90deg, rgba(0, 0, 0, 0.03), rgba(0, 0, 0, 0.1) 12%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.02) 50%, rgba(0, 0, 0, 0.2) 73.5%, rgba(0, 0, 0, 0.5) 75.25%, rgba(0, 0, 0, 0.15) 85.25%, rgba(0, 0, 0, 0));
+  --ds-shadow-book: 0 1px 1px 0 rgba(0, 0, 0, .02), 0 4px 8px -4px rgba(0, 0, 0, .1), 0 16px 24px -8px rgba(0, 0, 0, .03);
+  --ds-shadow-book-border: inset 0 1px 2px 0 rgba(255, 255, 255, .3);
 }
 
 .dark, [data-theme="dark"] {
-  --background: #020617;
-  --foreground: #f8fafc;
-  --card-bg: #0b1329;
-  --card-border: #1e293b;
+  --context-card-border: hsla(0, 0%, 18%, 1);
+  --ds-amber-600: oklch(75.04% 0.1737 74.49);
+  --ds-gray-200: hsla(0, 0%, 12%, 1);
+  --ds-gray-1000: hsla(0, 0%, 93%, 1);
+  --ds-gray-alpha-400: hsla(0, 0%, 100%, 0.14);
+  --ds-background-200: hsla(0, 0%, 0%, 1);
 }
 
-html.dark body {
-  background-color: #020617;
-  background-image: 
-    radial-gradient(1100px 620px at 88% -8%, rgba(2, 132, 199, 0.15), transparent 62%),
-    radial-gradient(900px 560px at 4% 4%, rgba(37, 99, 235, 0.12), transparent 60%),
-    linear-gradient(180deg, #020617 0%, #07132c 100%);
-  color: #f8fafc;
+html.light, [data-theme="light"] {
+  --background: #fafafa;
+  --foreground: #09090b;
+  --card-bg: #ffffff;
+  --card-border: #e4e4e7;
 }
 
-html.light body {
-  background-color: #f8fafc;
-  background-image: 
-    radial-gradient(1100px 620px at 88% -8%, rgba(2, 132, 199, 0.06), transparent 62%),
-    radial-gradient(900px 560px at 4% 4%, rgba(59, 130, 246, 0.05), transparent 60%),
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  color: #0f172a;
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: #09090b;
+  color: #fafafa;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html.light body,
+html:not(.dark) body {
+  background-color: #fafafa;
+  color: #09090b;
+}
+
+.font-display {
+  font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.font-editorial {
+  font-family: 'Newsreader', Georgia, serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-editorial: 'Newsreader', Georgia, serif;
   --font-mono: var(--font-geist-mono);
+
+  /* 3D Realistic Book Theme Mapping */
+  --color-context-card-border: var(--context-card-border);
+  --color-amber-600: var(--ds-amber-600);
+  --color-gray-200: var(--ds-gray-200);
+  --color-gray-1000: var(--ds-gray-1000);
+  --color-gray-alpha-400: var(--ds-gray-alpha-400);
+  --color-background-200: var(--ds-background-200);
+  --color-book-bind: var(--ds-book-bind);
+  --shadow-book: var(--ds-shadow-book);
+  --shadow-book-border: var(--ds-shadow-book-border);
 
   /* breakpoint xs untuk layar kecil (antara default & sm) */
   --breakpoint-xs: 480px;
@@ -57,191 +96,92 @@ html.light body {
   --color-emerald-950: #041f2d;
 }
 
+/* ==========================================================================
+   Design Tokens & Modern Glassmorphism System
+   ========================================================================== */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-panel {
+  background: rgba(11, 19, 41, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.12);
+  box-shadow: 0 4px 24px -2px rgba(0, 0, 0, 0.4), inset 0 1px 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-glow {
+  position: relative;
+}
+.glass-panel-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), transparent 45%, rgba(14, 165, 233, 0.2));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(203, 213, 225, 0.7);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dark .glass-pill {
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(51, 65, 85, 0.7);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glass-pill:hover {
+  transform: translateY(-1px);
+}
+
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px -10px rgba(2, 132, 199, 0.2);
+}
+.dark .hover-lift:hover {
+  box-shadow: 0 14px 30px -10px rgba(56, 189, 248, 0.15);
+}
+
 body {
-  background-color: #f8fafc;
-  background-image:
-    radial-gradient(1100px 620px at 88% -8%, rgba(2, 132, 199, 0.06), transparent 62%),
-    radial-gradient(900px 560px at 4% 4%, rgba(59, 130, 246, 0.05), transparent 60%),
-    linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-  color: #0f172a;
   font-family: var(--font-sans), system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   min-height: 100vh;
 }
 
-/* ponytail: dekorasi animasi halaman publik. Upgrade path: hapus blok ini. */
-@keyframes perpus-blob {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%      { transform: translate(52px, -58px) scale(1.22); }
-  66%      { transform: translate(-44px, 42px) scale(0.86); }
-}
-@keyframes perpus-float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-20px); }
-}
 @keyframes perpus-fade-up {
-  from { opacity: 0; transform: translateY(26px) scale(.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-@keyframes perpus-shimmer {
-  0%   { background-position: -120% 0; }
-  100% { background-position: 220% 0; }
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 @keyframes perpus-pop {
-  0%   { opacity: 0; transform: scale(.9) translateY(16px); }
-  60%  { opacity: 1; transform: scale(1.02) translateY(-2px); }
+  0%   { opacity: 0; transform: scale(.95) translateY(8px); }
   100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-@keyframes aurora-mesh-1 {
-  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  33%      { transform: translate(60px, -45px) scale(1.18) rotate(12deg); }
-  66%      { transform: translate(-35px, 40px) scale(0.92) rotate(-8deg); }
-}
-@keyframes aurora-mesh-2 {
-  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  33%      { transform: translate(-50px, 45px) scale(1.15) rotate(-14deg); }
-  66%      { transform: translate(45px, -30px) scale(0.88) rotate(16deg); }
-}
-@keyframes aurora-mesh-3 {
-  0%, 100% { transform: translate(0, 0) scale(1) rotate(0deg); }
-  50%      { transform: translate(40px, 35px) scale(1.2) rotate(-20deg); }
-}
-@keyframes aurora-wave-pulse {
-  0%, 100% { opacity: 0.35; transform: scale(1); }
-  50%      { opacity: 0.65; transform: scale(1.1); }
-}
+.animate-fade-up       { animation: perpus-fade-up .3s cubic-bezier(.16, 1, .3, 1) both; }
+.animate-pop           { animation: perpus-pop .2s cubic-bezier(.16, 1, .3, 1) both; }
 
-.animate-blob          { animation: perpus-blob 8s ease-in-out infinite; }
-.animate-float         { animation: perpus-float 3.5s ease-in-out infinite; }
-.animate-fade-up       { animation: perpus-fade-up .5s cubic-bezier(.22, 1, .36, 1) both; }
-.animate-pop           { animation: perpus-pop .3s cubic-bezier(.22, 1, .36, 1) both; }
-.animate-aurora-1      { animation: aurora-flow-1 14s ease-in-out infinite; }
-.animate-aurora-2      { animation: aurora-flow-2 18s ease-in-out -5s infinite; }
-.animate-aurora-3      { animation: aurora-flow-3 16s ease-in-out -10s infinite; }
-.animate-aurora-mesh-1 { animation: aurora-mesh-1 18s ease-in-out infinite; }
-.animate-aurora-mesh-2 { animation: aurora-mesh-2 22s ease-in-out -7s infinite; }
-.animate-aurora-mesh-3 { animation: aurora-mesh-3 20s ease-in-out -12s infinite; }
-.animate-aurora-pulse  { animation: aurora-wave-pulse 10s ease-in-out infinite; }
-
-/* ponytail: animasi latar bertema perpustakaan digital. Upgrade path: hapus blok ini. */
-@keyframes perpus-aurora {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1);   opacity: .55; }
-  50%      { transform: translate3d(40px, -30px, 0) scale(1.15); opacity: .9; }
-}
-@keyframes perpus-wave {
-  from { background-position: 0 0; }
-  to   { background-position: 600px 0; }
-}
-@keyframes perpus-bokeh {
-  0%, 100% { transform: translateY(0) scale(1);   opacity: .35; }
-  50%      { transform: translateY(-26px) scale(1.14); opacity: .75; }
-}
-@keyframes perpus-book-float {
-  0%   { transform: translateY(0) rotate(var(--rot, 0deg)); opacity: 0; }
-  12%  { opacity: .9; }
-  88%  { opacity: .9; }
-  100% { transform: translateY(-130px) rotate(calc(var(--rot, 0deg) + 24deg)); opacity: 0; }
-}
-@keyframes perpus-twinkle {
-  0%, 100% { opacity: .15; transform: scale(.7); }
-  50%      { opacity: 1;   transform: scale(1.25); }
-}
-
-/* Aurora biru menyala — blob besar bergerak halus */
-.aurora-layer { position: absolute; inset: -20%; pointer-events: none; }
-.aurora-layer::before,
-.aurora-layer::after {
-  content: "";
-  position: absolute;
-  border-radius: 9999px;
-  filter: blur(70px);
-  mix-blend-mode: screen;
-}
-.aurora-layer::before {
-  width: 46vw; height: 46vw; top: 6%;  left: -6%;
-  background: radial-gradient(circle, rgba(59,130,246,.85), transparent 62%);
-  animation: perpus-aurora 12s ease-in-out infinite;
-}
-.aurora-layer::after {
-  width: 40vw; height: 40vw; bottom: 4%; right: -4%;
-  background: radial-gradient(circle, rgba(34,211,238,.8), transparent 62%);
-  animation: perpus-aurora 15s ease-in-out -6s infinite reverse;
-}
-
-/* Gelombang sutra mengalir — garis lengkung halus, bukan kotak */
-.silk-waves {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%2393c5fd' stroke-width='1.1' opacity='0.5'%3E%3Cpath d='M-40 120 Q 150 40 320 120 T 660 120'/%3E%3Cpath d='M-40 210 Q 160 130 330 210 T 660 210'/%3E%3Cpath d='M-40 300 Q 150 220 320 300 T 660 300'/%3E%3Cpath d='M-40 390 Q 160 310 330 390 T 660 390'/%3E%3Cpath d='M-40 480 Q 150 400 320 480 T 660 480'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 600px 600px;
-  animation: perpus-wave 22s linear infinite;
-}
-
-/* Bokeh — lingkaran cahaya lembut melayang */
-.bokeh {
-  position: absolute;
-  border-radius: 9999px;
-  pointer-events: none;
-  filter: blur(2px);
-  background: radial-gradient(circle, rgba(191,219,254,.9) 0%, rgba(147,197,253,.45) 45%, transparent 70%);
-  animation: perpus-bokeh var(--dur, 7s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-}
-
-/* Ikon buku melayang naik perlahan */
-.book-float {
-  position: absolute;
-  color: rgba(147, 197, 253, .9);
-  filter: drop-shadow(0 0 10px rgba(59, 130, 246, .65));
-  animation: perpus-book-float var(--dur, 16s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-}
-
-/* Bintang berkelap-kelip kecil */
-.twinkle {
-  position: absolute;
-  border-radius: 9999px;
-  background: #bfdbfe;
-  box-shadow: 0 0 8px 2px rgba(147, 197, 253, .85);
-  animation: perpus-twinkle var(--dur, 3s) ease-in-out infinite;
-  animation-delay: var(--delay, 0s);
-}
-
-.text-gradient {
-  background: linear-gradient(90deg, #ffffff 0%, #cfe0ff 45%, #a5f3fc 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
-.shimmer-line {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent);
-  background-size: 200% 100%;
-  animation: perpus-shimmer 2.4s linear infinite;
-}
-
-.page-subtle {
-  background-image: radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.055) 1px, transparent 0);
-  background-size: 26px 26px;
-}
-
-/* ponytail: pola rak buku kayu untuk latar login/hero. Hapus untuk latar polos. */
-.book-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cg fill='none' stroke='%2392410e' stroke-width='2'%3E%3C!-- baris rak atas --%3E%3Crect x='8' y='26' width='56' height='42' rx='2.5'/%3E%3Crect x='70' y='34' width='26' height='34' rx='2.5'/%3E%3Crect x='102' y='22' width='20' height='46' rx='2.5'/%3E%3Crect x='128' y='36' width='40' height='32' rx='2.5'/%3E%3C!-- baris rak bawah --%3E%3Crect x='14' y='104' width='34' height='48' rx='2.5'/%3E%3Crect x='54' y='112' width='46' height='40' rx='2.5'/%3E%3Crect x='106' y='98' width='24' height='54' rx='2.5'/%3E%3Crect x='136' y='110' width='32' height='42' rx='2.5'/%3E%3C!-- papan kayu horizontal --%3E%3Cpath d='M4 74h172M4 158h172'/%3E%3C/g%3E%3C/svg%3E");
-  background-size: 180px 180px;
-  opacity: 0.13;
-}
-
-/* ponytail: tekstur kertas halus berlapis di atas gradien body. Hapus untuk latar bersih. */
-.paper-texture {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
-  background-size: 140px 140px;
-  opacity: 0.035;
-}
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-blob, .animate-float, .animate-fade-up, .animate-pop,
-  .aurora-layer::before, .aurora-layer::after, .silk-waves, .bokeh,
-  .book-float, .twinkle, .shimmer-line { animation: none !important; }
+  .animate-fade-up, .animate-pop { animation: none !important; }
 }
 
 /* ============================================
@@ -454,7 +394,7 @@ html[data-theme="dark"] {
 }
 
 /* ==========================================================================
-   Interactive Kiosk & Scanner Visual Effects
+   Interactive Kiosk Scanner Laser Beam
    ========================================================================== */
 @keyframes perpus-laser {
   0% {
@@ -471,24 +411,6 @@ html[data-theme="dark"] {
   }
 }
 
-@keyframes perpus-pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 15px rgba(2, 132, 199, 0.35), 0 0 30px rgba(56, 176, 248, 0.15);
-  }
-  50% {
-    box-shadow: 0 0 25px rgba(2, 132, 199, 0.65), 0 0 50px rgba(56, 176, 248, 0.35);
-  }
-}
-
-@keyframes perpus-radar-sweep {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .animate-laser {
   position: absolute;
   left: 0;
@@ -499,14 +421,6 @@ html[data-theme="dark"] {
   animation: perpus-laser 2.4s ease-in-out infinite;
   pointer-events: none;
   z-index: 20;
-}
-
-.animate-pulse-glow {
-  animation: perpus-pulse-glow 2.5s ease-in-out infinite;
-}
-
-.animate-radar {
-  animation: perpus-radar-sweep 4s linear infinite;
 }
 
 /* Glassmorphism Card Utilities */
@@ -553,11 +467,12 @@ html[data-theme="dark"] {
   position: fixed;
   bottom: calc(clamp(4.25rem, 8.5dvh, 5.75rem) + env(safe-area-inset-bottom, 0px));
   left: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-left, 0px));
+  max-width: min(calc(100vw - 1.5rem), 26rem);
 }
 @media (min-width: 640px) {
   .floating-banner-adaptive {
-    left: auto;
-    right: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-right, 0px));
+    left: calc(clamp(0.75rem, 2.5vw, 1.5rem) + env(safe-area-inset-left, 0px));
+    right: auto;
   }
 }
 
@@ -566,12 +481,79 @@ html[data-theme="dark"] {
 }
 
 /* ==========================================================================
+   Modern Infinite Book Marquee Styles
+   ========================================================================== */
+@keyframes marquee-scroll-left {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes marquee-scroll-right {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-marquee-track-left {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll-left 52s linear infinite;
+  will-change: transform;
+}
+
+.animate-marquee-track-right {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll-right 52s linear infinite;
+  will-change: transform;
+}
+
+/* Only pause when manually toggled with data-paused="true", NEVER on hover as requested */
+.marquee-container[data-paused="true"] .animate-marquee-track-left,
+.marquee-container[data-paused="true"] .animate-marquee-track-right {
+  animation-play-state: paused !important;
+}
+
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent 0%, black 2.5%, black 97.5%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 2.5%, black 97.5%, transparent 100%);
+}
+
+/* 3D Realistic Book Component Styles (Official 21st.dev @shugar/book implementation) */
+:root .bg-book-gradient {
+  background: var(--ds-background-200);
+}
+
+.dark .bg-book-gradient {
+  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 0)), #1f1f1f;
+}
+
+.book-rotate {
+  transform-style: preserve-3d;
+  transform: rotateY(0deg) translate(0) scale(1);
+  transition: transform 250ms ease;
+  will-change: transform;
+}
+
+.book-rotate:hover,
+.group:hover .book-rotate {
+  transform: rotateY(-16deg) translate(-4px) scale(1.03);
+}
+
+/* ==========================================================================
    Dedicated High-Precision Print Styles (A4 Standard)
    ========================================================================== */
 @media print {
   @page {
     size: A4 portrait;
-    margin: 8mm 8mm 8mm 8mm;
+    margin: 7mm 8mm 7mm 8mm;
   }
 
   html, body {
@@ -581,7 +563,7 @@ html[data-theme="dark"] {
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
-    min-height: auto !important;
+    height: 100% !important;
     overflow: visible !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -599,26 +581,20 @@ html[data-theme="dark"] {
     display: none !important;
   }
 
-  /* Kontrol halaman cetak presisi */
+  /* Kontrol halaman cetak 1 lembar A4 presisi & proporsional penuh */
   .a4-print-page {
     width: 100% !important;
     max-width: 100% !important;
+    height: 100% !important;
     box-sizing: border-box !important;
     background: #ffffff !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
-  }
-
-  .a4-page-1 {
-    page-break-after: always !important;
-    break-after: page !important;
-    margin-bottom: 0 !important;
-  }
-
-  .a4-page-2 {
-    page-break-before: always !important;
-    break-before: page !important;
-    margin-top: 0 !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
   }
 
   .print-avoid-break {

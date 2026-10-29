@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Users,
@@ -41,6 +42,7 @@ export default function KunjunganClient({
 }: {
   initialData: KunjunganItem[];
 }) {
+  const router = useRouter();
   const [periode, setPeriode] = useState<"ALL" | "MONTH" | "WEEK" | "TODAY">(
     "MONTH"
   );
@@ -54,6 +56,17 @@ export default function KunjunganClient({
   useEffect(() => {
     setAllData(initialData);
   }, [initialData]);
+
+  const handleDeleteKunjungan = async (id: string) => {
+    // Optimistic removal: langsung hilang dari UI dalam 0 milidetik
+    setAllData((prev) => prev.filter((item) => item.id !== id));
+    try {
+      await deleteKunjungan(id);
+      router.refresh();
+    } catch {
+      setAllData(initialData);
+    }
+  };
 
   // Real-time live update: BroadcastChannel (<1ms) + Polling (3s) tanpa refresh halaman
   useEffect(() => {
@@ -323,11 +336,9 @@ export default function KunjunganClient({
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 flex flex-col relative overflow-x-hidden selection:bg-emerald-500 selection:text-white transition-colors duration-300">
-      {/* Background glowing aurora blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/10 dark:bg-emerald-600/10 rounded-full blur-[128px]" />
-        <div className="absolute top-1/3 right-10 w-96 h-96 bg-teal-500/10 dark:bg-teal-600/10 rounded-full blur-[140px]" />
-        <div className="absolute bottom-10 left-1/3 w-80 h-80 bg-indigo-500/10 dark:bg-indigo-600/10 rounded-full blur-[128px]" />
+      {/* Clean Subtle Grid Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 select-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a04_1px,transparent_1px),linear-gradient(to_bottom,#0f172a04_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:48px_48px]" />
       </div>
 
       {/* Top Navbar */}
@@ -369,9 +380,9 @@ export default function KunjunganClient({
               <Link href="/kiosk" target="kiosk_presensi">
                 <Button
                   size="sm"
-                  className="cursor-pointer text-xs flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold shadow-md shadow-emerald-500/20 border border-emerald-400/30"
+                  className="cursor-pointer text-xs flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium shadow-sm"
                 >
-                  <QrCode className="w-3.5 h-3.5 animate-pulse" />
+                  <QrCode className="w-3.5 h-3.5" />
                   <span className="hidden sm:inline">Buka Kios Scanner</span>
                   <span className="sm:hidden">Kios QR</span>
                   <ExternalLink className="w-3 h-3 opacity-75" />
@@ -518,10 +529,10 @@ export default function KunjunganClient({
         </div>
 
         {/* Kiosk Banner Shortcut */}
-        <div className="bg-gradient-to-r from-emerald-600/90 via-teal-600/90 to-emerald-700/90 border border-emerald-500/30 backdrop-blur-xl rounded-2xl p-4 sm:p-5 text-white shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
+        <div className="bg-emerald-800 border border-emerald-700/60 rounded-2xl p-4 sm:p-5 text-white shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 print:hidden">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-slate-950/40 backdrop-blur-md border border-white/20 flex items-center justify-center shrink-0">
-              <QrCode className="w-6 h-6 text-emerald-300 animate-pulse" />
+            <div className="w-11 h-11 rounded-xl bg-emerald-950/40 border border-emerald-600/40 flex items-center justify-center shrink-0">
+              <QrCode className="w-6 h-6 text-emerald-300" />
             </div>
             <div>
               <h2 className="text-sm sm:text-base font-bold text-white leading-tight">
@@ -682,7 +693,7 @@ export default function KunjunganClient({
                   </div>
                   <div className="flex-1 bg-stone-100 dark:bg-slate-800 rounded-full h-6 overflow-hidden border border-stone-200 dark:border-slate-700/50">
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500 shadow-xs shadow-emerald-500/50"
+                      className="bg-emerald-600 h-full rounded-full transition-all duration-300"
                       style={{ width: `${(jumlah / maxKeperluan) * 100}%` }}
                     />
                   </div>
@@ -697,9 +708,7 @@ export default function KunjunganClient({
 
         {/* Grafik: Tren Harian */}
         {stats.tanggalList.length > 0 && (
-          <div className="bg-white dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-stone-200/90 dark:border-slate-800 shadow-xs dark:shadow-2xl p-6 relative overflow-hidden">
-            <div className="absolute -right-12 -top-12 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-            
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200/90 dark:border-slate-800 shadow-2xs p-6 relative overflow-hidden">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 relative z-10">
               <div>
                 <div className="flex items-center gap-2">
@@ -773,7 +782,7 @@ export default function KunjunganClient({
                         <div
                           className={`w-full rounded-t-md transition-all duration-300 ${
                             isPositive
-                              ? "bg-gradient-to-t from-emerald-600 via-teal-400 to-cyan-300 shadow-lg shadow-emerald-500/30 group-hover:brightness-125"
+                              ? "bg-emerald-600 rounded-t-sm shadow-xs group-hover:bg-emerald-500"
                               : "h-1.5 bg-stone-200 dark:bg-slate-800/80 border-t border-stone-300 dark:border-slate-700/60 rounded-full group-hover:bg-stone-300 dark:group-hover:bg-slate-700"
                           }`}
                           style={{ height: isPositive ? `${Math.max(10, heightPercent)}%` : undefined }}
@@ -810,7 +819,7 @@ export default function KunjunganClient({
                 >
                   <div className="w-full bg-stone-100 dark:bg-slate-800/80 rounded-t-md flex-1 flex items-end overflow-hidden border border-stone-200 dark:border-slate-700/30">
                     <div
-                      className="w-full bg-gradient-to-t from-indigo-600 to-sky-400 rounded-t-md transition-all duration-500 shadow-xs shadow-indigo-500/20"
+                      className="w-full bg-blue-600 rounded-t-sm transition-all duration-300 shadow-xs"
                       style={{ height: `${(jumlah / maxMingguan) * 100}%` }}
                     />
                   </div>
@@ -827,9 +836,7 @@ export default function KunjunganClient({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Grafik: Distribusi per Jam (Jam Tersibuk) */}
           {stats.jamList.length > 0 && (
-            <div className="bg-white dark:bg-slate-900/90 backdrop-blur-xl rounded-2xl border border-stone-200/90 dark:border-slate-800 shadow-xs dark:shadow-2xl p-6 relative overflow-hidden">
-              <div className="absolute -right-12 -top-12 w-48 h-48 bg-rose-500/10 rounded-full blur-3xl pointer-events-none" />
-              
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200/90 dark:border-slate-800 shadow-2xs p-6 relative overflow-hidden">
               <div className="flex items-center justify-between gap-3 mb-6 relative z-10">
                 <div>
                   <div className="flex items-center gap-2">
@@ -890,9 +897,9 @@ export default function KunjunganClient({
                           <div
                             className={`w-full rounded-t-md transition-all duration-300 ${
                               isPeak
-                                ? "bg-gradient-to-t from-rose-600 via-pink-500 to-amber-400 ring-2 ring-rose-400/60 shadow-lg shadow-rose-500/40"
+                                ? "bg-rose-600 rounded-t-sm shadow-xs"
                                 : isPositive
-                                ? "bg-gradient-to-t from-rose-700 via-rose-500 to-orange-400 group-hover:brightness-125 shadow-md shadow-rose-950"
+                                ? "bg-rose-500/85 rounded-t-sm group-hover:bg-rose-600"
                                 : "h-1.5 bg-stone-200 dark:bg-slate-800/80 border-t border-stone-300 dark:border-slate-700/60 rounded-full group-hover:bg-stone-300 dark:group-hover:bg-slate-700"
                             }`}
                             style={{ height: isPositive ? `${Math.max(12, heightPercent)}%` : undefined }}
@@ -928,7 +935,7 @@ export default function KunjunganClient({
                     </div>
                     <div className="flex-1 bg-stone-100 dark:bg-slate-800 rounded-full h-6 overflow-hidden border border-stone-200 dark:border-slate-700/50">
                       <div
-                        className="bg-gradient-to-r from-sky-500 to-cyan-400 h-full rounded-full transition-all duration-500 shadow-xs shadow-sky-500/30"
+                        className="bg-sky-600 h-full rounded-full transition-all duration-300"
                         style={{ width: `${(jumlah / maxHari) * 100}%` }}
                       />
                     </div>
@@ -961,7 +968,7 @@ export default function KunjunganClient({
                     </div>
                     <div className="flex-1 bg-stone-100 dark:bg-slate-800 rounded-full h-6 overflow-hidden border border-stone-200 dark:border-slate-700/50">
                       <div
-                        className="bg-gradient-to-r from-indigo-500 to-purple-400 h-full rounded-full transition-all duration-500 shadow-xs shadow-indigo-500/30"
+                        className="bg-indigo-600 h-full rounded-full transition-all duration-300"
                         style={{ width: `${(jumlah / maxKelas) * 100}%` }}
                       />
                     </div>
@@ -1082,16 +1089,16 @@ export default function KunjunganClient({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right print:hidden">
-                      <form action={deleteKunjungan.bind(null, item.id)}>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          type="submit"
-                          className="h-7 px-2 text-[11px] bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/40 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 shadow-xs cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </form>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        type="button"
+                        onClick={() => handleDeleteKunjungan(item.id)}
+                        className="h-7 px-2 text-[11px] bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/40 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 shadow-xs cursor-pointer"
+                        title="Hapus Kunjungan"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -1118,17 +1125,16 @@ export default function KunjunganClient({
                     </div>
                   </div>
 
-                  <form action={deleteKunjungan.bind(null, item.id)}>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      type="submit"
-                      className="h-7 w-7 p-0 flex items-center justify-center text-[11px] bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/40 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 shadow-xs cursor-pointer rounded-lg"
-                      title="Hapus Kunjungan"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </form>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    type="button"
+                    onClick={() => handleDeleteKunjungan(item.id)}
+                    className="h-7 w-7 p-0 flex items-center justify-center text-[11px] bg-rose-100 hover:bg-rose-200 dark:bg-rose-500/20 dark:hover:bg-rose-500/40 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-500/30 shadow-xs cursor-pointer rounded-lg"
+                    title="Hapus Kunjungan"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </Button>
                 </div>
 
                 <div className="flex items-center justify-between gap-2 text-[11px] pt-1">

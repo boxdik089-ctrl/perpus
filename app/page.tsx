@@ -79,5 +79,50 @@ export default async function HomePage() {
     console.error("Gagal mengambil data top readers:", error);
   }
 
-  return <KatalogBukuClient initialBuku={data} topReaders={topReaders} />;
+  // 3. Ambil data ulasan dari database asli
+  let initialUlasan: {
+    id: string;
+    bukuId: string;
+    nama: string;
+    rating: number;
+    komentar: string;
+    tanggal: string;
+  }[] = [];
+
+  try {
+    const rawUlasan = await prisma.ulasan.findMany({
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        bukuId: true,
+        nama: true,
+        rating: true,
+        komentar: true,
+        createdAt: true,
+      },
+    });
+
+    initialUlasan = rawUlasan.map((u) => ({
+      id: u.id,
+      bukuId: u.bukuId,
+      nama: u.nama,
+      rating: u.rating,
+      komentar: u.komentar,
+      tanggal: u.createdAt.toLocaleDateString("id-ID", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      }),
+    }));
+  } catch (error) {
+    console.error("Gagal mengambil data ulasan:", error);
+  }
+
+  return (
+    <KatalogBukuClient
+      initialBuku={data}
+      topReaders={topReaders}
+      initialUlasan={initialUlasan}
+    />
+  );
 }

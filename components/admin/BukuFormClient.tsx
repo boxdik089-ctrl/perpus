@@ -251,7 +251,7 @@ export function BukuFormClient({
       <div className="flex items-center gap-3 pt-5 border-t border-slate-200 dark:border-slate-800">
         <button
           type="submit"
-          className="h-11 px-6 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-blue-600/20 active:scale-95"
+          className="h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
         >
           <Save className="w-4 h-4" />
           Simpan Buku

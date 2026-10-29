@@ -2,14 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { 
-  Bot, 
-  Sparkles, 
+  MessageSquareText, 
   X, 
   Send, 
   BookOpen, 
   Laptop, 
   MapPin, 
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 
 type Recommendation = {
@@ -57,12 +57,15 @@ function formatAiText(text: string) {
 }
 
 export default function PustakawanAiWidget({ 
-  isDark, 
+  isDark: _isDark, 
   onSelectBook 
 }: { 
-  isDark: boolean;
+  isDark?: boolean;
   onSelectBook?: (bookId: string, bookTitle: string) => void;
 }) {
+  // Widget Pustaka AI mandiri dengan tema Dark Emerald premium khasnya
+  // agar selalu kontras tinggi, jelas terbaca, dan tidak terpengaruh toggle tema halaman
+  const isDark = true;
   const [isOpen, setIsOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -84,9 +87,9 @@ export default function PustakawanAiWidget({
     {
       id: "init-1",
       sender: "bot",
-      text: "Halo! 👋 Saya **Pustaka AI**, asisten cerdas Perpustakaan SMKN 1 Beringin. Mau cari buku pelajaran/kejuruan, novel fiksi, info sirkulasi rak & e-book, atau sekadar berdiskusi santai? Tanyakan saja ya!",
+      text: "Selamat datang di layanan Perpustakaan SMKN 1 Beringin. Ada yang bisa kami bantu? Anda dapat mencari buku pelajaran, materi kejuruan, fiksi, cek lokasi rak & e-book, atau bertanya seputar layanan perpustakaan.",
       time: "Baru saja",
-      provider: "pustaka-ai",
+      provider: "pustakawan",
     },
   ]);
 
@@ -151,7 +154,7 @@ export default function PustakawanAiWidget({
         {
           id: "bot-err-" + Date.now(),
           sender: "bot",
-          text: "Waduh, koneksi ke server AI terganggu. Silakan coba sesaat lagi ya!",
+          text: "Koneksi ke layanan bantuan sedang mengalami kendala. Silakan coba sesaat lagi.",
           time: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
         },
       ]);
@@ -161,12 +164,12 @@ export default function PustakawanAiWidget({
   };
 
   const quickPrompts = [
-    "💡 Rekomendasi Buku Populer",
-    "💻 Belajar Pemrograman / PPLG",
-    "🌐 Buku Jaringan / TJKT",
-    "🏫 Jurusan di SMKN 1 Beringin",
-    "🕒 Jam Buka Perpustakaan",
-    "📖 Cara Pinjam di Kiosk",
+    "Rekomendasi Buku Populer",
+    "Belajar Pemrograman / PPLG",
+    "Buku Jaringan / TJKT",
+    "Jurusan di SMKN 1 Beringin",
+    "Jam Buka Perpustakaan",
+    "Cara Pinjam di Kiosk",
   ];
 
   return (
@@ -175,52 +178,46 @@ export default function PustakawanAiWidget({
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="floating-adaptive-right z-40 group flex items-center gap-2.5 px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-full bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-500 hover:to-cyan-500 text-white font-bold shadow-xl shadow-emerald-600/30 active:scale-95 transition-all cursor-pointer border border-emerald-400/30"
-          title="Buka Chat Pustaka AI"
+          className="floating-adaptive-right z-50 pointer-events-auto group flex items-center gap-2 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-full bg-emerald-700 hover:bg-emerald-600 text-white font-medium shadow-lg shadow-emerald-950/20 active:scale-95 transition-all cursor-pointer border border-emerald-600/60"
+          title="Buka Tanya Pustakawan"
         >
-          <div className="relative">
-            <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-white group-hover:rotate-12 transition-transform" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-amber-400" />
-          </div>
-          <span className="text-xs sm:text-sm tracking-wide">Pustaka AI</span>
-          <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse hidden sm:inline" />
+          <MessageSquareText className="w-4 h-4 sm:w-5 sm:h-5 text-emerald-100 group-hover:scale-105 transition-transform" />
+          <span className="text-xs sm:text-sm">Tanya Pustaka</span>
         </button>
       )}
 
       {/* Chat Window Dialog */}
       {isOpen && (
-        <div className={`floating-adaptive-right z-50 w-[calc(100vw-clamp(1.5rem,4vw,2.5rem))] sm:w-[420px] h-[min(560px,calc(100dvh-5rem))] max-h-[88dvh] rounded-3xl shadow-2xl flex flex-col overflow-hidden border backdrop-blur-2xl transition-all duration-200 animate-fade-up ${
+        <div className={`floating-adaptive-right z-[60] w-[calc(100vw-clamp(1.5rem,4vw,2.5rem))] sm:w-[420px] h-[min(560px,calc(100dvh-5rem))] max-h-[88dvh] rounded-2xl shadow-xl flex flex-col overflow-hidden border backdrop-blur-md transition-all duration-200 ${
           isDark 
-            ? "bg-slate-900/95 border-slate-800 text-slate-100 shadow-emerald-950/40" 
-            : "bg-white/95 border-slate-200 text-slate-900 shadow-slate-900/15"
+            ? "bg-slate-900/95 border-slate-800 text-slate-100 shadow-black/40" 
+            : "bg-white/95 border-slate-200 text-slate-900 shadow-slate-900/10"
         }`}>
           {/* Header */}
-          <div className="p-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 text-white flex items-center justify-between shadow-md shrink-0">
+          <div className="p-4 bg-emerald-800 text-white flex items-center justify-between shadow-xs shrink-0">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-inner">
-                <Bot className="w-6 h-6 text-white" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-700/80 flex items-center justify-center border border-emerald-600/40">
+                <MessageSquareText className="w-5 h-5 text-emerald-100" />
               </div>
               <div>
-                <h3 className="font-black text-sm flex items-center gap-1.5 leading-tight">
-                  <span>Pustaka AI</span>
-                  <span className="px-1.5 py-0.5 rounded-md text-[9px] bg-white/25 text-white font-semibold tracking-wider flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" /> ONLINE
+                <h3 className="font-bold text-sm flex items-center gap-2 leading-tight">
+                  <span>Tanya Pustaka</span>
+                  <span className="px-1.5 py-0.5 rounded-sm text-[9px] bg-emerald-900/80 text-emerald-200 font-medium">
+                    Aktif
                   </span>
                 </h3>
-                <p className="text-[11px] text-emerald-100 flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-300 animate-pulse inline-block" />
-                  Asisten Cerdas Perpustakaan SMKN 1
+                <p className="text-[11px] text-emerald-200">
+                  Layanan Bantuan &amp; Rekomendasi Buku
                 </p>
               </div>
             </div>
 
             <button
               onClick={() => setIsOpen(false)}
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-white cursor-pointer"
+              className="p-1.5 rounded-lg bg-emerald-900/60 hover:bg-emerald-900 transition-colors text-white cursor-pointer"
               title="Tutup Chat"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
@@ -234,9 +231,9 @@ export default function PustakawanAiWidget({
                 className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`max-w-[88%] rounded-2xl p-3 sm:p-3.5 shadow-xs leading-relaxed ${
+                  className={`max-w-[88%] rounded-xl p-3 sm:p-3.5 shadow-xs leading-relaxed ${
                     msg.sender === "user"
-                      ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-tr-xs"
+                      ? "bg-emerald-700 text-white rounded-tr-xs"
                       : isDark
                         ? "bg-slate-800/90 border border-slate-700/80 text-slate-100 rounded-tl-xs"
                         : "bg-white border border-slate-200/90 text-slate-800 rounded-tl-xs"
@@ -318,11 +315,11 @@ export default function PustakawanAiWidget({
             {/* Typing Loader */}
             {loading && (
               <div className="flex items-center gap-2 p-3 rounded-2xl bg-slate-800/80 border border-emerald-500/30 w-fit text-xs text-slate-300 shadow-md transition-all">
-                <Bot className="w-4 h-4 text-emerald-400 animate-spin shrink-0" />
+                <Loader2 className="w-4 h-4 text-emerald-400 animate-spin shrink-0" />
                 <span className="text-[11px] font-medium text-emerald-300/90">
-                  {loadingStep === 0 && "Pustaka AI sedang membaca pesanmu..."}
-                  {loadingStep === 1 && "Mencari referensi & katalog buku perpustakaan..."}
-                  {loadingStep >= 2 && "Menyusun jawaban terbaik untukmu..."}
+                  {loadingStep === 0 && "Sedang memeriksa pertanyaan..."}
+                  {loadingStep === 1 && "Mencari data katalog buku perpustakaan..."}
+                  {loadingStep >= 2 && "Menyusun jawaban untuk Anda..."}
                 </span>
               </div>
             )}
@@ -337,7 +334,7 @@ export default function PustakawanAiWidget({
             {quickPrompts.map((prompt) => (
               <button
                 key={prompt}
-                onClick={() => handleSendMessage(prompt.replace(/^[^\w\s]+\s*/, ""))}
+                onClick={() => handleSendMessage(prompt)}
                 className={`text-[10px] font-semibold px-2.5 py-1 rounded-full whitespace-nowrap transition-all border shrink-0 cursor-pointer active:scale-95 ${
                   isDark
                     ? "bg-slate-800/80 hover:bg-slate-800 border-slate-700 text-slate-300 hover:text-emerald-400 hover:border-emerald-500/40"
@@ -362,7 +359,7 @@ export default function PustakawanAiWidget({
                   handleSendMessage();
                 }
               }}
-              placeholder="Tanya buku, materi pelajaran, atau info sekolah..."
+              placeholder="Tanya buku, materi pelajaran, atau info perpustakaan..."
               className={`flex-1 px-3.5 py-2.5 text-xs rounded-xl focus:outline-none border transition-colors ${
                 isDark
                   ? "bg-slate-950 border-slate-800 text-slate-100 placeholder:text-slate-500 focus:border-emerald-500"
@@ -372,7 +369,7 @@ export default function PustakawanAiWidget({
             <button
               onClick={() => handleSendMessage()}
               disabled={loading || !inputMessage.trim()}
-              className="p-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white transition-all shadow-md active:scale-95 cursor-pointer disabled:cursor-not-allowed"
+              className="p-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 disabled:opacity-50 text-white transition-all shadow-xs active:scale-95 cursor-pointer disabled:cursor-not-allowed"
               title="Kirim pesan"
             >
               <Send className="w-4 h-4" />

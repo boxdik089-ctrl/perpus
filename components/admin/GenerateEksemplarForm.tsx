@@ -38,7 +38,7 @@ export default function GenerateEksemplarForm({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6 sm:p-7">
+    <form onSubmit={handleSubmit} className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm p-6 sm:p-7">
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
           <Plus className="w-4 h-4" />
@@ -70,7 +70,7 @@ export default function GenerateEksemplarForm({
         <button
           type="submit"
           disabled={loading}
-          className="h-11 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
+          className="h-11 px-6 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0"
         >
           {loading ? (
             <>

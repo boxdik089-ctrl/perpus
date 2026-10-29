@@ -243,17 +243,14 @@ export function VoiceNoteBuku() {
           <AudioLines className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-bold text-slate-800 dark:text-white">
-            Voice Note — Dikte Input Buku (Bahasa Indonesia)
+          <p className="text-xs font-semibold text-slate-800 dark:text-white">
+            Dikte Suara (Opsional)
           </p>
           <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed mt-0.5">
-            Bicara sekali, sistem isi form otomatis. Sebut nama field:{" "}
+            Gunakan mikrofon untuk mengisi kolom formulir secara lisan. Sebutkan nama kolom (misal:{" "}
             <strong className="text-blue-600 dark:text-blue-400">judul</strong>,{" "}
             <strong className="text-blue-600 dark:text-blue-400">penulis</strong>,{" "}
-            <strong className="text-blue-600 dark:text-blue-400">kategori</strong>,{" "}
-            <strong className="text-blue-600 dark:text-blue-400">klasifikasi</strong>,{" "}
-            <strong className="text-blue-600 dark:text-blue-400">tahun</strong>. Akhiri dengan{" "}
-            <strong className="text-blue-600 dark:text-blue-400">selesai</strong>.
+            <strong className="text-blue-600 dark:text-blue-400">kategori</strong>) lalu isi nilainya. Anda tetap dapat mengoreksi teks sebelum disimpan.
           </p>
         </div>
         <button
@@ -262,8 +259,8 @@ export function VoiceNoteBuku() {
           title={listening ? "Berhenti merekam" : "Mulai dikte (id-ID)"}
           className={`shrink-0 h-10 px-4 rounded-xl flex items-center gap-2 text-xs sm:text-sm font-bold transition-all cursor-pointer touch-manipulation ${
             listening
-              ? "bg-rose-500 text-white animate-pulse shadow-lg shadow-rose-500/30 ring-4 ring-rose-500/30"
-              : "bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-600/20 active:scale-95"
+              ? "bg-rose-500 text-white animate-pulse shadow-md"
+              : "bg-blue-600 hover:bg-blue-700 text-white shadow-sm"
           }`}
         >
           {listening ? (

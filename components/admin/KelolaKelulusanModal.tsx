@@ -9,7 +9,6 @@ import {
   X,
   Loader2,
   BookX,
-  Sparkles,
   Info,
 } from "lucide-react";
 import { getInfoKelas12, hapusSiswaKelas12Permanen } from "@/actions/anggota";
@@ -95,7 +94,7 @@ export function KelolaKelulusanModal() {
           onClick={() => !deleting && setIsOpen(false)}
         >
           <div
-            className="bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl space-y-4 my-8"
+            className="bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-5 sm:p-6 shadow-xl space-y-4 my-8"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header Modal */}

@@ -187,7 +187,7 @@ export function StockOpnameListClient({
 
         <button
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-sky-600 hover:from-blue-700 hover:to-sky-700 text-white font-bold text-sm shadow-md shadow-blue-500/20 hover:shadow-lg transition-all active:scale-98 cursor-pointer shrink-0"
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-sm transition-colors cursor-pointer shrink-0"
         >
           <Plus className="w-4 h-4" />
           Mulai Audit Baru
@@ -303,7 +303,7 @@ export function StockOpnameListClient({
                         className={`h-full rounded-full transition-all duration-500 ${
                           sesi.status === "SELESAI"
                             ? "bg-emerald-500"
-                            : "bg-gradient-to-r from-blue-500 to-sky-400"
+                            : "bg-blue-600"
                         }`}
                         style={{ width: `${summary.persentase}%` }}
                       />

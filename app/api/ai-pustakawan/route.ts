@@ -44,7 +44,8 @@ export async function POST(req: Request) {
     const searchTerms = cleanMsg
       .replace(/[^\w\s]/g, " ")
       .split(/\s+/)
-      .filter((w) => w.length > 2 && !stopWords.has(w));
+      .filter((w) => w.length > 2 && !stopWords.has(w))
+      .slice(0, 5); // Batasi maksimal 5 kata kunci untuk mencegah Query DoS & ReDoS
 
     // Cari buku relevan di database
     let relevantBooks: any[] = [];
@@ -113,13 +114,15 @@ export async function POST(req: Request) {
           })
           .join("\n");
 
-        const prompt = `Kamu adalah "Pustaka AI", asisten cerdas dan ramah Perpustakaan SMK Negeri 1 Beringin.
+        const prompt = `Kamu adalah "Tanya Pustaka", pustakawan digital resmi Perpustakaan SMK Negeri 1 Beringin.
 Karakter:
-- Sopan, hangat, empatik, cerdas, dan komunikatif.
-- Format rapi dengan poin bullet dan **bold**.
-- Jam buka perpustakaan: Senin-Jumat 07.30 - 16.00 WIB (E-Book 24 jam).
+- Bersikap layaknya pustakawan sekolah profesional: ramah, sopan, membantu, dan edukatif.
+- Hindari bahasa robot atau istilah teknis AI yang berlebihan. Gunakan bahasa Indonesia yang santun dan mudah dipahami siswa serta guru.
+- Format jawaban rapi dengan poin bullet dan penekanan teks penting.
+- DILARANG menggunakan emoji. Jangan gunakan emoji dalam bentuk apa pun pada seluruh respon.
+- Jam operasional perpustakaan: Senin - Jumat pukul 07.30 s/d 16.00 WIB (Katalog & E-Book dapat diakses online 24 jam).
 - Jurusan SMKN 1 Beringin: PPLG, TJKT, Tata Busana, Kuliner, Perhotelan, Usaha Layanan Wisata (ULW), Tata Kecantikan.
-- Peminjaman buku fisik: 7 hari kalender, bisa mandiri di mesin Kiosk.
+- Masa peminjaman buku cetak: 7 hari kalender, dapat dilakukan mandiri di Kiosk perpustakaan.
 
 Katalog Buku Relevan:
 ${catalogSummary || "- Katalog umum perpustakaan tersedia"}
@@ -206,7 +209,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // A. Emosi / Curhat / Sedih / Galau / Capek
   if (/(sedih|nangis|menangis|galau|kecewa|capek|lelah|down|hampa|patah hati|tertekan|stres|stress|depresi|putus asa|berat banget|lagi down)/i.test(cleanMsg)) {
     return {
-      reply: `Peluk hangat untukmu ya 🤗\n\nWajar sekali kalau ada hari-hari di mana kita merasa lelah, sedih, atau terbebani. Kamu tidak sendirian, dan perasaan yang sedang kamu alami saat ini sangat manusiawi dan valid.\n\nJangan memaksakan diri terlalu keras ya. Ambil jeda sejenak, tarik napas perlahan, dan minum air hangat. Kalau kamu butuh pengalihan pikiran yang menenangkan, membaca cerita santai atau novel fiksi di perpustakaan bisa jadi teman yang baik.\n\nIngat, hari yang berat ini pasti akan berlalu. Kamu hebat sudah bertahan dan melangkah sampai hari ini! ✨`,
+      reply: `Wajar sekali jika ada hari-hari di mana kita merasa lelah, sedih, atau terbebani. Perasaan yang sedang kamu alami saat ini sangat manusiawi dan valid.\n\nJangan memaksakan diri terlalu keras. Ambil jeda sejenak, tarik napas perlahan, dan istirahat sejenak. Jika kamu butuh pengalihan pikiran yang menenangkan, membaca cerita santai atau novel fiksi di perpustakaan bisa jadi teman yang baik.\n\nTetap semangat, setiap tantangan akan membantumu tumbuh lebih kuat.`,
       recommendations: mapBooks(fallbackCatalog),
       provider: "pustaka-ai",
     };
@@ -215,7 +218,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // B. Senang / Bahagia / Gembira / Bersyukur
   if (/(senang|bahagia|gembira|alhamdulillah|bersyukur|happy|ceria)/i.test(cleanMsg)) {
     return {
-      reply: `Wah, ikut senang dan bersyukur mendengarnya! 🎉😊\n\nTetap jaga energi positif dan senyuman manismu ya. Semoga hari-harimu di sekolah SMKN 1 Beringin selalu menyenangkan dan penuh berkah!`,
+      reply: `Senang mendengarnya. Tetap jaga semangat belajar dan energi positifmu. Semoga harimu di SMK Negeri 1 Beringin selalu produktif dan menyenangkan.`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -224,9 +227,9 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // C. Sapaan / Salam
   if (/^(halo|hai|hey|hei|p|halo p|assalamu|assalamualaikum|assalamu'alaikum|selamat pagi|selamat siang|selamat sore|selamat malam)/i.test(cleanMsg)) {
     const greetings = [
-      `Halo! 👋 Senang bisa menyapamu. Saya **Pustaka AI**, asisten cerdas Perpustakaan SMKN 1 Beringin.\n\nAda yang bisa saya bantu hari ini? Mau tanya materi pelajaran, cari buku bacaan/e-book, atau sekadar ngobrol santai?`,
-      `Hai! 👋 Selamat datang di Perpustakaan Digital SMKN 1 Beringin. Pustaka AI siap membantu keperluan literasi dan belajarmu hari ini!`,
-      `Wa'alaikumsalam / Halo! 👋 Pustaka AI siap mendampingi kamu. Mau cari referensi buku apa nih hari ini?`,
+      `Halo, selamat datang di layanan Perpustakaan SMKN 1 Beringin. Ada yang bisa saya bantu terkait buku pelajaran, materi kejuruan, atau layanan pustaka hari ini?`,
+      `Selamat datang di Perpustakaan Digital SMKN 1 Beringin. Saya siap membantu keperluan literasi dan referensi belajarmu.`,
+      `Wa'alaikumsalam / Halo. Tanya Pustaka siap mendampingi kamu mencari referensi buku atau e-book di perpustakaan.`,
     ];
     return {
       reply: greetings[Math.floor(Math.random() * greetings.length)],
@@ -238,7 +241,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // D. Apa Kabar
   if (/apa kabar|gimana kabarmu|bagaimana kabarmu/i.test(cleanMsg)) {
     return {
-      reply: `Kabar saya sangat baik dan sistem berjalan lancar! 🚀 Terima kasih sudah bertanya. Kamu sendiri bagaimana harinya? Semoga tetap semangat belajar ya!`,
+      reply: `Kabar baik dan sistem perpustakaan beroperasi normal. Terima kasih sudah menyapa. Bagaimana dengan kegiatan belajarmu hari ini?`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -247,7 +250,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // E. Identitas
   if (/siapa kamu|kamu siapa|tentang kamu|nama kamu|siapa namamu/i.test(cleanMsg)) {
     return {
-      reply: `Saya **Pustaka AI**, asisten kecerdasan buatan cerdas di **Perpustakaan SMK Negeri 1 Beringin**.\n\nSaya dirancang untuk membantu seluruh siswa dan guru dalam:\n- 🔍 Menemukan buku cetak di rak fisik & koleksi E-Book digital.\n- 📚 Tanya materi pelajaran umum & 7 kejuruan SMK.\n- 🕒 Informasi jam operasional dan tata tertib peminjaman di Kiosk.\n- 💬 Berdiskusi, motivasi belajar, dan obrolan santai!`,
+      reply: `Saya **Tanya Pustaka**, layanan bantuan virtual resmi di **Perpustakaan SMK Negeri 1 Beringin**.\n\nSaya siap membantu siswa dan guru dalam:\n- Menemukan buku cetak di rak fisik dan koleksi e-book digital.\n- Informasi materi pelajaran umum dan 7 konsentrasi keahlian SMK.\n- Informasi jam operasional dan tata tertib peminjaman di Kiosk.\n- Rekomendasi bacaan untuk mendukung kegiatan literasi sekolah.`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -255,7 +258,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
 
   if (/siapa yang bikin|siapa pembuatmu|siapa ciptakan kamu|dibuat oleh siapa/i.test(cleanMsg)) {
     return {
-      reply: `Saya dikembangkan khusus dengan cinta untuk Perpustakaan Digital SMK Negeri 1 Beringin, hasil karya tim IT sekolah untuk memajukan literasi digital dan teknologi pendidikan! 💻✨`,
+      reply: `Layanan Tanya Pustaka dikembangkan oleh tim Perpustakaan SMK Negeri 1 Beringin untuk memudahkan seluruh warga sekolah mengakses informasi pustaka dan buku secara mandiri.`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -264,7 +267,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // F. Jam Operasional
   if (/jam|buka|tutup|operasional|hari apa|jadwal/i.test(cleanMsg)) {
     return {
-      reply: `🕒 **Jam Operasional Perpustakaan SMKN 1 Beringin:**\n\n- **Hari:** Senin s/d Jumat\n- **Waktu Layanan Fisik:** 07.30 – 16.00 WIB\n- **Sabtu & Minggu:** Libur / Tutup\n\n*Catatan:* Portal perpustakaan web dan koleksi **E-Book** dapat kamu baca online **24 jam** nonstop dari perangkat HP atau laptop!`,
+      reply: `**Jam Operasional Perpustakaan SMKN 1 Beringin:**\n\n- **Hari:** Senin s/d Jumat\n- **Waktu Layanan Fisik:** 07.30 – 16.00 WIB\n- **Sabtu & Minggu:** Libur / Tutup\n\n*Catatan:* Portal perpustakaan web dan koleksi **E-Book** dapat dibaca online **24 jam** nonstop dari HP atau laptop.`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -273,7 +276,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // G. Aturan Pinjam / Denda / Kiosk
   if (/cara pinjam|syarat pinjam|aturan pinjam|kiosk|pinjam mandiri|denda|terlambat/i.test(cleanMsg)) {
     return {
-      reply: `📖 **Panduan Peminjaman Buku di SMKN 1 Beringin:**\n\n1. Cari buku di katalog web ini atau langsung di rak fisik perpustakaan.\n2. Datangi mesin **Kiosk Mandiri** di perpustakaan.\n3. Masukkan NISN atau scan barcode kartu perpustakaan kamu.\n4. Scan barcode buku yang ingin dipinjam.\n5. Durasi peminjaman adalah **7 hari** (dapat diperpanjang).\n6. Pengingat otomatis akan dikirimkan via WhatsApp sebelum masa pinjam berakhir agar kamu terhindar dari denda!`,
+      reply: `**Panduan Peminjaman Buku di SMKN 1 Beringin:**\n\n1. Cari buku di katalog web ini atau langsung di rak fisik perpustakaan.\n2. Datangi mesin **Kiosk Mandiri** di perpustakaan.\n3. Masukkan NISN atau scan barcode kartu perpustakaan kamu.\n4. Scan barcode buku yang ingin dipinjam.\n5. Durasi peminjaman adalah **7 hari** (dapat diperpanjang).\n6. Pengingat otomatis akan dikirimkan via WhatsApp sebelum masa pinjam berakhir agar terhindar dari denda.`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -282,7 +285,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // H. Jurusan di SMKN 1 Beringin
   if (/jurusan|pplg|tjkt|busana|kuliner|perhotelan|ulw|kecantikan|sekolah/i.test(cleanMsg)) {
     return {
-      reply: `🏫 **7 Kompetensi Keahlian di SMK Negeri 1 Beringin:**\n\n1. 💻 **PPLG** (Pengembangan Perangkat Lunak dan Gim) — Software, web, aplikasi, dan game dev.\n2. 🌐 **TJKT** (Teknik Jaringan Komputer & Telekomunikasi) — Jaringan internet, server, fiber optic, dan cyber security.\n3. 👗 **Busana** (Tata Busana) — Desain busana, pola, draping, dan tata rias busana.\n4. 🍳 **Kuliner** (Tata Boga) — Seni memasak nusantara/internasional, pastry & bakery.\n5. 🏨 **Perhotelan** — Front office, housekeeping, and hospitality industry.\n6. ✈️ **ULW** (Usaha Layanan Wisata) — Tour guide, reservasi tiket, dan industri pariwisata.\n7. 💄 **Kecantikan & Spa** — Perawatan kulit, tata rias, dan hair styling.\n\nPerpustakaan menyediakan modul pelajaran dan buku referensi untuk seluruh jurusan ini! Mau cari buku jurusan apa?`,
+      reply: `**7 Kompetensi Keahlian di SMK Negeri 1 Beringin:**\n\n1. **PPLG** (Pengembangan Perangkat Lunak dan Gim) — Rekayasa perangkat lunak, pemrograman web, mobile, dan basis data.\n2. **TJKT** (Teknik Jaringan Komputer & Telekomunikasi) — Jaringan komputer, administrasi server, fiber optic, dan keamanan jaringan.\n3. **Busana** (Tata Busana) — Desain busana, pembuatan pola, dan produksi busana.\n4. **Kuliner** (Tata Boga) — Pengolahan makanan nusantara/internasional, tata hidang, dan pastry.\n5. **Perhotelan** — Layanan front office, tata graha (housekeeping), dan operasional hotel.\n6. **ULW** (Usaha Layanan Wisata) — Pemanduan wisata, perencanaan perjalanan, dan tiket reservasi.\n7. **Kecantikan & Spa** — Perawatan kulit, tata rias, dan perawatan rambut.\n\nPerpustakaan menyediakan modul pelajaran dan buku referensi untuk seluruh jurusan ini.`,
       recommendations: [],
       provider: "pustaka-ai",
     };
@@ -295,18 +298,18 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     );
 
     return {
-      reply: `💻 **Tips Belajar Coding & Pemrograman:**\n\nKunci utama menguasai coding adalah konsistensi dan sering membuat proyek nyata (*learning by doing*):\n1. Mulai dari dasar algoritma & logika matematika dasar.\n2. Untuk Web: kuasai HTML, CSS, dan JavaScript.\n3. Untuk Backend & Data: pelajari Python, PHP, atau Node.js.\n4. Baca modul & buku di perpustakaan untuk panduan langkah demi langkah yang terstruktur!`,
+      reply: `**Panduan Belajar Pemrograman:**\n\nKunci utama menguasai pemrograman adalah pemahaman konsep dasar dan latihan konsisten:\n1. Kuasai dasar logika pemrograman dan algoritma.\n2. Untuk Web: pelajari HTML, CSS, dan JavaScript secara bertahap.\n3. Untuk Backend & Data: pelajari bahasa pemrograman seperti PHP, Python, atau Node.js serta dasar SQL.\n4. Manfaatkan buku dan modul di perpustakaan sebagai referensi terstruktur.`,
       recommendations: mapBooks(itBooks.length > 0 ? itBooks : fallbackCatalog),
       provider: "pustaka-ai",
     };
   }
 
-  // J. Humor, Pantun, Motivasi
+  // J. Pantun, Motivasi
   if (/pantun/i.test(cleanMsg)) {
     const pantunList = [
-      "Pergi ke pasar membeli durian,\nDurian manis harum baunya.\nJangan malas membaca kawan,\nIlmu berguna sepanjang usia. ✨",
-      "Pagi hari embun menetes,\nBurung berkicau riang gembira.\nBelajar giat raihlah sukses,\nBanggakan sekolah dan orang tua! 🚀",
-      "Pohon beringin rindang daunnya,\nTempat berteduh kala panas terik.\nBuku jendela ilmu dunia,\nMembaca rutin masa depan terbaik! 📚",
+      "Pergi ke pasar membeli durian,\nDurian manis harum baunya.\nJangan malas membaca kawan,\nIlmu berguna sepanjang usia.",
+      "Pagi hari embun menetes,\nBurung berkicau riang gembira.\nBelajar giat raihlah sukses,\nBanggakan sekolah dan orang tua.",
+      "Pohon beringin rindang daunnya,\nTempat berteduh kala panas terik.\nBuku jendela ilmu dunia,\nMembaca rutin masa depan terbaik.",
     ];
     return {
       reply: pantunList[Math.floor(Math.random() * pantunList.length)],
@@ -317,9 +320,9 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
 
   if (/lelucon|jokes|lucu|humor|tebak-tebakan|tebakan/i.test(cleanMsg)) {
     const jokes = [
-      "Kenapa keyboard komputer suka galau? 🤔 Karena selalu ada 'Space' di antara tombol-tombolnya! 😂",
-      "Kenapa buku matematika selalu kelihatan stres? 📚 Soalnya dari dulu masalahnya terlalu banyak dan belum selesai-selesai! 😆",
-      "Pintu apa yang didorong 10 orang kuat nggak bakal kebuka? 🚪\nJawabannya: Pintu yang tulisannya 'TARIK'! 😂",
+      "Kenapa keyboard komputer suka galau? Karena selalu ada 'Space' di antara tombol-tombolnya.",
+      "Kenapa buku matematika selalu kelihatan rumit? Karena dari dulu soal dan masalahnya belum selesai-selesai.",
+      "Pintu apa yang didorong sepuluh orang kuat tetap tidak terbuka? Jawabannya: Pintu yang tulisannya 'TARIK'.",
     ];
     return {
       reply: jokes[Math.floor(Math.random() * jokes.length)],
@@ -330,7 +333,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
 
   if (/malas|semangat|motivasi|tips belajar/i.test(cleanMsg)) {
     return {
-      reply: `💪 **Pesan Semangat Untukmu:**\n\n*"Lelahnya belajar hari ini jauh lebih baik daripada perihnya penyesalan di masa depan."*\n\nKalau sedang lelah, istirahat sejenak 15-30 menit sangat boleh, tapi jangan menyerah ya. Setiap halaman yang kamu baca dan setiap hal baru yang kamu pelajari adalah investasi berharga untuk masa depanmu! 🌟`,
+      reply: `**Motivasi Belajar:**\n\n*\"Lelahnya belajar hari ini jauh lebih baik daripada perihnya penyesalan di masa depan.\"*\n\nJika merasa lelah, beristirahatlah sejenak untuk memulihkan energi, lalu lanjutkan kembali. Setiap hal yang kamu pelajari hari ini adalah bekal berharga untuk masa depanmu.`,
       recommendations: mapBooks(fallbackCatalog),
       provider: "pustaka-ai",
     };
@@ -339,7 +342,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
   // K. Pencarian Buku Relevan di Database
   if (relevantBooks.length > 0) {
     return {
-      reply: `Tentu! Saya menemukan beberapa buku di katalog Perpustakaan SMKN 1 Beringin yang sesuai dengan pencarian "${raw}":\n\nKamu bisa langsung membaca secara online (jika ada label E-Book) atau mengambil buku fisiknya di rak perpustakaan!`,
+      reply: `Berikut beberapa buku di katalog Perpustakaan SMKN 1 Beringin yang sesuai dengan pencarian "${raw}":\n\nKamu dapat langsung membaca secara daring (jika bertanda E-Book) atau meminjam buku fisik di rak perpustakaan.`,
       recommendations: mapBooks(relevantBooks),
       provider: "pustaka-ai",
     };
@@ -347,7 +350,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
 
   // L. Respon Terbuka / General Conversation
   return {
-    reply: `Pertanyaan yang bagus mengenai "${raw}"! ✨\n\nSebagai asisten cerdas Pustaka AI di SMKN 1 Beringin, saya siap membantu kamu menjelajahi ilmu pengetahuan, mencari bahan belajar pelajaran sekolah, maupun mengecek koleksi literasi perpustakaan.\n\nBerikut beberapa rekomendasi buku pilihan yang tersedia di perpustakaan:`,
+    reply: `Terkait pertanyaan "${raw}", saya siap membantu memberikan referensi bahan ajar, informasi operasional perpustakaan, maupun katalog buku yang tersedia di SMKN 1 Beringin.\n\nBerikut beberapa rekomendasi buku pilihan yang dapat kamu baca:`,
     recommendations: mapBooks(fallbackCatalog),
     provider: "pustaka-ai",
   };

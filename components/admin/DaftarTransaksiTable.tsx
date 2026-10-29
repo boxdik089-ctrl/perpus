@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Clock,
   CheckCircle2,
@@ -91,12 +92,19 @@ export default function DaftarTransaksiTable({
 }: {
   transaksiList: TransaksiItem[];
 }) {
+  const router = useRouter();
+  const [listData, setListData] = useState<TransaksiItem[]>(transaksiList);
   const [isPending, startTransition] = useTransition();
   const [filterTab, setFilterTab] = useState<FilterTab>("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [kelasFilter, setKelasFilter] = useState("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+
+  // Sync dengan transaksiList terbaru dari server
+  useEffect(() => {
+    setListData(transaksiList);
+  }, [transaksiList]);
 
   // Modal States
   const [selectedSlip, setSelectedSlip] = useState<Group | null>(null);
@@ -127,15 +135,15 @@ export default function DaftarTransaksiTable({
     setWaModalOpen(true);
   };
 
-  const groups = useMemo(() => buildGroups(transaksiList), [transaksiList]);
+  const groups = useMemo(() => buildGroups(listData), [listData]);
 
   const kelasOptions = useMemo(() => {
     const set = new Set<string>();
-    transaksiList.forEach((t) => {
+    listData.forEach((t) => {
       if (t.siswa?.kelas) set.add(t.siswa.kelas);
     });
     return Array.from(set).sort((a, b) => a.localeCompare(b, "id"));
-  }, [transaksiList]);
+  }, [listData]);
 
   const filteredGroups = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -180,15 +188,31 @@ export default function DaftarTransaksiTable({
   };
 
   const handleSelesaikan = (id: string) => {
+    // Optimistic: langsung ubah status menjadi SELESAI di UI tanpa nunggu server
+    setListData((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, status: "SELESAI", tgl_dikembalikan: new Date() } : t))
+    );
     startTransition(async () => {
       await selesaikanTransaksi(id);
+      router.refresh();
     });
   };
 
   const handlePerpanjangHari = (id: string, hari: number) => {
+    setListData((prev) =>
+      prev.map((t) => {
+        if (t.id === id) {
+          const d = new Date(t.batas_kembali);
+          d.setDate(d.getDate() + hari);
+          return { ...t, batas_kembali: d };
+        }
+        return t;
+      })
+    );
+    setEditModalItem(null);
     startTransition(async () => {
       await perpanjangTransaksi(id, hari);
-      setEditModalItem(null);
+      router.refresh();
     });
   };
 
@@ -196,20 +220,35 @@ export default function DaftarTransaksiTable({
     e.preventDefault();
     if (!editModalItem || !customNewDate) return;
 
+    const targetDate = new Date(customNewDate);
+    setListData((prev) =>
+      prev.map((t) => {
+        const belongs = editModalItem.items.some((i) => i.id === t.id);
+        return belongs ? { ...t, batas_kembali: targetDate } : t;
+      })
+    );
+
     const formData = new FormData();
     formData.append("batasKembali", customNewDate);
+    const primaryId = editModalItem.items[0].id;
+    setEditModalItem(null);
+    setCustomNewDate("");
 
     startTransition(async () => {
-      await updateTransaksi(editModalItem.items[0].id, formData);
-      setEditModalItem(null);
-      setCustomNewDate("");
+      await updateTransaksi(primaryId, formData);
+      router.refresh();
     });
   };
 
   const handleDelete = (id: string) => {
+    // Optimistic: langsung hilangkan baris transaksi dari UI
+    setListData((prev) =>
+      prev.filter((t) => t.id !== id && (!deleteModalItem?.key || (t.groupId ? t.groupId !== deleteModalItem.key : true)))
+    );
+    setDeleteModalItem(null);
     startTransition(async () => {
       await deleteTransaksi(id);
-      setDeleteModalItem(null);
+      router.refresh();
     });
   };
 

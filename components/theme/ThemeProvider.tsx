@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
 
 type Theme = "light" | "dark";
 
@@ -22,7 +22,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("dark");
   const [mounted, setMounted] = useState(false);
 
-  const applyTheme = (t: Theme) => {
+  const applyTheme = useCallback((t: Theme) => {
+    if (typeof document === "undefined") return;
     const root = document.documentElement;
     if (t === "dark") {
       root.classList.add("dark");
@@ -33,68 +34,58 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       root.classList.add("light");
       root.setAttribute("data-theme", "light");
     }
-  };
-
-  useEffect(() => {
-    const syncTheme = () => {
-      try {
-        const savedTheme = localStorage.getItem("perpus_theme") as Theme | null;
-        if (savedTheme === "light" || savedTheme === "dark") {
-          setThemeState(savedTheme);
-          applyTheme(savedTheme);
-        } else {
-          const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-          const initialTheme: Theme = prefersDark ? "dark" : "light";
-          setThemeState(initialTheme);
-          applyTheme(initialTheme);
-        }
-      } catch {
-        applyTheme("dark");
-      }
-    };
-
-    syncTheme();
-    setMounted(true);
-
-    const handleStorage = (e: StorageEvent | CustomEvent) => {
-      let newTheme: Theme | null = null;
-      if ("key" in e && e.key === "perpus_theme") {
-        newTheme = e.newValue as Theme;
-      } else if ("detail" in e && e.detail?.theme) {
-        newTheme = e.detail.theme as Theme;
-      }
-      if (newTheme === "light" || newTheme === "dark") {
-        setThemeState(newTheme);
-        applyTheme(newTheme);
-      }
-    };
-
-    window.addEventListener("storage", handleStorage as EventListener);
-    window.addEventListener("perpus_theme_change", handleStorage as EventListener);
-
-    return () => {
-      window.removeEventListener("storage", handleStorage as EventListener);
-      window.removeEventListener("perpus_theme_change", handleStorage as EventListener);
-    };
   }, []);
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem("perpus_theme") as Theme | null;
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setThemeState(savedTheme);
+        applyTheme(savedTheme);
+      } else {
+        const root = document.documentElement;
+        const isDomDark = root.classList.contains("dark") || root.getAttribute("data-theme") === "dark";
+        const initialTheme: Theme = isDomDark ? "dark" : "light";
+        setThemeState(initialTheme);
+        applyTheme(initialTheme);
+      }
+    } catch {
+      applyTheme("dark");
+    }
+    setMounted(true);
+
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "perpus_theme" && (e.newValue === "light" || e.newValue === "dark")) {
+        const newTheme = e.newValue as Theme;
+        applyTheme(newTheme);
+        setThemeState(newTheme);
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [applyTheme]);
+
+  const setTheme = useCallback((newTheme: Theme) => {
     applyTheme(newTheme);
     try {
       localStorage.setItem("perpus_theme", newTheme);
-      window.dispatchEvent(
-        new CustomEvent("perpus_theme_change", { detail: { theme: newTheme } })
-      );
-    } catch {
-      // ignore
-    }
-  };
+    } catch {}
+    setThemeState(newTheme);
+  }, [applyTheme]);
 
-  const toggleTheme = () => {
-    const nextTheme = theme === "dark" ? "light" : "dark";
-    setTheme(nextTheme);
-  };
+  const toggleTheme = useCallback(() => {
+    setThemeState((current) => {
+      const next: Theme = current === "dark" ? "light" : "dark";
+      applyTheme(next);
+      try {
+        localStorage.setItem("perpus_theme", next);
+      } catch {}
+      return next;
+    });
+  }, [applyTheme]);
 
   return (
     <ThemeContext.Provider

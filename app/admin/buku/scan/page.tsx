@@ -6,18 +6,15 @@ import { ArrowLeft, Scan, BookOpen, Plus, FileSpreadsheet } from "lucide-react";
 import { QuickScanBukuClient } from "@/components/admin/QuickScanBukuClient";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ScanBukuPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-300">
-      {/* Aurora glow background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-40 -left-32 w-[42rem] h-[42rem] rounded-full bg-emerald-500/10 dark:bg-emerald-600/15 blur-[120px] animate-blob" />
-        <div className="absolute top-1/3 -right-32 w-[38rem] h-[38rem] rounded-full bg-teal-500/10 dark:bg-teal-600/15 blur-[120px] animate-blob animation-delay-2000" />
-        <div className="absolute -bottom-40 left-1/3 w-[36rem] h-[36rem] rounded-full bg-indigo-500/10 dark:bg-indigo-600/10 blur-[120px] animate-blob animation-delay-4000" />
-      </div>
+    <div className="relative min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
 
       {/* Header Sticky Navigation */}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-950/70 border-b border-stone-200/80 dark:border-slate-800/80 mb-6 sm:mb-8 shadow-xs">

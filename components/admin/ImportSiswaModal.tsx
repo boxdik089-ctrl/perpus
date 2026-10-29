@@ -759,7 +759,7 @@ export function ImportSiswaModal() {
                   </div>
                   <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-emerald-500 to-teal-400 h-2.5 rounded-full transition-all duration-300 ease-out"
+                      className="bg-emerald-500 h-2.5 rounded-full transition-all duration-300 ease-out"
                       style={{ width: `${importProgress.percent}%` }}
                     />
                   </div>

@@ -4,6 +4,26 @@ import { authOptions } from "@/lib/auth";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 
+// Validasi Magic Bytes audio untuk memastikan isi file benar-benar berkas audio yang sah
+function isValidAudioSignature(buffer: Buffer): boolean {
+  if (buffer.length < 12) return false;
+  // MP3 dengan header ID3: 'ID3'
+  if (buffer[0] === 0x49 && buffer[1] === 0x44 && buffer[2] === 0x33) return true;
+  // MP3 raw frame sync
+  if (buffer[0] === 0xff && (buffer[1] & 0xe0) === 0xe0) return true;
+  // WAV: 'RIFF....WAVE'
+  if (
+    buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 &&
+    buffer[8] === 0x57 && buffer[9] === 0x41 && buffer[10] === 0x56 && buffer[11] === 0x45
+  ) return true;
+  // OGG: 'OggS'
+  if (buffer[0] === 0x4f && buffer[1] === 0x67 && buffer[2] === 0x67 && buffer[3] === 0x53) return true;
+  // M4A / MP4 Audio: 'ftyp'
+  if (buffer.subarray(4, 8).toString("ascii") === "ftyp") return true;
+
+  return false;
+}
+
 export async function POST(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -38,6 +58,14 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+
+    // Validasi Magic Bytes konten file audio
+    if (!isValidAudioSignature(buffer)) {
+      return NextResponse.json(
+        { error: "Isi file tidak sesuai dengan format file audio yang sah." },
+        { status: 400 }
+      );
+    }
 
     const audioDir = path.join(process.cwd(), "public", "audio");
     await mkdir(audioDir, { recursive: true });

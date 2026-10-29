@@ -10,7 +10,6 @@ import {
   CheckCircle2,
   Calendar,
   Layers,
-  Sparkles,
   ArrowUpRight,
   Flame,
   Award,
@@ -35,20 +34,20 @@ export function AdminAnalyticsDashboard({ data }: { data: AnalyticsDashboardData
   );
 
   return (
-    <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl border border-stone-200/90 dark:border-slate-800 rounded-3xl p-4 sm:p-7 shadow-xl space-y-6 animate-fade-up">
+    <div className="bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-2xl p-4 sm:p-7 shadow-sm space-y-6">
       {/* Header Infografis */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-stone-200/80 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-sky-500 to-indigo-600 text-white flex items-center justify-center shadow-md shadow-sky-500/20 shrink-0">
+          <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-sm shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-extrabold text-stone-900 dark:text-white tracking-tight">
+              <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-white tracking-tight">
                 Infografis &amp; Tren Perpustakaan
               </h2>
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                <Sparkles className="w-3 h-3" /> Live
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Real-time
               </span>
             </div>
             <p className="text-xs text-stone-500 dark:text-slate-400">
@@ -171,13 +170,13 @@ export function AdminAnalyticsDashboard({ data }: { data: AnalyticsDashboardData
                       <div className="w-full max-w-[32px] flex flex-col justify-end items-center h-full">
                         <div
                           style={{ height: `${heightPercent}%` }}
-                          className={`w-full rounded-t-xl transition-all duration-300 relative ${
+                          className={`w-full rounded-t-lg transition-all duration-300 relative ${
                             activeMetric === "pinjam"
-                              ? "bg-gradient-to-t from-sky-600 to-sky-400"
+                              ? "bg-sky-500"
                               : activeMetric === "kunjungan"
-                              ? "bg-gradient-to-t from-purple-600 to-purple-400"
-                              : "bg-gradient-to-t from-indigo-600 via-sky-500 to-teal-400"
-                          } ${isHovered ? "brightness-110 shadow-lg scale-102" : "opacity-90"}`}
+                              ? "bg-indigo-500"
+                              : "bg-blue-600"
+                          } ${isHovered ? "brightness-110 shadow-md" : "opacity-90"}`}
                         >
                           {barVal > 0 && (
                             <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-[10px] font-bold text-stone-700 dark:text-slate-300 group-hover:scale-110 transition-transform">

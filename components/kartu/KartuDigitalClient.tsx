@@ -7,7 +7,7 @@ import {
   Search,
   Download,
   CheckCircle2,
-  Sparkles,
+  Info,
   ArrowLeft,
   Loader2,
   AlertCircle,
@@ -22,6 +22,7 @@ import {
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import bwipjs from "bwip-js";
 import { getKartuDigitalSiswa, updateWhatsAppMandiriAction } from "@/actions/anggota";
+import { PublicNavbar } from "@/components/layout/PublicNavbar";
 
 interface AnggotaKartuData {
   id: string;
@@ -288,64 +289,47 @@ export default function KartuDigitalClient({
   };
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-800 dark:bg-[#020617] dark:text-slate-100 font-sans selection:bg-blue-600 selection:text-white pb-20 overflow-x-hidden transition-colors duration-300">
-      {/* Background Soft Blue Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-500/20 via-sky-400/15 to-transparent blur-[120px] animate-aurora-mesh-1" />
-        <div className="absolute top-[30%] -right-[10%] w-[550px] h-[550px] rounded-full bg-gradient-to-bl from-cyan-500/15 via-blue-600/15 to-transparent blur-[130px] animate-aurora-mesh-2" />
-        <div className="absolute -bottom-[15%] left-[20%] w-[650px] h-[650px] rounded-full bg-gradient-to-tr from-indigo-500/15 via-sky-500/10 to-transparent blur-[140px] animate-aurora-mesh-3" />
+    <div className="relative min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 font-sans pb-24 overflow-x-hidden transition-colors duration-200">
+      {/* Clean Subtle Grid Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 select-none" aria-hidden="true">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a05_1px,transparent_1px),linear-gradient(to_bottom,#0f172a05_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff04_1px,transparent_1px),linear-gradient(to_bottom,#ffffff04_1px,transparent_1px)] bg-[size:40px_40px]" />
       </div>
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-slate-700 hover:text-blue-600 dark:text-slate-300 dark:hover:text-blue-400 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700/60 px-3.5 py-1.5 rounded-xl shadow-xs transition-all"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Katalog Buku</span>
-          </Link>
-
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 hidden sm:inline">SMK Negeri 1 Beringin</span>
-            <ThemeToggle />
-          </div>
-        </div>
-      </header>
+      {/* Standard Public Floating Island Navbar */}
+      <PublicNavbar currentPage="kartu" autoHideOnScroll={false} />
 
       {/* Main Container */}
-      <main className="max-w-2xl mx-auto px-4 pt-8 relative z-10 space-y-8">
+      <main className="max-w-2xl mx-auto px-4 pt-24 sm:pt-28 relative z-10 space-y-8">
         {/* Title Hero */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wide uppercase">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Kartu Perpustakaan Digital Siswa</span>
+        <div className="text-center space-y-2.5">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wide backdrop-blur-md shadow-xs">
+            <CreditCard className="w-3.5 h-3.5" />
+            <span>Kartu Perpustakaan Digital Resmi</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
             Cek &amp; Simpan Kartu Anggota
           </h1>
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto">
-            Masukkan NISN untuk memunculkan Kartu Digital dan QR Code yang dapat discan saat presensi di perpustakaan.
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+            Masukkan NISN atau Nama untuk menampilkan Kartu Digital interaktif berserta Barcode &amp; QR Code presensi kilat.
           </p>
         </div>
 
         {/* Search Box */}
         <form onSubmit={handleSearch} className="relative group max-w-lg mx-auto">
-          <div className="relative flex items-center">
+          <div className="relative flex items-center glass-panel rounded-2xl p-1.5 shadow-lg shadow-blue-500/5 dark:shadow-blue-500/10 border-2 border-slate-200/90 dark:border-slate-800 focus-within:border-blue-500 dark:focus-within:border-blue-500 transition-all">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Masukkan NISN atau Nama Siswa..."
-              className="w-full h-13 pl-11 pr-32 rounded-2xl bg-white dark:bg-slate-900/90 border-2 border-slate-200 group-hover:border-slate-300 dark:border-slate-800 dark:group-hover:border-slate-700 focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 shadow-lg transition-all"
+              className="w-full h-11 pl-10 pr-28 rounded-xl bg-transparent focus:outline-none text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500"
               autoFocus
             />
-            <Search className="w-5 h-5 text-slate-400 dark:text-slate-500 absolute left-3.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-4 pointer-events-none" />
             <button
               type="submit"
               disabled={loading || !query.trim()}
-              className="absolute right-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-md shadow-blue-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all cursor-pointer"
+              className="absolute right-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white text-xs font-bold shadow-md shadow-blue-600/25 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all cursor-pointer"
             >
               {loading ? (
                 <>
@@ -361,7 +345,7 @@ export default function KartuDigitalClient({
 
         {/* Error State */}
         {error && (
-          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-rose-700 dark:text-rose-300 text-xs sm:text-sm max-w-lg mx-auto animate-in fade-in slide-in-from-top-2">
+          <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-start gap-3 text-rose-700 dark:text-rose-300 text-xs sm:text-sm max-w-lg mx-auto animate-in fade-in slide-in-from-top-2 backdrop-blur-md">
             <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-rose-500 dark:text-rose-400" />
             <div>
               <p className="font-semibold text-rose-800 dark:text-rose-200">Data Tidak Ditemukan</p>
@@ -532,9 +516,9 @@ export default function KartuDigitalClient({
             </div>
 
               {/* Holographic Tip Badge */}
-              <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 text-blue-600 dark:text-blue-300 text-[11px] font-semibold animate-pulse">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                <span>Geser kursor atau miringkan layar untuk efek kilau hologram 3D</span>
+              <div className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 dark:bg-slate-800 border border-stone-200 dark:border-slate-700 text-stone-600 dark:text-slate-300 text-[11px] font-medium">
+                <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <span>Geser kursor atau miringkan layar untuk efek kilau hologram kartu</span>
               </div>
             </div>
 
@@ -544,7 +528,7 @@ export default function KartuDigitalClient({
                 type="button"
                 onClick={downloadCardImage}
                 disabled={downloading}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600 hover:from-blue-500 hover:via-indigo-500 hover:to-cyan-500 text-white font-bold text-xs sm:text-sm shadow-xl shadow-blue-500/25 hover:shadow-blue-500/40 flex items-center justify-center gap-2 transition-all duration-300 cursor-pointer active:scale-98"
               >
                 {downloading ? (
                   <>
@@ -567,7 +551,7 @@ export default function KartuDigitalClient({
                     alert(`Nomor Anggota "${data.no_anggota}" berhasil disalin!`);
                   }
                 }}
-                className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-200 dark:border-slate-800 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
+                className="w-full sm:w-auto px-5 py-3 rounded-2xl bg-white/80 dark:bg-slate-900/80 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white border border-slate-200/90 dark:border-slate-800 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer backdrop-blur-md active:scale-98"
               >
                 <CreditCard className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Salin No. Anggota</span>
@@ -575,30 +559,30 @@ export default function KartuDigitalClient({
             </div>
 
             {/* Self-Service WhatsApp Registration Card */}
-            <div className="p-4 sm:p-5 bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-cyan-500/10 border border-emerald-500/30 dark:border-emerald-500/20 rounded-2xl shadow-xs space-y-3">
+            <div className="p-5 sm:p-6 glass-panel rounded-3xl border border-emerald-500/30 dark:border-emerald-500/30 shadow-lg shadow-emerald-500/5 space-y-4">
               <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-xs">
                     <MessageCircle className="w-5 h-5" />
                   </div>
                   <div>
                     <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-tight">
                       Notifikasi &amp; Pengingat Buku via WhatsApp
                     </h4>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
-                      Dapatkan pengingat gratis H-1 sebelum buku jatuh tempo &amp; bukti peminjaman langsung di WhatsApp Anda
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      Dapatkan pengingat otomatis H-1 sebelum buku jatuh tempo langsung di WhatsApp Anda.
                     </p>
                   </div>
                 </div>
               </div>
 
               {data.telepon && !editingPhone ? (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-white dark:bg-slate-900 rounded-xl border border-emerald-500/30">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 p-3.5 bg-white/90 dark:bg-slate-900/90 rounded-2xl border border-emerald-500/30 backdrop-blur-md">
                   <div className="flex items-center gap-2 text-xs">
                     <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                    <span className="text-slate-600 dark:text-slate-300">Nomor WhatsApp Anda:</span>
-                    <strong className="font-mono text-emerald-600 dark:text-emerald-400">+{data.telepon}</strong>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-800">
+                    <span className="text-slate-600 dark:text-slate-300">Nomor WhatsApp Terdaftar:</span>
+                    <strong className="font-mono text-emerald-600 dark:text-emerald-400 font-bold">+{data.telepon}</strong>
+                    <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30">
                       Terhubung
                     </span>
                   </div>
@@ -622,12 +606,12 @@ export default function KartuDigitalClient({
                       placeholder="Masukkan No. WhatsApp Anda (Contoh: 081234567890)..."
                       value={phoneInput}
                       onChange={(e) => setPhoneInput(e.target.value)}
-                      className="flex-1 px-3.5 py-2.5 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="flex-1 px-4 py-2.5 bg-white/90 dark:bg-slate-900/90 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                     />
                     <button
                       type="submit"
                       disabled={savingPhone || !phoneInput.trim()}
-                      className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+                      className="px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
                     >
                       {savingPhone ? (
                         <>
@@ -648,7 +632,7 @@ export default function KartuDigitalClient({
                           setEditingPhone(false);
                           setPhoneSaveMessage(null);
                         }}
-                        className="px-3 py-2 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 cursor-pointer"
+                        className="px-3.5 py-2 text-xs text-slate-500 hover:text-slate-800 dark:text-slate-400 cursor-pointer"
                       >
                         Batal
                       </button>
@@ -660,10 +644,10 @@ export default function KartuDigitalClient({
               {/* Feedback toast */}
               {phoneSaveMessage && (
                 <div
-                  className={`p-2.5 rounded-xl border text-xs flex items-center gap-2 ${
+                  className={`p-3 rounded-2xl border text-xs flex items-center gap-2 ${
                     phoneSaveMessage.ok
-                      ? "bg-emerald-50 dark:bg-emerald-950/50 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
-                      : "bg-rose-50 dark:bg-rose-950/50 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300"
+                      ? "bg-emerald-50/90 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-800 dark:text-emerald-300"
+                      : "bg-rose-50/90 dark:bg-rose-950/60 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300"
                   }`}
                 >
                   {phoneSaveMessage.ok ? (
@@ -677,12 +661,12 @@ export default function KartuDigitalClient({
             </div>
 
             {/* Instructions Guide */}
-            <div className="p-4 bg-white/80 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800/80 rounded-2xl shadow-xs space-y-3">
+            <div className="p-5 glass-panel rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-md space-y-3">
               <h3 className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <ScanLine className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 <span>Cara Menggunakan Kartu Ini untuk Presensi:</span>
               </h3>
-              <ol className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-decimal pl-4">
+              <ol className="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-decimal pl-4 leading-relaxed">
                 <li>Klik tombol <strong>&quot;Simpan Kartu ke Galeri HP&quot;</strong> atau screenshot layar kartu di atas.</li>
                 <li>Saat berkunjung ke perpustakaan, buka foto kartu di galeri HP Anda.</li>
                 <li>Arahkan layar HP Anda ke kamera pemindai di meja depan perpustakaan.</li>
@@ -692,12 +676,12 @@ export default function KartuDigitalClient({
 
             {/* Borrowed Books info if any */}
             {data.totalBukuDipinjam > 0 && (
-              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs space-y-2">
+              <div className="p-5 bg-amber-500/10 border border-amber-500/30 rounded-3xl text-xs space-y-2 backdrop-blur-md shadow-xs">
                 <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold">
                   <BookMarked className="w-4 h-4" />
                   <span>Sedang Meminjam {data.totalBukuDipinjam} Buku:</span>
                 </div>
-                <ul className="list-disc pl-4 space-y-0.5 text-amber-800 dark:text-amber-200/90">
+                <ul className="list-disc pl-4 space-y-1 text-amber-800 dark:text-amber-200/90">
                   {data.bukuDipinjam.map((judul, i) => (
                     <li key={i} className="line-clamp-1">{judul}</li>
                   ))}

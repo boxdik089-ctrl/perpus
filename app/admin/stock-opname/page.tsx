@@ -9,6 +9,7 @@ import { getStockOpnameList } from "@/actions/stock-opname";
 import { StockOpnameListClient } from "@/components/admin/stock-opname/StockOpnameListClient";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function StockOpnameListPage() {
   const session = await getServerSession(authOptions);
@@ -24,11 +25,7 @@ export default async function StockOpnameListPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 selection:bg-sky-500 selection:text-white relative overflow-x-hidden font-sans transition-colors duration-300">
-      {/* Background Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-        <div className="absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full bg-blue-400/15 dark:bg-blue-600/15 blur-[130px] animate-aurora-1" />
-        <div className="absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full bg-sky-300/20 dark:bg-sky-600/15 blur-[140px] animate-aurora-2" />
-      </div>
+
 
       {/* Top Navbar */}
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">

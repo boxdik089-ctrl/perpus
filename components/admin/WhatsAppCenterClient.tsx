@@ -12,7 +12,6 @@ import {
   Calendar,
   AlertTriangle,
   Clock,
-  Sparkles,
   CheckCircle2,
   Search,
   Filter,
@@ -186,7 +185,7 @@ export function WhatsAppCenterClient({
       </div>
 
       {/* Manual Quick Message Sender Box */}
-      <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-700 rounded-3xl p-5 sm:p-6 text-white shadow-xl space-y-4">
+      <div className="bg-emerald-800 border border-emerald-700/60 rounded-2xl p-5 sm:p-6 text-white shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/20 border border-white/30 flex items-center justify-center shrink-0">
@@ -207,7 +206,7 @@ export function WhatsAppCenterClient({
               type="button"
               onClick={handleBroadcastAll}
               disabled={isBroadcasting}
-              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 text-xs font-extrabold shadow-md transition-all cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 text-xs font-semibold shadow-sm transition-colors cursor-pointer shrink-0"
             >
               <Send className="w-3.5 h-3.5" />
               <span>{isBroadcasting ? "Memproses Broadcast..." : `Broadcast ke ${totalTerlambat} Terlambat`}</span>
@@ -242,7 +241,7 @@ export function WhatsAppCenterClient({
             onClick={handleOpenManualWA}
             className="px-4 py-2.5 rounded-xl bg-white text-emerald-900 hover:bg-emerald-50 text-xs font-bold transition-all shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
           >
-            <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+            <Send className="w-3.5 h-3.5 text-emerald-600" />
             <span>Buka Template Pesan</span>
           </button>
         </div>

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useMemo, Fragment } from "react";
+import React, { useState, useMemo, useEffect, Fragment } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Users,
   UserPlus,
@@ -178,6 +179,8 @@ const JURUSAN_TABS: {
 ];
 
 export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: AnggotaListItem[] }) {
+  const router = useRouter();
+  const [anggotaList, setAnggotaList] = useState<AnggotaListItem[]>(initialAnggota);
   const [query, setQuery] = useState("");
   const [jenisFilter, setJenisFilter] = useState<"ALL" | "SISWA" | "GURU" | "STAF">("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "AKTIF" | "NONAKTIF">("ALL");
@@ -191,10 +194,15 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
   const [anggotaToDelete, setAnggotaToDelete] = useState<AnggotaListItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Selalu sinkronkan data ketika props dari server diperbarui
+  useEffect(() => {
+    setAnggotaList(initialAnggota);
+  }, [initialAnggota]);
+
   // Hitung jumlah anggota per Jurusan
   const jurusanCounts = useMemo(() => {
     const counts: Record<JurusanKey, number> = {
-      ALL: (initialAnggota || []).length,
+      ALL: (anggotaList || []).length,
       TJKT: 0,
       PPLG: 0,
       PERHOTELAN: 0,
@@ -204,17 +212,17 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
       ULW: 0,
       OTHER: 0,
     };
-    for (const a of initialAnggota || []) {
+    for (const a of anggotaList || []) {
       const j = getJurusanFromMember(a);
       counts[j] = (counts[j] || 0) + 1;
     }
     return counts;
-  }, [initialAnggota]);
+  }, [anggotaList]);
 
   // Daftar kelas yang relevan dengan Jurusan yang sedang dipilih
   const availableClassesForJurusan = useMemo(() => {
     const classMap = new Map<string, number>();
-    for (const a of initialAnggota || []) {
+    for (const a of anggotaList || []) {
       if (a?.jenis !== "SISWA") continue;
       const j = getJurusanFromMember(a);
       if (jurusanFilter === "ALL" || j === jurusanFilter) {
@@ -226,7 +234,7 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
     return Array.from(classMap.entries())
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
-  }, [initialAnggota, jurusanFilter]);
+  }, [anggotaList, jurusanFilter]);
 
   // Reset kelas & halaman jika jurusan filter berubah
   const handleSelectJurusan = (key: JurusanKey) => {
@@ -237,7 +245,7 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
 
   // Filter & Urutkan
   const filteredAndSortedAnggota = useMemo(() => {
-    const list = (initialAnggota || []).filter((a) => {
+    const list = (anggotaList || []).filter((a) => {
       if (!a) return false;
       const q = query.toLowerCase().trim();
       const matchQuery =
@@ -316,20 +324,27 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
   }, [filteredAndSortedAnggota, isPagingEnabled, activePage, pageSize]);
 
   const totalAktif = useMemo(() => {
-    return (initialAnggota || []).filter((a) => a?.status_aktif).length;
-  }, [initialAnggota]);
+    return (anggotaList || []).filter((a) => a?.status_aktif).length;
+  }, [anggotaList]);
 
   const totalPinjam = useMemo(() => {
-    return (initialAnggota || []).reduce((acc, a) => acc + (a?._count?.transaksi ?? 0), 0);
-  }, [initialAnggota]);
+    return (anggotaList || []).reduce((acc, a) => acc + (a?._count?.transaksi ?? 0), 0);
+  }, [anggotaList]);
 
   const handleDelete = async () => {
     if (!anggotaToDelete) return;
+    const toDeleteId = anggotaToDelete.id;
     setIsDeleting(true);
+    // Optimistic: langsung hapus dari tampilan UI dalam 0ms
+    setAnggotaList((prev) => prev.filter((a) => a.id !== toDeleteId));
+    setAnggotaToDelete(null);
+
     try {
-      await deleteAnggota(anggotaToDelete.id);
-      setAnggotaToDelete(null);
+      await deleteAnggota(toDeleteId);
+      router.refresh();
     } catch (e: any) {
+      // Revert jika gagal
+      setAnggotaList(initialAnggota);
       alert(`Gagal menghapus anggota: ${e?.message || e}`);
     } finally {
       setIsDeleting(false);

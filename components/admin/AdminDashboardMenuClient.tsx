@@ -18,6 +18,7 @@ import {
   MessageCircle,
   Search,
   X,
+  Star,
 } from "lucide-react";
 
 type CategoryTab = "ALL" | "SIRKULASI" | "KOLEKSI" | "ANGGOTA" | "LAPORAN";
@@ -139,6 +140,17 @@ export function AdminDashboardMenuClient() {
           borderHover: "hover:border-indigo-500/70 dark:hover:border-indigo-500/70",
           bgHighlight: "bg-indigo-50/40 dark:bg-slate-900/90",
         },
+        {
+          title: "Moderasi Ulasan & Rating",
+          desc: "Pantau ulasan buku dari pembaca publik dan hapus ulasan tidak pantas",
+          href: "/admin/ulasan",
+          tag: "RATING & REVIEW",
+          tagColor: "bg-amber-500/10 text-amber-700 dark:text-amber-400",
+          icon: Star,
+          iconColor: "bg-amber-500/20 text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white",
+          borderHover: "hover:border-amber-500/70 dark:hover:border-amber-500/70",
+          bgHighlight: "bg-white/90 dark:bg-slate-900/90",
+        },
       ],
     },
     {
@@ -220,27 +232,27 @@ export function AdminDashboardMenuClient() {
       {/* Quick Search Command Bar */}
       <div className="relative">
         <div className="relative flex items-center">
-          <Search className="w-4 h-4 text-stone-400 dark:text-slate-500 absolute left-3.5 pointer-events-none" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 pointer-events-none" />
           <input
             ref={searchInputRef}
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari menu, layanan, buku, anggota... (Tekan Ctrl + K)"
-            className="w-full h-10 sm:h-11 pl-10 pr-24 rounded-2xl bg-white/90 dark:bg-slate-900/80 border border-stone-200/90 dark:border-slate-800 text-xs sm:text-sm text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 shadow-xs focus:outline-hidden focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-all"
+            placeholder="Cari menu, layanan sirkulasi, buku, anggota... (Tekan Ctrl + K)"
+            className="w-full h-11 sm:h-12 pl-10 pr-24 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs sm:text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 shadow-2xs focus:outline-hidden focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
           />
           <div className="absolute right-3 flex items-center gap-1.5 pointer-events-auto">
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => setSearchQuery("")}
-                className="p-1 rounded-md text-stone-400 hover:text-stone-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors cursor-pointer"
                 title="Hapus pencarian"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             )}
-            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md bg-stone-100 dark:bg-slate-800 text-stone-500 dark:text-slate-400 border border-stone-200 dark:border-slate-700/80 font-mono text-[10px] font-semibold select-none">
+            <kbd className="hidden sm:inline-flex items-center gap-0.5 px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700 font-mono text-[10px] font-bold select-none">
               <span className="text-[11px]">Ctrl</span>K
             </kbd>
           </div>
@@ -248,29 +260,29 @@ export function AdminDashboardMenuClient() {
 
         {/* Quick Jump Links when typing search */}
         {q.length >= 2 && (
-          <div className="mt-2 p-2 rounded-xl bg-stone-100/90 dark:bg-slate-800/90 border border-stone-200 dark:border-slate-700/80 flex flex-wrap items-center gap-2 text-xs animate-fade-in">
-            <span className="text-[11px] font-semibold text-stone-500 dark:text-slate-400">
+          <div className="mt-2.5 p-2.5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 flex flex-wrap items-center gap-2 text-xs backdrop-blur-md animate-fade-in shadow-sm">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400">
               Lompat ke pencarian data:
             </span>
             <Link
               href={`/admin/buku?q=${encodeURIComponent(q)}`}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-stone-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-stone-200 dark:border-slate-700 shadow-2xs font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700 font-bold transition-all shadow-2xs"
             >
-              <BookOpen className="w-3 h-3 text-purple-500" />
+              <BookOpen className="w-3.5 h-3.5 text-purple-500" />
               <span>Buku: &quot;{q}&quot;</span>
             </Link>
             <Link
               href={`/admin/anggota?q=${encodeURIComponent(q)}`}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-stone-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-stone-200 dark:border-slate-700 shadow-2xs font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700 font-bold transition-all shadow-2xs"
             >
-              <Users className="w-3 h-3 text-amber-500" />
+              <Users className="w-3.5 h-3.5 text-amber-500" />
               <span>Anggota: &quot;{q}&quot;</span>
             </Link>
             <Link
               href={`/admin/transaksi?q=${encodeURIComponent(q)}`}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-900 text-stone-700 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400 border border-stone-200 dark:border-slate-700 shadow-2xs font-medium transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700 font-bold transition-all shadow-2xs"
             >
-              <ArrowLeftRight className="w-3 h-3 text-sky-500" />
+              <ArrowLeftRight className="w-3.5 h-3.5 text-sky-500" />
               <span>Transaksi: &quot;{q}&quot;</span>
             </Link>
           </div>
@@ -280,11 +292,11 @@ export function AdminDashboardMenuClient() {
       {/* Category Pills & View Switcher Bar */}
       <div className="flex flex-wrap lg:flex-nowrap items-center justify-between gap-3">
         {/* Horizontal Category Filter Pills */}
-        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1 scrollbar-none flex-1 min-w-0 pr-3">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none flex-1 min-w-0 pr-3">
           {[
-            { id: "ALL", label: "Semua Menu", icon: LayoutGrid, iconColor: "text-amber-500" },
+            { id: "ALL", label: "Semua Menu", icon: LayoutGrid, iconColor: "text-sky-500" },
             { id: "SIRKULASI", label: "Sirkulasi & Meja Depan", icon: ScanLine, iconColor: "text-emerald-500" },
-            { id: "KOLEKSI", label: "Koleksi & Audit", icon: BookOpen, iconColor: "text-indigo-500" },
+            { id: "KOLEKSI", label: "Koleksi & Audit", icon: BookOpen, iconColor: "text-purple-500" },
             { id: "ANGGOTA", label: "Anggota", icon: Users, iconColor: "text-amber-500" },
             { id: "LAPORAN", label: "Laporan", icon: BarChart3, iconColor: "text-cyan-500" },
           ].map((tab) => {
@@ -295,15 +307,15 @@ export function AdminDashboardMenuClient() {
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id as CategoryTab)}
-                className={`px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 sm:gap-2 shrink-0 ${
+                className={`px-3.5 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-2 shrink-0 ${
                   isSelected
-                    ? "bg-stone-900 text-white dark:bg-white dark:text-slate-900 shadow-md shadow-black/10 scale-102"
-                    : "bg-white/80 dark:bg-slate-900/80 text-stone-600 dark:text-slate-300 border border-stone-200/90 dark:border-slate-800 hover:bg-stone-100 dark:hover:bg-slate-800"
+                    ? "bg-sky-600 text-white shadow-md shadow-sky-600/25 border border-sky-500 scale-102"
+                    : "bg-white/80 dark:bg-slate-900/75 text-slate-600 dark:text-slate-300 border border-slate-200/90 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
                 }`}
               >
                 <TabIcon
                   className={`w-3.5 h-3.5 shrink-0 ${
-                    isSelected ? "text-emerald-400 dark:text-emerald-600" : tab.iconColor
+                    isSelected ? "text-white" : tab.iconColor
                   }`}
                 />
                 <span>{tab.label}</span>
@@ -313,14 +325,14 @@ export function AdminDashboardMenuClient() {
         </div>
 
         {/* View Switcher (List vs Grid) */}
-        <div className="flex items-center bg-white/80 dark:bg-slate-900/80 p-1 rounded-xl border border-stone-200/90 dark:border-slate-800 shrink-0">
+        <div className="flex items-center bg-white/80 dark:bg-slate-900/80 p-1 rounded-2xl border border-slate-200/90 dark:border-slate-800 shrink-0 shadow-2xs">
           <button
             type="button"
             onClick={() => setViewMode("list")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === "list"
-                ? "bg-stone-900 text-white dark:bg-white dark:text-slate-900 shadow-xs"
-                : "text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white"
+                ? "bg-sky-600 text-white shadow-xs"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
             title="Tampilan List Panel"
           >
@@ -330,10 +342,10 @@ export function AdminDashboardMenuClient() {
           <button
             type="button"
             onClick={() => setViewMode("grid")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
               viewMode === "grid"
-                ? "bg-stone-900 text-white dark:bg-white dark:text-slate-900 shadow-xs"
-                : "text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white"
+                ? "bg-sky-600 text-white shadow-xs"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
             }`}
             title="Tampilan Grid Card"
           >
@@ -349,28 +361,28 @@ export function AdminDashboardMenuClient() {
           {filteredSections.map((sec) => (
             <div
               key={sec.id}
-              className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl border border-stone-200/90 dark:border-slate-800 shadow-xs overflow-hidden transition-all hover:border-stone-300 dark:hover:border-slate-700/80"
+              className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs overflow-hidden transition-all hover:border-slate-300 dark:hover:border-slate-700"
             >
               {/* Panel Header */}
-              <div className="px-4 sm:px-5 py-3 sm:py-3.5 bg-stone-50/70 dark:bg-slate-900/90 border-b border-stone-200/80 dark:border-slate-800/80 flex items-center justify-between">
+              <div className="px-5 py-3.5 bg-slate-50/70 dark:bg-slate-900/90 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className={`w-2 h-2 rounded-full ${sec.dotColor || "bg-emerald-500"}`} />
-                  <h2 className="text-xs sm:text-sm font-extrabold text-stone-900 dark:text-white tracking-tight">
+                  <span className={`w-2.5 h-2.5 rounded-full ${sec.dotColor || "bg-emerald-500"}`} />
+                  <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
                     {sec.title}
                   </h2>
                   <span
-                    className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border ${sec.badgeColor}`}
+                    className={`hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${sec.badgeColor}`}
                   >
                     {sec.badge}
                   </span>
                 </div>
-                <span className="text-[11px] font-semibold text-stone-400 dark:text-slate-500">
+                <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500">
                   {sec.items.length} Menu
                 </span>
               </div>
 
               {/* Rows List */}
-              <div className="divide-y divide-stone-100 dark:divide-slate-800/60">
+              <div className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {sec.items.map((item) => {
                   const IconComponent = item.icon;
                   return (
@@ -378,19 +390,19 @@ export function AdminDashboardMenuClient() {
                       key={item.title}
                       href={item.href}
                       target={item.target}
-                      className="group px-4 sm:px-5 py-3 sm:py-3.5 flex items-center gap-3 sm:gap-4 hover:bg-stone-50/80 dark:hover:bg-slate-800/40 transition-colors duration-150"
+                      className="group px-5 py-3.5 flex items-center gap-3 sm:gap-4 hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors duration-150"
                     >
                       {/* Icon Container */}
                       <div
-                        className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-stone-200 dark:border-slate-700/60 flex items-center justify-center shrink-0 transition-colors shadow-2xs ${item.iconColor}`}
+                        className={`w-10 h-10 rounded-2xl border border-slate-200 dark:border-slate-700/60 flex items-center justify-center shrink-0 transition-all shadow-2xs ${item.iconColor}`}
                       >
-                        <IconComponent className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <IconComponent className="w-5 h-5" />
                       </div>
 
                       {/* Title & Desc */}
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="font-bold text-stone-900 dark:text-white text-xs sm:text-sm group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                          <span className="font-bold text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                             {item.title}
                           </span>
                           <span
@@ -399,7 +411,7 @@ export function AdminDashboardMenuClient() {
                             {item.tag}
                           </span>
                         </div>
-                        <p className="text-[11px] sm:text-xs text-stone-500 dark:text-slate-400 truncate mt-0.5">
+                        <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                           {item.desc}
                         </p>
                       </div>
@@ -411,8 +423,8 @@ export function AdminDashboardMenuClient() {
                         >
                           {item.tag}
                         </span>
-                        <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-stone-100 dark:bg-slate-800/80 group-hover:bg-emerald-600 text-stone-400 dark:text-slate-400 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
-                          <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:translate-x-0.5 transition-transform" />
+                        <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800/80 group-hover:bg-sky-600 text-slate-400 dark:text-slate-400 group-hover:text-white flex items-center justify-center transition-all duration-200 shadow-2xs">
+                          <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                         </div>
                       </div>
                     </Link>
@@ -430,8 +442,8 @@ export function AdminDashboardMenuClient() {
               {/* Section Header */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${sec.dotColor || "bg-emerald-500"}`} />
-                  <h2 className="text-sm sm:text-base font-extrabold text-stone-900 dark:text-white">
+                  <span className={`w-2.5 h-2.5 rounded-full ${sec.dotColor || "bg-emerald-500"}`} />
+                  <h2 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white">
                     {sec.title}
                   </h2>
                   <span
@@ -451,12 +463,12 @@ export function AdminDashboardMenuClient() {
                       key={item.title}
                       href={item.href}
                       target={item.target}
-                      className={`group p-4 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${item.bgHighlight} ${item.borderHover}`}
+                      className={`group p-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-lg transition-all duration-200 flex flex-col justify-between glass-panel ${item.bgHighlight} ${item.borderHover}`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-3">
                           <div
-                            className={`w-10 h-10 rounded-xl border border-stone-200 dark:border-slate-700/60 flex items-center justify-center transition-colors shadow-xs ${item.iconColor}`}
+                            className={`w-10 h-10 rounded-2xl border border-slate-200 dark:border-slate-700/60 flex items-center justify-center transition-colors shadow-xs ${item.iconColor}`}
                           >
                             <IconComponent className="w-5 h-5" />
                           </div>
@@ -467,15 +479,15 @@ export function AdminDashboardMenuClient() {
                           </span>
                         </div>
 
-                        <h3 className="font-extrabold text-stone-900 dark:text-white text-sm sm:text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                        <h3 className="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-xs text-stone-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 line-clamp-2 leading-relaxed">
                           {item.desc}
                         </p>
                       </div>
 
-                      <div className="pt-3 mt-3 border-t border-stone-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-stone-400 dark:text-slate-500 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                      <div className="pt-3 mt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-bold text-slate-400 dark:text-slate-500 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                         <span>Buka Fitur</span>
                         <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                       </div>
@@ -490,15 +502,15 @@ export function AdminDashboardMenuClient() {
 
       {/* Empty State when Search Matches No Menus */}
       {totalMatchingItems === 0 && (
-        <div className="py-12 text-center bg-white/60 dark:bg-slate-900/60 rounded-2xl border border-stone-200/90 dark:border-slate-800 p-6 space-y-3">
-          <div className="w-12 h-12 rounded-2xl bg-stone-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-stone-400 dark:text-slate-500">
+        <div className="py-12 text-center glass-panel rounded-3xl border border-slate-200/90 dark:border-slate-800 p-8 space-y-3">
+          <div className="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400 dark:text-slate-500">
             <Search className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="font-bold text-sm text-stone-900 dark:text-white">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white">
               Tidak ada menu yang cocok
             </h3>
-            <p className="text-xs text-stone-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
               Tidak ditemukan menu dengan kata kunci &quot;{searchQuery}&quot;. Coba gunakan kata kunci lain.
             </p>
           </div>
@@ -508,7 +520,7 @@ export function AdminDashboardMenuClient() {
               setSearchQuery("");
               setActiveTab("ALL");
             }}
-            className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-xs cursor-pointer inline-flex items-center gap-1.5"
+            className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold transition-all shadow-md shadow-sky-600/20 cursor-pointer inline-flex items-center gap-1.5"
           >
             <span>Reset Pencarian</span>
           </button>

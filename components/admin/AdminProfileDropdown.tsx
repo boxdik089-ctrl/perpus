@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { signOut } from "next-auth/react";
+import { performLogout } from "@/lib/logout";
 import Link from "next/link";
 import {
   ShieldCheck,
@@ -44,7 +44,7 @@ export function AdminProfileDropdown({ userName }: { userName: string }) {
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-stone-100 dark:hover:bg-slate-800 border border-transparent hover:border-stone-200 dark:hover:border-slate-700 transition-all cursor-pointer text-left"
         >
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-600 to-teal-400 text-white font-black flex items-center justify-center text-xs shadow-xs shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center text-xs shadow-xs shrink-0">
             {userName?.charAt(0)?.toUpperCase() || "A"}
           </div>
           <div className="hidden sm:block text-left">
@@ -108,7 +108,7 @@ export function AdminProfileDropdown({ userName }: { userName: string }) {
             <div className="pt-1 border-t border-stone-100 dark:border-slate-800">
               <button
                 type="button"
-                onClick={() => signOut({ callbackUrl: "/login", redirect: true })}
+                onClick={() => performLogout()}
                 className="w-full flex items-center gap-2 px-4 py-2 text-xs text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 font-bold transition-colors cursor-pointer text-left"
               >
                 <LogOut className="w-3.5 h-3.5" />

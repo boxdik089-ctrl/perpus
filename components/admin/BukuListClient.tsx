@@ -14,7 +14,6 @@ import {
   FileSpreadsheet, 
   Barcode, 
   Filter, 
-  Sparkles, 
   Layers, 
   AlertCircle,
   Tag,
@@ -23,7 +22,9 @@ import {
   AlertTriangle,
   Loader2,
   Check,
-  X
+  X,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import { deleteBuku, deleteMultipleBuku, deleteAllBuku } from "@/actions/buku";
 
@@ -101,6 +102,45 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
       return matchQuery && matchKategori && matchStatus;
     });
   }, [bukuList, query, kategoriFilter, statusFilter]);
+
+  // Pagination State & Logic
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
+
+  // Otomatis reset ke halaman 1 jika filter atau pencarian berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, kategoriFilter, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBuku.length / itemsPerPage));
+  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedBuku = useMemo(() => {
+    const startIndex = (validCurrentPage - 1) * itemsPerPage;
+    return filteredBuku.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredBuku, validCurrentPage, itemsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === validCurrentPage) return;
+    setCurrentPage(page);
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  };
+
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (validCurrentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, "...", totalPages);
+      } else if (validCurrentPage >= totalPages - 3) {
+        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", validCurrentPage - 1, validCurrentPage, validCurrentPage + 1, "...", totalPages);
+      }
+    }
+    return pages;
+  }, [totalPages, validCurrentPage]);
 
   const totalStokSemua = useMemo(() => {
     return bukuList.reduce((acc, curr) => acc + curr.stok_total, 0);
@@ -271,8 +311,8 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
-      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-stone-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
+      {/* Filter & Search Bar - Sticky on Scroll */}
+      <div className="sticky top-2 sm:top-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-stone-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-md transition-all">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search Box */}
           <div className="relative flex-1">
@@ -385,7 +425,7 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
                   : "text-stone-600 hover:text-stone-900 dark:text-slate-400 dark:hover:text-slate-200"
               }`}
             >
-              <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+              <BookOpen className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
               <span>E-Book Digital ({bukuList.filter((b) => b.file_url || b.is_ebook).length})</span>
             </button>
           </div>
@@ -483,7 +523,7 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-200 dark:divide-slate-800/60">
-              {filteredBuku.map((b) => {
+              {paginatedBuku.map((b) => {
                 const isSelected = selectedIds.has(b.id);
                 return (
                   <tr 
@@ -599,7 +639,7 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
                             title="Buka 3D E-Book Reader"
                             className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 dark:bg-purple-950/60 dark:hover:bg-purple-900/60 dark:text-purple-300 dark:border-purple-800 text-xs font-bold transition-all shadow-xs"
                           >
-                            <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                            <BookOpen className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
                             <span>Baca E-Book</span>
                           </Link>
                         )}
@@ -641,7 +681,7 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
 
         {/* Mobile View (Card List) */}
         <div className="md:hidden divide-y divide-stone-200 dark:divide-slate-800/80">
-          {filteredBuku.map((b) => {
+          {paginatedBuku.map((b) => {
             const isSelected = selectedIds.has(b.id);
             return (
               <div 
@@ -730,8 +770,8 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
                       target="_blank"
                       className="w-full flex items-center justify-center gap-1.5 h-9 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/20 dark:hover:bg-purple-500/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-500/40 text-xs font-bold transition-all shadow-xs"
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-purple-500" />
-                      <span>Buka 3D E-Book Reader</span>
+                      <BookOpen className="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                      <span>Baca E-Book</span>
                     </Link>
                   )}
 
@@ -766,6 +806,95 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
             );
           })}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-5 py-4 border-t border-stone-200 dark:border-slate-800/80 bg-stone-50/50 dark:bg-slate-950/40">
+            {/* Info Range Halaman */}
+            <div className="text-xs text-stone-600 dark:text-slate-400 font-medium text-center sm:text-left">
+              Menampilkan{" "}
+              <strong className="text-stone-900 dark:text-white">
+                {(validCurrentPage - 1) * itemsPerPage + 1}
+              </strong>
+              {" - "}
+              <strong className="text-stone-900 dark:text-white">
+                {Math.min(validCurrentPage * itemsPerPage, filteredBuku.length)}
+              </strong>{" "}
+              dari{" "}
+              <strong className="text-emerald-600 dark:text-emerald-400">
+                {filteredBuku.length}
+              </strong>{" "}
+              buku
+            </div>
+
+            {/* Tombol Nomor & Navigasi Halaman */}
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap justify-center select-none">
+              {/* Tombol Sebelumnya */}
+              <button
+                type="button"
+                onClick={() => handlePageChange(validCurrentPage - 1)}
+                disabled={validCurrentPage === 1}
+                className="inline-flex items-center gap-1 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-slate-800 text-stone-700 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white border-stone-200 dark:border-slate-700"
+                title="Halaman Sebelumnya"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sebelumnya</span>
+              </button>
+
+              {/* Nomor Halaman */}
+              {pageNumbers.map((p, idx) =>
+                typeof p === "number" ? (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handlePageChange(p)}
+                    className={`w-8 h-8 sm:w-9 sm:h-9 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      validCurrentPage === p
+                        ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/30 scale-105"
+                        : "text-stone-700 dark:text-slate-300 hover:bg-stone-100 dark:hover:bg-slate-700 bg-white dark:bg-slate-800 border border-stone-200 dark:border-slate-700"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ) : (
+                  <span key={idx} className="px-1 text-stone-400 dark:text-slate-500 font-mono text-xs select-none">
+                    ...
+                  </span>
+                )
+              )}
+
+              {/* Tombol Selanjutnya */}
+              <button
+                type="button"
+                onClick={() => handlePageChange(validCurrentPage + 1)}
+                disabled={validCurrentPage === totalPages}
+                className="inline-flex items-center gap-1 px-3 py-1.5 sm:py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-xs disabled:opacity-30 disabled:cursor-not-allowed bg-white dark:bg-slate-800 text-stone-700 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white border-stone-200 dark:border-slate-700"
+                title="Halaman Selanjutnya"
+              >
+                <span className="hidden sm:inline">Selanjutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Opsi Item per Halaman */}
+            <div className="hidden sm:flex items-center gap-2 text-xs text-stone-500 dark:text-slate-400">
+              <span>Per halaman:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-2 py-1 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer shadow-2xs bg-white dark:bg-slate-800 text-stone-800 dark:text-slate-200 border-stone-200 dark:border-slate-700"
+              >
+                <option value={15}>15 buku</option>
+                <option value={20}>20 buku</option>
+                <option value={30}>30 buku</option>
+                <option value={50}>50 buku</option>
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Empty State */}
         {filteredBuku.length === 0 && (

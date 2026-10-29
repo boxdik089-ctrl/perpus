@@ -14,7 +14,6 @@ import {
   Calendar,
   AlertTriangle,
   Clock,
-  Sparkles,
   Loader2,
   CheckCircle2,
   Bell,
@@ -149,11 +148,11 @@ export function WhatsAppModal({ isOpen, onClose, data }: WhatsAppModalProps) {
       />
 
       {/* Modal Container */}
-      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] z-10 animate-fade-up">
+      <div className="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden flex flex-col max-h-[92vh] z-10">
         {/* Header with WhatsApp Theme Styling */}
-        <div className="bg-gradient-to-r from-emerald-600 via-emerald-700 to-teal-800 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-md">
+        <div className="bg-emerald-800 p-4 sm:p-5 text-white flex items-center justify-between shrink-0 shadow-sm">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center shrink-0">
               <MessageCircle className="w-5 h-5 text-emerald-200" />
             </div>
             <div className="min-w-0">

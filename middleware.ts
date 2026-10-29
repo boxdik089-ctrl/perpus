@@ -1,5 +1,6 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { getToken } from "next-auth/jwt";
 
 export default withAuth(
   function middleware(req) {
@@ -15,8 +16,28 @@ export default withAuth(
     return response;
   },
   {
+    secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: async ({ req, token }) => {
+        if (token) return true;
+
+        // Fallback check jika cookie ada tanpa prefix __Secure-
+        const fallbackCookie = req.cookies.get("next-auth.session-token")?.value;
+        if (fallbackCookie) {
+          try {
+            const fallbackToken = await getToken({
+              req,
+              secret: process.env.NEXTAUTH_SECRET,
+              cookieName: "next-auth.session-token",
+            });
+            return !!fallbackToken;
+          } catch {
+            return false;
+          }
+        }
+
+        return false;
+      },
     },
     pages: {
       signIn: "/login",
@@ -26,6 +47,7 @@ export default withAuth(
 
 export const config = {
   matcher: [
+    "/admin",
     "/admin/:path*",
     "/upload-audio",
     "/api/upload-cover",

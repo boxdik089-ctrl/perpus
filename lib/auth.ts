@@ -3,10 +3,12 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-import { checkRateLimit, clearRateLimit, sanitizeInput } from "@/lib/security";
+import { isRateLimited, recordFailedAttempt, clearRateLimit, sanitizeInput } from "@/lib/security";
+
+const isHttps = process.env.NEXTAUTH_URL?.startsWith("https://") || process.env.NODE_ENV === "production";
 
 export const authOptions: NextAuthOptions = {
-  useSecureCookies: process.env.NODE_ENV === "production",
+  useSecureCookies: isHttps,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -24,9 +26,11 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Username tidak valid");
         }
 
-        // Perlindungan terhadap Brute-Force: Maksimal 5 percobaan gagal per 5 menit
-        const rateCheck = checkRateLimit(`login:${username.toLowerCase()}`, 5, 5 * 60 * 1000);
-        if (!rateCheck.allowed) {
+        const rateLimitKey = `login:${username.toLowerCase()}`;
+
+        // Perlindungan terhadap Brute-Force: Cek apakah akun sedang dibatasi
+        const rateCheck = isRateLimited(rateLimitKey, 5, 5 * 60 * 1000);
+        if (rateCheck.limited) {
           throw new Error(
             `Terlalu banyak percobaan login yang gagal. Akun dibatasi sementara. Silakan coba lagi dalam ${rateCheck.retryAfterSeconds} detik.`
           );
@@ -37,6 +41,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!admin) {
+          recordFailedAttempt(rateLimitKey);
           throw new Error("Username atau password salah");
         }
 
@@ -62,11 +67,12 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!isPasswordValid) {
+          recordFailedAttempt(rateLimitKey);
           throw new Error("Username atau password salah");
         }
 
         // Bersihkan rate limit saat login sukses
-        clearRateLimit(`login:${username.toLowerCase()}`);
+        clearRateLimit(rateLimitKey);
 
         return {
           id: admin.id,

@@ -8,7 +8,6 @@ import {
   QrCode,
   ScanLine,
   UserCheck,
-  Sparkles,
   Clock,
   Users,
   CheckCircle2,
@@ -33,6 +32,7 @@ import {
   Send
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import { PublicNavbar } from "@/components/layout/PublicNavbar";
 
 type VisitorResult = {
   id: string;
@@ -385,60 +385,37 @@ export default function KioskScannerClient({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#020617] text-slate-800 dark:text-slate-100 flex flex-col selection:bg-blue-600 selection:text-white relative overflow-x-hidden font-sans transition-colors duration-300">
-      {/* Background Glowing Soft Blue Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-500/20 via-sky-400/15 to-transparent blur-[120px] animate-aurora-mesh-1" />
-        <div className="absolute top-[30%] -right-[10%] w-[550px] h-[550px] rounded-full bg-gradient-to-bl from-cyan-500/15 via-blue-600/15 to-transparent blur-[130px] animate-aurora-mesh-2" />
-        <div className="absolute -bottom-[15%] left-[20%] w-[650px] h-[650px] rounded-full bg-gradient-to-tr from-indigo-500/15 via-sky-500/10 to-transparent blur-[140px] animate-aurora-mesh-3" />
-      </div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 flex flex-col relative overflow-x-hidden font-sans transition-colors duration-200">
 
-      {/* Top Header Bar */}
-      <header className="relative z-20 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 px-4 sm:px-8 py-3.5 flex items-center justify-between shadow-xs">
-        <div className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href="/"
-            tabIndex={-1}
-            onFocus={(e) => e.currentTarget.blur()}
-            className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all border border-slate-200 dark:border-slate-700/60 flex items-center gap-1.5 text-xs font-semibold"
-            title="Kembali ke Katalog"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="hidden sm:inline">Katalog</span>
-          </Link>
+      {/* Standard Public Floating Island Navbar */}
+      {!isFullscreen && (
+        <PublicNavbar currentPage="kios" autoHideOnScroll={false} />
+      )}
 
-          <div className="flex items-center gap-2 sm:gap-2.5">
-            <img
-              src="/assets/logo.png"
-              alt="Logo SMK Negeri 1 Beringin"
-              className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl object-contain bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/20 p-1 shrink-0"
-            />
-            <img
-              src="/assets/logo-kolaborasi.png"
-              alt="Logo Kolaborasi Sumut Berkah"
-              className="h-8 sm:h-10 w-auto object-contain shrink-0"
-            />
-            <div className="border-l border-slate-200 dark:border-slate-700 pl-3 ml-1">
-              <h1 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-                Presensi Pengunjung Mandiri
-                <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  KIOSK LIVE
-                </span>
-              </h1>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden xs:block">
-                Perpustakaan SMK Negeri 1 Beringin
-              </p>
-            </div>
+      {/* Kiosk Status & Control Bar */}
+      <div className={`relative z-20 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-8 py-3 flex items-center justify-between shadow-xs transition-all ${
+        !isFullscreen ? "pt-20 sm:pt-22" : "py-3"
+      }`}>
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+            <span>KIOSK LIVE</span>
+          </div>
+          <div>
+            <h1 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white leading-none">
+              Presensi Mandiri Pengunjung
+            </h1>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 hidden xs:block">
+              Perpustakaan SMK Negeri 1 Beringin
+            </p>
           </div>
         </div>
 
         {/* Live Clock & Controls */}
-        <div className="flex items-center gap-2 sm:gap-4">
-          <ThemeToggle />
+        <div className="flex items-center gap-2 sm:gap-3">
           {currentTime && (
-            <div className="hidden md:flex flex-col items-end pr-3 border-r border-slate-200 dark:border-slate-800">
-              <span className="text-base font-extrabold text-slate-900 dark:text-white tracking-widest font-mono">
+            <div className="hidden sm:flex flex-col items-end pr-2.5 border-r border-slate-200 dark:border-slate-800">
+              <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white tracking-widest font-mono leading-none">
                 {currentTime.toLocaleTimeString("id-ID", {
                   hour: "2-digit",
                   minute: "2-digit",
@@ -446,13 +423,11 @@ export default function KioskScannerClient({
                 })}{" "}
                 WIB
               </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3 h-3 text-blue-500 dark:text-blue-400" />
+              <span className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                 {currentTime.toLocaleDateString("id-ID", {
-                  weekday: "long",
+                  weekday: "short",
                   day: "numeric",
                   month: "short",
-                  year: "numeric",
                 })}
               </span>
             </div>
@@ -463,16 +438,16 @@ export default function KioskScannerClient({
             target="_blank"
             tabIndex={-1}
             onFocus={(e) => e.currentTarget.blur()}
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-all cursor-pointer"
+            className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-600 dark:text-blue-400 text-xs font-semibold transition-all cursor-pointer"
             title="Cek atau download QR Code kartu anggota di HP"
           >
-            <CreditCard className="w-4 h-4" />
+            <CreditCard className="w-3.5 h-3.5" />
             <span>Kartu Siswa</span>
           </Link>
 
           <button
             onClick={() => setMuted(!muted)}
-            className={`p-2.5 rounded-xl border transition-all cursor-pointer ${
+            className={`p-2 rounded-xl border transition-all cursor-pointer ${
               muted
                 ? "bg-rose-500/10 border-rose-500/30 text-rose-500 dark:text-rose-400"
                 : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
@@ -484,13 +459,13 @@ export default function KioskScannerClient({
 
           <button
             onClick={toggleFullscreen}
-            className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
+            className="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-all cursor-pointer"
             title={isFullscreen ? "Keluar Layar Penuh" : "Layar Penuh (Kiosk Mode)"}
           >
             {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
           </button>
         </div>
-      </header>
+      </div>
 
       {/* Main Kiosk Viewport */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col lg:flex-row gap-6">
@@ -500,7 +475,7 @@ export default function KioskScannerClient({
           <div className="bg-white/80 dark:bg-slate-900/90 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-sm dark:shadow-xl backdrop-blur-md">
             <div className="flex items-center justify-between mb-3">
               <label className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <UserCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 Pilih Keperluan Kunjungan Sebelum Scan:
               </label>
               <span className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:inline">
@@ -539,12 +514,12 @@ export default function KioskScannerClient({
           </div>
 
           {/* Scanner Interactive Box */}
-          <div className="bg-white/80 dark:bg-slate-900/90 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-sm dark:shadow-2xl backdrop-blur-md flex-1 flex flex-col relative overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-6 shadow-sm flex-1 flex flex-col relative overflow-hidden">
             {/* Header Box */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 mb-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 dark:border-blue-500/30 flex items-center justify-center">
-                  <ScanLine className="w-5 h-5 animate-pulse" />
+                  <ScanLine className="w-5 h-5" />
                 </div>
                 <div>
                   <h2 className="text-base font-bold text-slate-900 dark:text-white leading-tight">
@@ -588,7 +563,7 @@ export default function KioskScannerClient({
                   
                   {/* Glowing Target Crosshair Overlay */}
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                    <div className="w-56 h-56 sm:w-64 sm:h-64 border-2 border-sky-400/40 dark:border-sky-400/30 rounded-3xl relative shadow-[0_0_35px_rgba(2,132,199,0.35)] overflow-hidden">
+                    <div className="w-56 h-56 sm:w-64 sm:h-64 border-2 border-sky-400/40 dark:border-sky-400/30 rounded-2xl relative shadow-md overflow-hidden">
                       {/* Corner Accents */}
                       <span className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-sky-500 dark:border-sky-400 rounded-tl-2xl" />
                       <span className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-sky-500 dark:border-sky-400 rounded-tr-2xl" />
@@ -602,13 +577,8 @@ export default function KioskScannerClient({
                 </>
               ) : (
                 <div className="p-8 sm:p-12 text-center space-y-4 max-w-lg mx-auto">
-                  <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-                    {/* Glowing pulse rings */}
-                    <div className="absolute inset-0 rounded-3xl bg-blue-500/20 animate-ping opacity-50" />
-                    <div className="absolute -inset-2 rounded-3xl bg-blue-500/10 animate-pulse" />
-                    <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 to-sky-500 text-white flex items-center justify-center shadow-xl shadow-blue-500/20 border border-blue-400/40">
-                      <ScanLine className="w-10 h-10 animate-pulse" />
-                    </div>
+                  <div className="w-20 h-20 mx-auto rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md border border-blue-500/50">
+                    <ScanLine className="w-10 h-10" />
                   </div>
 
                   <div className="space-y-1.5">
@@ -667,7 +637,7 @@ export default function KioskScannerClient({
               <button
                 type="submit"
                 disabled={!manualInput.trim() || busy}
-                className="px-5 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-xs shadow-md shadow-blue-600/25 active:scale-95 disabled:bg-none disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5 transition-all shrink-0 cursor-pointer border border-transparent disabled:border-slate-300 dark:disabled:border-slate-700"
+                className="px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs shadow-sm active:scale-95 disabled:bg-none disabled:bg-slate-200 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-500 disabled:shadow-none disabled:cursor-not-allowed disabled:scale-100 flex items-center gap-1.5 transition-colors shrink-0 cursor-pointer border border-transparent disabled:border-slate-300 dark:disabled:border-slate-700"
               >
                 <Send className="w-3.5 h-3.5 shrink-0" />
                 <span>Kirim Presensi</span>
@@ -680,8 +650,7 @@ export default function KioskScannerClient({
         <div className="w-full lg:w-96 flex flex-col gap-5">
           {/* Welcome Card / Result Popup */}
           {currentVisitor ? (
-            <div className="bg-gradient-to-br from-blue-900/90 via-slate-900 to-cyan-950/90 rounded-3xl border-2 border-blue-500/80 p-6 shadow-2xl relative overflow-hidden animate-fade-up text-white">
-              <div className="absolute -top-12 -right-12 w-40 h-40 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
+            <div className="bg-slate-900 rounded-2xl border border-blue-500/60 p-6 shadow-xl relative overflow-hidden text-white">
               
               <div className="flex items-center justify-between mb-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/40 text-blue-300 text-xs font-bold">
@@ -696,7 +665,7 @@ export default function KioskScannerClient({
               </div>
 
               <div className="text-center space-y-3 py-2">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-500 to-sky-400 text-white font-extrabold text-2xl flex items-center justify-center mx-auto shadow-xl ring-4 ring-blue-400/30">
+                <div className="w-20 h-20 rounded-2xl bg-blue-600 text-white font-bold text-2xl flex items-center justify-center mx-auto shadow-md">
                   {currentVisitor.nama.charAt(0).toUpperCase()}
                 </div>
 
@@ -753,7 +722,7 @@ export default function KioskScannerClient({
             </div>
           ) : bannerStatus ? (
             <div
-              className={`rounded-3xl border-2 p-5 shadow-xl animate-fade-up ${
+              className={`rounded-2xl border-2 p-5 shadow-sm animate-fade-up ${
                 bannerStatus.type === "DUPLICATE"
                   ? "bg-amber-950/70 border-amber-500/60 text-amber-200"
                   : "bg-rose-950/70 border-rose-500/60 text-rose-200"
@@ -773,9 +742,9 @@ export default function KioskScannerClient({
             </div>
           ) : (
             /* Idle Ready Card */
-            <div className="bg-white/80 dark:bg-slate-900/90 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm dark:shadow-xl backdrop-blur-md text-center space-y-3">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-sm text-center space-y-3">
               <div className="w-14 h-14 rounded-2xl bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 dark:border-blue-500/30 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto">
-                <QrCode className="w-7 h-7 animate-pulse" />
+                <QrCode className="w-7 h-7" />
               </div>
               <h3 className="text-base font-bold text-slate-900 dark:text-white">Siap Memindai Kartu</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
@@ -810,7 +779,7 @@ export default function KioskScannerClient({
           </div>
 
           {/* Live Recent Visitors Stream */}
-          <div className="bg-white/80 dark:bg-slate-900/90 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-sm dark:shadow-xl backdrop-blur-md flex-1 flex flex-col min-h-[220px]">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 shadow-sm flex-1 flex flex-col min-h-[220px]">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 mb-3">
               <div className="flex items-center gap-2">
                 <UserCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />

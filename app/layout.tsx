@@ -52,10 +52,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html
       lang="id"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased overflow-x-hidden`}
+      className={`${geistSans.variable} ${geistMono.variable} dark h-full antialiased overflow-x-hidden`}
     >
       <head>
         <link rel="manifest" href="/manifest.json" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400;1,6..72,600&display=swap" rel="stylesheet" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="theme-color" content="#020617" />
@@ -65,8 +68,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               (function() {
                 try {
                   var saved = localStorage.getItem('perpus_theme');
-                  var prefDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  var isDark = saved ? (saved === 'dark') : prefDark;
+                  var isDark = saved ? (saved === 'dark') : true;
                   var root = document.documentElement;
                   if (isDark) {
                     root.classList.add('dark');
@@ -78,6 +80,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     root.setAttribute('data-theme', 'light');
                   }
                 } catch (e) {}
+
 
                 // Register Service Worker
                 if ('serviceWorker' in navigator) {

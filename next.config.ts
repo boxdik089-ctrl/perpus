@@ -7,7 +7,7 @@ const cspHeader = `
   font-src 'self' https://fonts.gstatic.com data:;
   img-src 'self' blob: data: https://*.google.com https://*.googleapis.com https://images.unsplash.com https://covers.openlibrary.org;
   media-src 'self' blob: data:;
-  connect-src 'self' https://generativelanguage.googleapis.com https://openlibrary.org https://www.googleapis.com;
+  connect-src 'self' ws: wss: https://generativelanguage.googleapis.com https://openlibrary.org https://www.googleapis.com;
   frame-src 'self';
   worker-src 'self' blob:;
   object-src 'none';
@@ -58,12 +58,37 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   typescript: { ignoreBuildErrors: true },
-  allowedDevOrigins: ["perpustakaan.smknegeri1beringin.sch.id"],
+  experimental: {
+    staleTimes: {
+      dynamic: 0,
+      static: 30,
+    },
+  },
+  allowedDevOrigins: [
+    "perpustakaan.tiksmkn1beringin.my.id",
+    "perpustakaan.smknegeri1beringin.sch.id",
+    "localhost",
+    "localhost:3000",
+    "localhost:3001",
+    "127.0.0.1",
+    "127.0.0.1:3000",
+    "127.0.0.1:3001",
+  ],
   poweredByHeader: false,
   async headers() {
     return [
       {
         source: "/admin/:path*",
+        headers: [
+          ...securityHeaders,
+          {
+            key: "Cache-Control",
+            value: "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+          },
+        ],
+      },
+      {
+        source: "/login",
         headers: [
           ...securityHeaders,
           {

@@ -7,6 +7,9 @@ import { ArrowLeft, BookOpen, Plus, FileSpreadsheet, Barcode, Scan } from "lucid
 import { BukuListClient, type BukuListItem } from "@/components/admin/BukuListClient";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function BukuPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
@@ -32,12 +35,7 @@ export default async function BukuPage() {
 
   return (
     <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans selection:bg-sky-500 selection:text-white transition-colors duration-300">
-      {/* Aurora glow background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-        <div className="absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full bg-sky-400/20 dark:bg-sky-600/15 blur-[130px] animate-aurora-1" />
-        <div className="absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full bg-blue-300/25 dark:bg-blue-600/15 blur-[140px] animate-aurora-2" />
-        <div className="absolute -bottom-32 left-1/3 w-[44rem] h-[44rem] rounded-full bg-cyan-300/20 dark:bg-indigo-600/12 blur-[140px] animate-aurora-3" />
-      </div>
+
 
       {/* Header Sticky Navigation */}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-950/70 border-b border-stone-200/80 dark:border-slate-800/80">

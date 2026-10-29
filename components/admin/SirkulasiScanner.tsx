@@ -224,7 +224,7 @@ export function SirkulasiScanner() {
                   : "border-stone-300 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 shadow-md"
             } p-4`}
           >
-            <ScanLine className={`w-7 h-7 ${busy ? "text-emerald-600 dark:text-emerald-400 animate-pulse" : "text-emerald-600 dark:text-emerald-400"} shrink-0`} />
+            <ScanLine className="w-7 h-7 text-emerald-600 dark:text-emerald-400 shrink-0" />
             <input
               ref={inputRef}
               value={input}
@@ -256,7 +256,7 @@ export function SirkulasiScanner() {
         {/* Kartu anggota aktif */}
         {anggota && (
           <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-stone-200 dark:border-slate-800 shadow-lg overflow-hidden animate-fade-up">
-            <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 px-6 py-4 flex items-center justify-between shadow-md">
+            <div className="bg-emerald-800 px-6 py-4 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-3">
                 <div className="w-11 h-11 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center shadow-inner">
                   <User className="w-6 h-6 text-white" />
@@ -361,7 +361,7 @@ export function SirkulasiScanner() {
         {!anggota && (
           <div className="bg-white/80 dark:bg-slate-900/40 rounded-2xl border border-dashed border-stone-300 dark:border-slate-800 p-10 text-center backdrop-blur-sm shadow-xs">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-              <ScanLine className="w-8 h-8 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+              <ScanLine className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
             </div>
             <p className="text-sm font-bold text-stone-900 dark:text-white">Mulai dengan scan kartu anggota</p>
             <p className="text-xs text-stone-500 dark:text-slate-400 mt-1">

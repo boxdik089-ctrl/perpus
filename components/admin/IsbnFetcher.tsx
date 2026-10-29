@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Search, Loader2, BookOpen, CheckCircle2, Camera, CameraOff, Sparkles, Scan, Volume2, Barcode, Zap } from "lucide-react";
+import { Search, Loader2, BookOpen, CheckCircle2, Camera, CameraOff, Scan, Volume2, Barcode } from "lucide-react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { fetchIsbnMetadataAction } from "@/actions/scanBuku";
 
@@ -210,7 +210,7 @@ export function IsbnFetcher({ onFetch }: IsbnFetcherProps) {
   }, []);
 
   return (
-    <div className="bg-gradient-to-br from-blue-50/70 via-slate-50 to-indigo-50/40 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-slate-950 border-2 border-blue-200/80 dark:border-blue-900/40 rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
+    <div className="bg-blue-50/40 dark:bg-slate-900 border border-blue-200/80 dark:border-blue-900/50 rounded-2xl p-4 sm:p-5 space-y-4 shadow-sm">
       {/* Header Info with Ready Indicator for Scanner Gun */}
       <div className="flex items-center justify-between flex-wrap gap-2 pb-2 border-b border-blue-100 dark:border-slate-800">
         <div className="flex items-center gap-2">
@@ -256,7 +256,7 @@ export function IsbnFetcher({ onFetch }: IsbnFetcherProps) {
         <div className="relative rounded-2xl overflow-hidden bg-black border-2 border-blue-500/40 shadow-xl p-2 animate-in fade-in duration-200">
           <div id="isbn-camera-scanner-box" className="w-full max-h-[260px] rounded-xl overflow-hidden" />
           <div className="p-2 text-center text-xs text-slate-200 bg-slate-950/90 rounded-b-xl border-t border-slate-800 mt-2 flex items-center justify-center gap-2">
-            <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-spin" />
+            <Scan className="w-3.5 h-3.5 text-blue-400" />
             <span>Arahkan kamera horizontal ke Garis Kode Batang (Barcode ISBN) di buku...</span>
           </div>
         </div>
@@ -297,12 +297,12 @@ export function IsbnFetcher({ onFetch }: IsbnFetcherProps) {
             type="button"
             onClick={() => executeFetch(isbn)}
             disabled={loading || !isbn.trim()}
-            className="shrink-0 h-12 px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-blue-600/20 active:scale-95"
+            className="shrink-0 h-12 px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold disabled:opacity-50 flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
           >
             {loading ? (
               <Loader2 className="w-4 h-4 animate-spin" />
             ) : (
-              <Zap className="w-4 h-4" />
+              <Search className="w-4 h-4" />
             )}
             <span>{loading ? "Mencari…" : "Ambil Data"}</span>
           </button>

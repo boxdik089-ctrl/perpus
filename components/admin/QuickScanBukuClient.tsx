@@ -7,7 +7,7 @@ import {
   Barcode,
   Camera,
   CameraOff,
-  Sparkles,
+  Info,
   BookOpen,
   User,
   Plus,
@@ -258,11 +258,11 @@ export function QuickScanBukuClient() {
         {/* Left Column: Scanner Station */}
         <div className="space-y-5">
           {/* Main Scan Terminal Card */}
-          <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-stone-200/90 dark:border-slate-800/90 shadow-lg dark:shadow-2xl p-6 sm:p-8 space-y-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-6 sm:p-8 space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-md shadow-emerald-500/10">
-                  <Scan className="w-6 h-6 animate-pulse" />
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/15 border border-emerald-500/25 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+                  <Scan className="w-6 h-6" />
                 </div>
                 <div>
                   <h2 className="text-lg sm:text-xl font-black text-stone-900 dark:text-white tracking-tight">
@@ -318,7 +318,7 @@ export function QuickScanBukuClient() {
               <div className="relative rounded-2xl overflow-hidden bg-black border-2 border-emerald-500/40 shadow-2xl p-2 animate-in fade-in duration-200">
                 <div id="camera-scanner-view" className="w-full max-h-[320px] rounded-xl overflow-hidden" />
                 <div className="p-2 text-center text-xs text-stone-200 bg-slate-900/90 rounded-b-xl border-t border-slate-800 mt-2 flex items-center justify-center gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+                  <Scan className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Arahkan kamera ke garis barcode ISBN di belakang buku fisik...</span>
                 </div>
               </div>
@@ -438,7 +438,7 @@ export function QuickScanBukuClient() {
           {/* Quick Guide Card */}
           <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl rounded-2xl border border-stone-200/80 dark:border-slate-800/80 p-5 space-y-2 shadow-xs">
             <h3 className="text-xs font-bold uppercase tracking-wider text-stone-600 dark:text-slate-400 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <Info className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
               Petunjuk Penggunaan Cepat
             </h3>
             <ul className="text-xs text-stone-600 dark:text-slate-300 space-y-1.5 leading-relaxed list-disc list-inside">
@@ -459,7 +459,7 @@ export function QuickScanBukuClient() {
         </div>
 
         {/* Right Column: Live Feed of Scanned Books in Current Session */}
-        <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-stone-200/90 dark:border-slate-800/90 shadow-lg dark:shadow-2xl p-5 space-y-4">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-5 space-y-4">
           <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-slate-800">
             <div className="flex items-center gap-2">
               <History className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, Sparkles, Send } from "lucide-react";
+import { ArrowLeft, MessageCircle, Send } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { WhatsAppCenterClient } from "@/components/admin/WhatsAppCenterClient";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata = {
   title: "Pusat Notifikasi & Pengingat WhatsApp - Perpustakaan SMKN 1 Beringin",
@@ -64,12 +65,7 @@ export default async function WhatsAppPage() {
   }));
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans selection:bg-emerald-500 selection:text-white transition-colors duration-300">
-      {/* Background Glowing Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/10 dark:bg-emerald-600/15 blur-[120px] animate-blob" />
-        <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-teal-500/10 dark:bg-teal-500/15 blur-[130px] animate-blob [animation-delay:-6s]" />
-      </div>
+    <div className="relative min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
 
       {/* Top Navbar */}
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">

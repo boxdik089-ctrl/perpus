@@ -9,6 +9,9 @@ import Link from "next/link";
 import { ArrowLeft, UserPlus, Users, GraduationCap, ClipboardList } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function CreateKunjunganPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
@@ -27,13 +30,7 @@ export default async function CreateKunjunganPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-blue-600 selection:text-white transition-colors duration-300">
-      {/* Background Soft Blue Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-500/20 via-sky-400/15 to-transparent blur-[120px] animate-aurora-mesh-1" />
-        <div className="absolute top-[30%] -right-[10%] w-[550px] h-[550px] rounded-full bg-gradient-to-bl from-cyan-500/15 via-blue-600/15 to-transparent blur-[130px] animate-aurora-mesh-2" />
-        <div className="absolute -bottom-[15%] left-[20%] w-[650px] h-[650px] rounded-full bg-gradient-to-tr from-indigo-500/15 via-sky-500/10 to-transparent blur-[140px] animate-aurora-mesh-3" />
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
 
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 sticky top-0 z-20 shadow-xs mb-8">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -57,7 +54,7 @@ export default async function CreateKunjunganPage() {
       </nav>
 
       <div className="max-w-2xl mx-auto px-4 pb-12 w-full">
-        <div className="bg-white/90 dark:bg-slate-900/80 rounded-3xl border border-slate-200/80 dark:border-slate-800/80 shadow-xl backdrop-blur-xl p-6 sm:p-8">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm p-6 sm:p-8">
           <div className="flex items-center gap-3 pb-5 mb-6 border-b border-slate-200 dark:border-slate-800">
             <img
               src="/assets/logo.png"
@@ -146,7 +143,7 @@ export default async function CreateKunjunganPage() {
             </div>
 
             <div className="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
-              <Button type="submit" className="h-10 px-6 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl shadow-lg shadow-blue-600/20 active:scale-95">
+              <Button type="submit" className="h-10 px-6 font-semibold bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xs transition-colors">
                 <UserPlus className="w-4 h-4 text-white" />
                 Simpan Kunjungan
               </Button>

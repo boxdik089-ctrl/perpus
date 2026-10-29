@@ -18,6 +18,9 @@ import {
   BookOpen
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function SiswaPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
@@ -36,35 +39,35 @@ export default async function SiswaPage() {
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white transition-colors duration-300">
       {/* Top Navigation */}
-      <nav className="bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/80 sticky top-0 z-20 shadow-lg shadow-black/20">
+      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
               <Link 
                 href="/admin" 
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-emerald-400 bg-slate-800/80 hover:bg-slate-700/80 px-2.5 sm:px-3 py-1.5 rounded-xl border border-slate-700/80 transition-colors shrink-0"
+                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-700 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 px-2.5 sm:px-3 py-1.5 rounded-xl border border-stone-300/80 dark:border-slate-700/80 transition-colors shrink-0"
               >
-                <ArrowLeft className="w-4 h-4 text-emerald-400" />
+                <ArrowLeft className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span className="hidden sm:inline">Dashboard</span>
               </Link>
-              <span className="text-slate-700 hidden sm:inline">/</span>
+              <span className="text-stone-300 dark:text-slate-700 hidden sm:inline">/</span>
               <div className="flex items-center gap-2 min-w-0">
                 <img
                   src="/assets/logo.png"
                   alt="Logo SMK Negeri 1 Beringin"
-                  className="w-7 h-7 object-contain rounded-xl bg-white/10 border border-emerald-500/30 p-1 shrink-0 hidden xs:block"
+                  className="w-7 h-7 object-contain rounded-xl bg-white/60 dark:bg-white/10 border border-stone-200 dark:border-white/20 p-1 shrink-0 hidden xs:block"
                 />
-                <h1 className="text-xs sm:text-base font-bold text-white truncate">Data Siswa Roster</h1>
+                <h1 className="text-xs sm:text-base font-bold text-stone-900 dark:text-white truncate">Data Siswa Roster</h1>
               </div>
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
               <ThemeToggle />
               <Link href="/admin/siswa/create">
-                <Button size="sm" className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20 text-xs shrink-0">
-                  <UserPlus className="w-3.5 h-3.5 text-slate-950" />
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm text-xs shrink-0">
+                  <UserPlus className="w-3.5 h-3.5 text-white" />
                   <span className="hidden xs:inline">Tambah Siswa</span>
                 </Button>
               </Link>
@@ -84,14 +87,14 @@ export default async function SiswaPage() {
           </div>
 
           <Link href="/admin/siswa/create">
-            <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20">
-              <UserPlus className="w-4 h-4 text-slate-950" />
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl shadow-sm">
+              <UserPlus className="w-4 h-4 text-white" />
               Tambah Siswa Baru
             </Button>
           </Link>
         </div>
 
-        <div className="bg-slate-900/70 rounded-3xl border border-slate-800/80 shadow-2xl backdrop-blur-xl overflow-hidden">
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-slate-800 text-xs sm:text-sm">
               <thead className="bg-slate-950/60">

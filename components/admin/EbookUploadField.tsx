@@ -10,7 +10,6 @@ import {
   ExternalLink,
   Eye,
   Loader2,
-  Sparkles
 } from "lucide-react";
 
 type Props = {

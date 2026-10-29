@@ -9,7 +9,6 @@ import {
   BookOpen,
   User,
   Send,
-  Sparkles,
   Phone,
   CheckCircle2,
   Calendar,

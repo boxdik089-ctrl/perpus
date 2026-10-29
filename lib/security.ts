@@ -70,6 +70,42 @@ export function checkRateLimit(
 }
 
 /**
+ * Periksa apakah kunci tertentu sedang terkena rate limit (tanpa menambah hitungan).
+ */
+export function isRateLimited(
+  key: string,
+  limit: number,
+  windowMs: number
+): { limited: boolean; retryAfterSeconds: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(key);
+  if (!record || record.timestamps.length === 0) {
+    return { limited: false, retryAfterSeconds: 0 };
+  }
+
+  record.timestamps = record.timestamps.filter((t) => now - t < windowMs);
+  rateLimitStore.set(key, record);
+
+  if (record.timestamps.length >= limit) {
+    const oldest = record.timestamps[0];
+    const retryAfterSeconds = Math.max(1, Math.ceil((windowMs - (now - oldest)) / 1000));
+    return { limited: true, retryAfterSeconds };
+  }
+
+  return { limited: false, retryAfterSeconds: 0 };
+}
+
+/**
+ * Catat satu percobaan gagal untuk kunci tertentu.
+ */
+export function recordFailedAttempt(key: string): void {
+  const now = Date.now();
+  const record = rateLimitStore.get(key) || { timestamps: [] };
+  record.timestamps.push(now);
+  rateLimitStore.set(key, record);
+}
+
+/**
  * Bersihkan riwayat rate limit untuk kunci tertentu (misal: saat login berhasil).
  */
 export function clearRateLimit(key: string): void {
@@ -122,18 +158,49 @@ export function escapeHtml(str: string): string {
 }
 
 /**
- * Validasi kekuatan password: minimal 6 karakter, tidak boleh hanya spasi.
+ * Validasi kekuatan password: minimal 8 karakter, kombinasi huruf & angka,
+ * dan menolak password lemah/umum (admin123, 12345678, dll).
  */
 export function validatePasswordStrength(password: string): { valid: boolean; message?: string } {
   if (!password || typeof password !== "string") {
     return { valid: false, message: "Password tidak boleh kosong." };
   }
-  if (password.length < 6) {
-    return { valid: false, message: "Password minimal harus memiliki 6 karakter." };
+  if (password.length < 8) {
+    return { valid: false, message: "Password minimal harus memiliki 8 karakter demi keamanan." };
   }
   if (password.length > 128) {
     return { valid: false, message: "Password terlalu panjang (maksimal 128 karakter)." };
   }
+
+  const lower = password.toLowerCase();
+  const commonWeak = [
+    "admin123",
+    "password",
+    "12345678",
+    "123456789",
+    "perpustakaan",
+    "smkn1beringin",
+    "perpus123",
+    "administrator",
+    "qwertyuiop",
+  ];
+  if (commonWeak.some((w) => lower.includes(w))) {
+    return {
+      valid: false,
+      message: "Password terlalu umum atau mudah ditebak. Hindari kata seperti 'admin', 'password', '12345678', atau nama sekolah.",
+    };
+  }
+
+  // Cek harus ada kombinasi huruf dan angka
+  const hasLetter = /[a-zA-Z]/.test(password);
+  const hasDigit = /[0-9]/.test(password);
+  if (!hasLetter || !hasDigit) {
+    return {
+      valid: false,
+      message: "Password harus mengombinasikan huruf dan angka untuk mencegah brute-force.",
+    };
+  }
+
   return { valid: true };
 }
 

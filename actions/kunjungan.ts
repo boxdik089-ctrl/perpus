@@ -3,11 +3,20 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAdminSession, sanitizeInput } from "@/lib/security";
+import { requireAdminSession, sanitizeInput, checkRateLimit } from "@/lib/security";
 
 export async function createKunjunganByScan(kode: string, keperluanCustom?: string) {
   const raw = sanitizeInput(kode || "", 255);
   if (!raw) return { ok: false as const, pesan: "Kode kartu kosong" };
+
+  // Rate limiting untuk mencegah automated spamming pada scanner
+  const scanRate = checkRateLimit(`scan_kunjungan:${raw.slice(0, 30)}`, 20, 60 * 1000);
+  if (!scanRate.allowed) {
+    return {
+      ok: false as const,
+      pesan: `Terlalu banyak permintaan presensi. Silakan tunggu ${scanRate.retryAfterSeconds} detik.`,
+    };
+  }
 
   // Parse QR code jika berisi JSON atau URL
   let cleanValue = raw;

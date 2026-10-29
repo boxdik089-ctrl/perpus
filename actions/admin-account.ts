@@ -14,7 +14,7 @@ export type UbahPasswordState = {
 };
 
 export async function ubahPasswordAdmin(formData: {
-  currentPassword?: string;
+  currentPassword: string;
   newPassword: string;
   confirmPassword: string;
 }): Promise<UbahPasswordState> {
@@ -29,10 +29,24 @@ export async function ubahPasswordAdmin(formData: {
 
   const { currentPassword, newPassword, confirmPassword } = formData;
 
+  if (!currentPassword) {
+    return {
+      ok: false,
+      message: "Password saat ini wajib diisi untuk verifikasi keamanan akun.",
+    };
+  }
+
   if (!newPassword || !confirmPassword) {
     return {
       ok: false,
       message: "Kolom password baru dan konfirmasi wajib diisi.",
+    };
+  }
+
+  if (newPassword === currentPassword) {
+    return {
+      ok: false,
+      message: "Password baru tidak boleh sama persis dengan password saat ini.",
     };
   }
 
@@ -71,23 +85,21 @@ export async function ubahPasswordAdmin(formData: {
     };
   }
 
-  // Validasi password saat ini jika dikirimkan oleh pengguna
-  if (currentPassword) {
-    let isCurrentValid = false;
-    try {
-      isCurrentValid = await bcrypt.compare(currentPassword, admin.password);
-    } catch {
-      isCurrentValid = false;
-    }
-    if (!isCurrentValid && admin.password === currentPassword) {
-      isCurrentValid = true;
-    }
-    if (!isCurrentValid) {
-      return {
-        ok: false,
-        message: "Password saat ini yang Anda masukkan salah.",
-      };
-    }
+  // Validasi ketat password saat ini
+  let isCurrentValid = false;
+  try {
+    isCurrentValid = await bcrypt.compare(currentPassword, admin.password);
+  } catch {
+    isCurrentValid = false;
+  }
+  if (!isCurrentValid && admin.password === currentPassword) {
+    isCurrentValid = true;
+  }
+  if (!isCurrentValid) {
+    return {
+      ok: false,
+      message: "Password saat ini yang Anda masukkan salah.",
+    };
   }
 
   // Hash password baru dengan bcrypt (cost factor 10)

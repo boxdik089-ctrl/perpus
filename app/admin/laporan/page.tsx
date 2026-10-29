@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import LaporanClient from "@/components/admin/LaporanClient";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function LaporanPage() {
   const session = await getServerSession(authOptions);

@@ -1,0 +1,230 @@
+{
+  "meta": {
+    "name": "malaka-books-marquee-dna",
+    "description": "Design DNA for the infinite book marquee section inspired by malakabooks.id, tailored for SMK Negeri 1 Beringin digital library.",
+    "source_references": [
+      "https://malakabooks.id/",
+      "SMK Negeri 1 Beringin Perpustakaan Digital UI"
+    ],
+    "created_at": "2026-10-27T17:05:00Z"
+  },
+  "design_system": {
+    "color": {
+      "palette_type": "curated-editorial-modern",
+      "primary": {
+        "hex": "#0284c7",
+        "role": "Primary brand accent, interactive elements, e-book markers"
+      },
+      "secondary": {
+        "hex": "#10b981",
+        "role": "Physical book indicators, availability status badges"
+      },
+      "accent": {
+        "hex": "#f59e0b",
+        "role": "Rating star accents, spotlight badges, warm highlights"
+      },
+      "neutral": {
+        "scale": [
+          "#ffffff",
+          "#f8fafc",
+          "#f1f5f9",
+          "#e2e8f0",
+          "#94a3b8",
+          "#64748b",
+          "#334155",
+          "#1e293b",
+          "#0f172a",
+          "#09090b"
+        ],
+        "usage": "Backgrounds, elevated cards, tactile borders, high-contrast typography"
+      },
+      "semantic": {
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "info": "#0284c7"
+      },
+      "surface": {
+        "background": "#09090b",
+        "card": "#10141f",
+        "elevated": "#182030"
+      },
+      "contrast_strategy": "High WCAG AA compliance with light/dark adaptive tokens and crisp text hierarchy"
+    },
+    "typography": {
+      "type_scale": {
+        "display": { "size": "36px", "weight": "900", "line_height": "1.1", "tracking": "-0.03em" },
+        "heading_1": { "size": "28px", "weight": "800", "line_height": "1.2", "tracking": "-0.02em" },
+        "heading_2": { "size": "22px", "weight": "700", "line_height": "1.25", "tracking": "-0.015em" },
+        "heading_3": { "size": "17px", "weight": "700", "line_height": "1.3", "tracking": "-0.01em" },
+        "body": { "size": "14px", "weight": "400", "line_height": "1.5", "tracking": "0" },
+        "body_small": { "size": "12px", "weight": "500", "line_height": "1.4", "tracking": "0" },
+        "caption": { "size": "11px", "weight": "600", "line_height": "1.3", "tracking": "0.02em" },
+        "overline": { "size": "10px", "weight": "800", "line_height": "1.2", "tracking": "0.08em" }
+      },
+      "font_families": {
+        "heading": "var(--font-geist-sans), Inter, sans-serif",
+        "body": "var(--font-geist-sans), Inter, sans-serif",
+        "mono": "var(--font-geist-mono), monospace"
+      },
+      "font_style_notes": "Clean geometric sans with tight tracking on headings and generous uppercase tracking for metadata badges"
+    },
+    "spacing": {
+      "base_unit": "4px",
+      "scale": ["4px", "8px", "12px", "16px", "24px", "32px", "48px", "64px"],
+      "content_density": "balanced",
+      "section_rhythm": "generous"
+    },
+    "layout": {
+      "grid_system": "flex-marquee-track",
+      "max_content_width": "1400px",
+      "columns": 12,
+      "gutter": "16px",
+      "breakpoints": {
+        "sm": "640px",
+        "md": "768px",
+        "lg": "1024px",
+        "xl": "1280px"
+      },
+      "alignment_tendency": "center-aligned-editorial"
+    },
+    "shape": {
+      "border_radius": {
+        "small": "6px",
+        "medium": "12px",
+        "large": "20px",
+        "pill": "9999px"
+      },
+      "border_usage": "subtle hairline borders (1px) with backdrop blur",
+      "divider_style": "subtle translucent borders"
+    },
+    "elevation": {
+      "shadow_style": "ambient-multitiered",
+      "levels": {
+        "low": "0 2px 8px -2px rgba(0,0,0,0.1)",
+        "medium": "0 8px 24px -4px rgba(0,0,0,0.25)",
+        "high": "18px 28px 36px -12px rgba(0,0,0,0.45)"
+      },
+      "depth_cues": "realistic book spine gradient, 3D perspective tilt, blurred ambient reflection"
+    },
+    "iconography": {
+      "style": "clean-outline",
+      "stroke_weight": "1.75px",
+      "size_scale": ["12px", "14px", "16px", "20px", "24px"],
+      "preferred_set": "lucide-react"
+    },
+    "motion": {
+      "easing": "cubic-bezier(0.16, 1, 0.3, 1)",
+      "duration_scale": {
+        "micro": "150ms",
+        "normal": "350ms",
+        "macro": "600ms"
+      },
+      "entrance_pattern": "fade-slide-up",
+      "exit_pattern": "fade-out",
+      "philosophy": "Premium physical inertia with smooth deceleration on hover"
+    },
+    "components": {
+      "button_style": "rounded-xl with subtle ring and press scale",
+      "input_style": "subtle glass-pill",
+      "card_style": "3D perspective tactile book card with spine highlight",
+      "navigation_pattern": "dual-track continuous marquee with pause controls",
+      "modal_style": "centered glassmorphic sheet",
+      "list_style": "horizontal ribbon tracks",
+      "component_notes": "Malaka Books inspired tactile 3D book hover with spine highlight and soft ambient drop shadows"
+    }
+  },
+  "design_style": {
+    "aesthetic": {
+      "mood": "editorial, modern, intellectual, prestigious, inviting",
+      "visual_metaphor": "infinite dynamic library bookshelf conveyor",
+      "era_influence": "contemporary editorial digital publisher",
+      "genre": "educational digital library",
+      "personality_traits": ["sophisticated", "tactile", "dynamic", "authoritative", "accessible"],
+      "adjectives": ["immersive", "sleek", "interactive", "responsive", "editorial"]
+    },
+    "visual_language": {
+      "complexity": "refined-moderate",
+      "ornamentation": "minimal-functional",
+      "whitespace_usage": "comfortable",
+      "visual_weight_distribution": "balanced-center",
+      "focal_strategy": "interactive 3D book card elevation on hover",
+      "contrast_level": "crisp-high",
+      "texture_usage": "tactile book spine highlights and page edge lines"
+    },
+    "composition": {
+      "hierarchy_method": "size, depth, contrast, and motion",
+      "balance_type": "kinetic-dynamic",
+      "flow_direction": "bidirectional-horizontal",
+      "grouping_strategy": "dual lane category tracks",
+      "negative_space_role": "frames the infinite book flow"
+    },
+    "imagery": {
+      "photo_treatment": "sharp cover art with spine crease shadow and top glare",
+      "illustration_style": "generative foil-stamped hardcover fallback",
+      "graphic_elements": ["spine highlight", "star rating badge", "edge gradient fade masks"],
+      "pattern_usage": "edge fade mask linear gradient",
+      "image_shape": "tactile 3D book cover aspect-[1/1.45]"
+    },
+    "interaction_feel": {
+      "feedback_style": "instant responsive 3D tilt with smooth return",
+      "hover_behavior": "perspective(900px) rotateY(-16deg) scale(1.03) with pause on hover",
+      "transition_personality": "premium",
+      "loading_style": "pulse shimmer skeleton",
+      "microinteraction_density": "rich"
+    },
+    "brand_voice_in_ui": {
+      "tone": "prestigious yet welcoming",
+      "formality": "professional-educational",
+      "cta_style": "clear action cues with arrow indicators",
+      "empty_state_approach": "generative hardcover covers",
+      "error_tone": "graceful fallback"
+    }
+  },
+  "visual_effects": {
+    "overview": {
+      "effect_intensity": "medium",
+      "performance_tier": "lightweight-to-medium",
+      "fallback_strategy": "graceful 2D hover and CSS scroll",
+      "primary_technology": "CSS 3D transforms + GPU-accelerated marquee keyframes"
+    },
+    "background_effects": {
+      "type": "subtle-radial-glow",
+      "description": "ambient atmospheric gradient behind marquee tracks",
+      "technology": "CSS radial-gradient",
+      "params": {
+        "color_palette": ["rgba(2,132,199,0.08)", "rgba(16,185,129,0.06)", "transparent"],
+        "speed": "0s",
+        "density": "low",
+        "opacity": "0.8",
+        "blend_mode": "screen"
+      }
+    },
+    "particle_systems": {
+      "enabled": false,
+      "type": "none",
+      "description": "disabled for clean editorial typography readability",
+      "technology": "none",
+      "params": {
+        "count": 0,
+        "shape": "none",
+        "size_range": "0",
+        "movement_pattern": "none",
+        "color_behavior": "none",
+        "interaction": "none",
+        "spawn_area": "none"
+      }
+    },
+    "3d_elements": {
+      "enabled": true,
+      "type": "css-3d-tactile-book",
+      "description": "Malaka Books inspired 3D perspective book cover with spine highlight and shadow projection",
+      "technology": "CSS 3D Transforms (perspective, rotateY, translateZ)",
+      "params": {
+        "renderer": "CSS GPU transform",
+        "lighting": "directional spine glare and ambient drop shadow",
+        "camera": "perspective 900px"
+      }
+    }
+  }
+}

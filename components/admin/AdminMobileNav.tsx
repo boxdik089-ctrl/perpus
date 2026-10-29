@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { performLogout } from "@/lib/logout";
 import {
   LayoutDashboard,
   ScanLine,
@@ -20,10 +20,10 @@ import {
   LogOut,
   X,
   ChevronRight,
-  Sparkles,
   School,
   FileSpreadsheet,
   MessageCircle,
+  Star,
 } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
@@ -139,6 +139,12 @@ export function AdminMobileNav() {
           icon: Boxes,
           color: "text-indigo-500 bg-indigo-500/10",
         },
+        {
+          name: "Moderasi Ulasan Buku",
+          href: "/admin/ulasan",
+          icon: Star,
+          color: "text-amber-500 bg-amber-500/10",
+        },
       ],
     },
     {
@@ -253,7 +259,7 @@ export function AdminMobileNav() {
             <div className="p-4 border-b border-stone-200 dark:border-slate-800 flex items-center justify-between shrink-0 bg-stone-50/70 dark:bg-slate-950/60">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30">
-                  <Sparkles className="w-4 h-4" />
+                  <Grid className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-sm font-bold text-stone-900 dark:text-white leading-tight">
@@ -314,45 +320,28 @@ export function AdminMobileNav() {
               ))}
 
               {/* Extra External & Utility Links */}
-              <div className="pt-2 border-t border-stone-200 dark:border-slate-800 grid grid-cols-3 gap-2">
+              <div className="pt-2 border-t border-stone-200 dark:border-slate-800 grid grid-cols-2 gap-2">
                 <Link
                   href="/"
-                  className="flex items-center justify-center gap-1 h-10 px-2 rounded-xl bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700 text-[11px] font-semibold"
+                  className="flex items-center justify-center gap-1.5 h-10 px-2 rounded-xl bg-stone-100 dark:bg-slate-800 hover:bg-stone-200 dark:hover:bg-slate-700 text-stone-700 dark:text-slate-300 border border-stone-200 dark:border-slate-700 text-[11px] font-semibold transition-colors"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="truncate">Katalog</span>
-                </Link>
-
-                <Link
-                  href="/brosur"
-                  className="flex items-center justify-center gap-1 h-10 px-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/20 text-[11px] font-semibold"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                  <span className="truncate">Brosur</span>
+                  <span className="truncate">Katalog Publik</span>
                 </Link>
 
                 <button
                   type="button"
-                  onClick={() => signOut({ callbackUrl: "/login" })}
-                  className="flex items-center justify-center gap-1 h-10 px-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-semibold cursor-pointer"
+                  onClick={() => performLogout()}
+                  className="flex items-center justify-center gap-1.5 h-10 px-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[11px] font-semibold cursor-pointer transition-colors"
                 >
                   <LogOut className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">Keluar</span>
                 </button>
               </div>
 
-              {/* Developer Copyright Notice */}
+              {/* Copyright Notice */}
               <div className="pt-2 pb-1 text-center text-[10px] text-stone-500 dark:text-slate-400">
-                <span>© {new Date().getFullYear()} Dika Armadana (</span>
-                <a
-                  href="https://instagram.com/dprxz_"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-emerald-600 dark:text-emerald-400 font-bold hover:underline"
-                >
-                  @dprxz_
-                </a>
-                <span>) • All Rights Reserved</span>
+                <span>© {new Date().getFullYear()} SMK Negeri 1 Beringin</span>
               </div>
             </div>
           </div>

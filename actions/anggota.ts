@@ -145,6 +145,12 @@ export async function getKartuDigitalSiswa(query: string) {
   const value = sanitizeInput(query || "", 80);
   if (!value || value.length < 3) return null;
 
+  // Rate limiting pencarian kartu untuk mencegah automated scraping data siswa
+  const rateCheck = checkRateLimit(`kartu_search:${value}`, 30, 60 * 1000);
+  if (!rateCheck.allowed) {
+    return null;
+  }
+
   // 1. Cari di Anggota
   let anggota = await prisma.anggota.findFirst({
     where: {
@@ -236,17 +242,20 @@ export async function updateWhatsAppMandiriAction(
       };
     }
 
-    const rateCheck = checkRateLimit(`wa_update:${cleanPhone}`, 3, 60 * 1000);
-    if (!rateCheck.allowed) {
-      return {
-        ok: false,
-        message: `Terlalu banyak permintaan update. Silakan tunggu ${rateCheck.retryAfterSeconds} detik.`,
-      };
-    }
-
-    const value = identifier.trim();
+    const value = sanitizeInput(identifier || "", 80);
     if (!value) {
       return { ok: false, message: "Identitas anggota tidak valid." };
+    }
+
+    // Rate limiting ganda: per nomor telepon DAN per identitas anggota
+    const rateCheckPhone = checkRateLimit(`wa_update_phone:${cleanPhone}`, 3, 5 * 60 * 1000);
+    const rateCheckId = checkRateLimit(`wa_update_id:${value.toLowerCase()}`, 3, 5 * 60 * 1000);
+    if (!rateCheckPhone.allowed || !rateCheckId.allowed) {
+      const waitSec = Math.max(rateCheckPhone.retryAfterSeconds, rateCheckId.retryAfterSeconds);
+      return {
+        ok: false,
+        message: `Terlalu banyak permintaan update. Harap tunggu ${waitSec} detik sebelum mencoba lagi.`,
+      };
     }
 
     const anggota = await prisma.anggota.findFirst({

@@ -101,7 +101,7 @@ export function ImportBukuClient() {
   return (
     <div className="space-y-6">
       {/* Upload area */}
-      <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl p-6 sm:p-8 space-y-5">
+      <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm p-6 sm:p-8 space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
             <h2 className="text-lg sm:text-xl font-bold text-white">Upload File CSV</h2>
@@ -168,7 +168,7 @@ export function ImportBukuClient() {
           <button
             onClick={handlePreview}
             disabled={busy === "preview"}
-            className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full h-12 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             {busy === "preview" ? (
               <>
@@ -212,7 +212,7 @@ export function ImportBukuClient() {
 
       {/* Preview table */}
       {preview && (
-        <div className="bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-slate-800/90 shadow-2xl overflow-hidden">
+        <div className="bg-slate-900 rounded-2xl border border-slate-800 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
             <div>
               <h3 className="text-base font-bold text-white">
@@ -292,7 +292,7 @@ export function ImportBukuClient() {
             <button
               onClick={handleImport}
               disabled={busy === "import"}
-              className="h-11 px-6 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-lg shadow-emerald-500/20"
+              className="h-11 px-6 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-xs"
             >
               {busy === "import" ? (
                 <>

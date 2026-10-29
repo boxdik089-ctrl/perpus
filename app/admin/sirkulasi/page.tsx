@@ -6,18 +6,15 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function SirkulasiPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 selection:bg-emerald-500 selection:text-white relative overflow-x-hidden font-sans transition-colors duration-300">
-      {/* Background Glowing Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-emerald-500/10 dark:bg-emerald-600/15 blur-[120px] animate-blob" />
-        <div className="absolute top-1/2 -right-32 w-96 h-96 rounded-full bg-teal-500/10 dark:bg-teal-500/15 blur-[130px] animate-blob [animation-delay:-6s]" />
-        <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-blue-500/10 dark:bg-blue-600/10 blur-[140px] animate-blob [animation-delay:-12s]" />
-      </div>
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 relative overflow-x-hidden font-sans transition-colors duration-200">
 
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">

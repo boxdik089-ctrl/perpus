@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition, useRef, useEffect, useMemo } from "react";
-import { User, BookOpen, Calendar, Clock, Sparkles, AlertCircle, Check, BookMarked, Package, X, Barcode, Camera, CameraOff, Loader2, Zap, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { User, BookOpen, Calendar, Clock, AlertCircle, Check, BookMarked, Package, X, Barcode, Camera, CameraOff, Loader2, Zap, Search, Scan } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { createTransaksi, lookupBarcodeTransaksiAction } from "@/actions/transaksi";
 import { formatDate } from "@/lib/utils";
@@ -70,6 +71,7 @@ function playBeep(isSuccess = true) {
 }
 
 export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList }: FormPeminjamanProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<TabType>("BIASA");
 
@@ -302,6 +304,7 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
     startTransition(async () => {
       try {
         await createTransaksi(formData);
+        router.refresh();
         setSuccessMessage(`Peminjaman buku biasa berhasil dicatat (${totalHari} hari)!`);
         resetBiasa();
         setTimeout(() => setSuccessMessage(null), 4000);
@@ -328,6 +331,7 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
     startTransition(async () => {
       try {
         await createTransaksi(formData);
+        router.refresh();
         const selectedCount = selectedBukuMapelIds.length;
         setSuccessMessage(`Peminjaman ${selectedCount} buku mapel berhasil dicatat!`);
         resetMapel();
@@ -396,17 +400,17 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
         {/* ========================================= */}
         {/* BARCODE SCANNER STATION (LASER & CAMERA) */}
         {/* ========================================= */}
-        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-blue-50/80 via-slate-50 to-indigo-50/50 dark:from-slate-900/90 dark:via-slate-900/70 dark:to-slate-950 border-2 border-blue-200/90 dark:border-blue-900/50 space-y-3.5 shadow-sm">
+        <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-3.5 shadow-sm">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
+              <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm">
                 <Barcode className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <span>Stasiun Scan Peminjaman (Laser Barcode / QR)</span>
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     SIAP SCAN
                   </span>
                 </h3>
@@ -444,7 +448,7 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
             <div className="relative rounded-2xl overflow-hidden bg-black border-2 border-blue-500/40 shadow-xl p-2 animate-in fade-in duration-200">
               <div id="transaksi-camera-scanner-view" className="w-full max-h-[260px] rounded-xl overflow-hidden" />
               <div className="p-2 text-center text-xs text-slate-200 bg-slate-950/90 rounded-b-xl border-t border-slate-800 mt-2 flex items-center justify-center gap-2">
-                <Sparkles className="w-3.5 h-3.5 text-blue-400 animate-spin" />
+                <Scan className="w-3.5 h-3.5 text-blue-400" />
                 <span>Arahkan kamera ke Barcode Kartu Siswa atau Barcode Buku Fisik...</span>
               </div>
             </div>
@@ -475,12 +479,12 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
               type="button"
               onClick={() => handleProcessBarcode(scanCode)}
               disabled={scanLoading || !scanCode.trim()}
-              className="shrink-0 h-11 px-4 sm:px-5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-md shadow-blue-600/20 active:scale-95"
+              className="shrink-0 h-11 px-4 sm:px-5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold disabled:opacity-50 flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
             >
               {scanLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
-                <Zap className="w-4 h-4" />
+                <Check className="w-4 h-4" />
               )}
               <span>{scanLoading ? "Memproses…" : "Scan In"}</span>
             </button>
@@ -744,9 +748,9 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button type="submit" disabled={isPending} className="h-10 px-6 cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20">
-                <Sparkles className="w-4 h-4 mr-1.5" />
-                {isPending ? "Menyimpan..." : "Catat Peminjaman Buku Biasa"}
+              <Button type="submit" disabled={isPending} className="h-10 px-6 cursor-pointer bg-emerald-700 hover:bg-emerald-600 text-white font-semibold rounded-xl shadow-xs transition-colors">
+                <Check className="w-4 h-4 mr-1.5" />
+                {isPending ? "Menyimpan..." : "Catat Peminjaman Buku"}
               </Button>
             </div>
           </form>

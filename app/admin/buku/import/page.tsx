@@ -6,18 +6,15 @@ import { ImportBukuClient } from "@/components/admin/ImportBukuClient";
 import { ArrowLeft, FileSpreadsheet } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function ImportBukuPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-[#020617] dark:text-slate-100 overflow-hidden font-sans selection:bg-blue-600 selection:text-white transition-colors duration-300">
-      {/* Background Soft Blue Aurora */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-[20%] -left-[10%] w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-500/20 via-sky-400/15 to-transparent blur-[120px] animate-aurora-mesh-1" />
-        <div className="absolute top-[30%] -right-[10%] w-[550px] h-[550px] rounded-full bg-gradient-to-bl from-cyan-500/15 via-blue-600/15 to-transparent blur-[130px] animate-aurora-mesh-2" />
-        <div className="absolute -bottom-[15%] left-[20%] w-[650px] h-[650px] rounded-full bg-gradient-to-tr from-indigo-500/15 via-sky-500/10 to-transparent blur-[140px] animate-aurora-mesh-3" />
-      </div>
+    <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
 
       {/* Header Sticky Navigation */}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 mb-8 shadow-xs">

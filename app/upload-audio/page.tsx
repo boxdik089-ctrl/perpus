@@ -41,7 +41,7 @@ export default function UploadAudioPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 font-sans">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center">
+      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-sm space-y-6 text-center">
         <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 mx-auto flex items-center justify-center text-emerald-400">
           <Music className="w-8 h-8" />
         </div>
@@ -80,7 +80,7 @@ export default function UploadAudioPage() {
             <button
               type="submit"
               disabled={!file || loading}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 cursor-pointer shadow-lg shadow-emerald-500/20"
+              className="w-full h-12 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50 cursor-pointer shadow-sm"
             >
               {loading ? (
                 <>

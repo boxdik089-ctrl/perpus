@@ -72,7 +72,7 @@ export default function PrintLabelDialog({
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl w-full max-w-md p-6 space-y-4"
+            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
@@ -96,7 +96,7 @@ export default function PrintLabelDialog({
                 onClick={() => setTab('BARCODE')}
                 className={`flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   tab === 'BARCODE'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    ? 'bg-emerald-700 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -108,7 +108,7 @@ export default function PrintLabelDialog({
                 onClick={() => setTab('PUNGGUNG')}
                 className={`flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   tab === 'PUNGGUNG'
-                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                    ? 'bg-emerald-700 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
@@ -139,7 +139,7 @@ export default function PrintLabelDialog({
               <button
                 type="button"
                 onClick={handlePrint}
-                className="flex-1 h-11 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-sm shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all cursor-pointer"
+                className="flex-1 h-11 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm shadow-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <Printer className="w-4 h-4" />
                 <span>Cetak Label Sekarang</span>

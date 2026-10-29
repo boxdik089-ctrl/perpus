@@ -3,12 +3,34 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import {
+  BookOpen,
+  Layers,
+  ArrowLeftRight,
+  Users,
+  AlertCircle,
+  Clock,
+  ScanLine,
+  PlusCircle,
+  UserPlus,
+  QrCode,
+  ExternalLink,
+  ChevronRight,
+  Calendar,
+  AlertTriangle,
+  CheckCircle2,
+  FileText,
+  Sparkles,
+} from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { AdminProfileDropdown } from "@/components/admin/AdminProfileDropdown";
-import { AdminDashboardMenuClient } from "@/components/admin/AdminDashboardMenuClient";
 import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashboard";
 import { getDashboardAnalytics } from "@/lib/analytics";
+import { SecurityAlertBanner } from "@/components/admin/SecurityAlertBanner";
+import bcrypt from "bcryptjs";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function AdminDashboard() {
   const session = await getServerSession(authOptions);
@@ -16,155 +38,417 @@ export default async function AdminDashboard() {
     redirect("/login");
   }
 
-  // Stats
-  const totalBuku = await prisma.buku.count();
-  const totalEksemplar = await prisma.eksemplar.count();
-  const bukuDipinjam = await prisma.transaksi.count({
-    where: { status: "DIPINJAM" },
-  });
+  // 1. KPI Stats
+  const [totalBuku, totalEksemplar, bukuDipinjam, totalAnggota, totalAnggotaSiswa, totalAnggotaGuruStaf] =
+    await Promise.all([
+      prisma.buku.count(),
+      prisma.eksemplar.count(),
+      prisma.transaksi.count({ where: { status: "DIPINJAM" } }),
+      prisma.anggota.count(),
+      prisma.anggota.count({ where: { jenis: "SISWA" } }),
+      prisma.anggota.count({ where: { jenis: { in: ["GURU", "STAF"] } } }),
+    ]);
 
-  const [totalAnggota, totalAnggotaSiswa, totalAnggotaGuruStaf] = await Promise.all([
-    prisma.anggota.count(),
-    prisma.anggota.count({ where: { jenis: "SISWA" } }),
-    prisma.anggota.count({ where: { jenis: { in: ["GURU", "STAF"] } } }),
-  ]);
-
-  // Denda outstanding: transaksi selesai dengan denda belum dibayar
+  // Denda outstanding
   const dendaAgg = await prisma.transaksi.aggregate({
     where: { denda: { gt: 0 }, status: "SELESAI" },
     _sum: { denda: true },
   });
   const totalDenda = dendaAgg._sum.denda ?? 0;
 
-  // Real-time Analytics & Infografis
+  // 2. Real-time Analytics
   const analyticsData = await getDashboardAnalytics();
-  
 
+  // 3. Peminjaman Aktif & Jatuh Tempo Terdekat (Maksimal 5)
+  const now = new Date();
+  const upcomingReturns = await prisma.transaksi.findMany({
+    where: { status: "DIPINJAM" },
+    orderBy: { batas_kembali: "asc" },
+    take: 5,
+    include: {
+      buku: { select: { judul: true, kode_buku: true } },
+      eksemplar: { select: { kode: true, buku: { select: { judul: true } } } },
+      anggota: {
+        select: {
+          nama: true,
+          no_anggota: true,
+          jenis: true,
+          telepon: true,
+          kelasRef: { select: { nama_kelas: true } },
+        },
+      },
+      siswa: { select: { nama: true, nisn: true, kelas: true } },
+    },
+  });
+
+  // 4. Audit Keamanan Akun
+  const adminAccount = await prisma.admin.findFirst({
+    where: {
+      OR: [
+        { id: (session.user as any)?.id },
+        { username: session.user?.email || "" },
+      ],
+    },
+    select: { id: true, username: true, nama: true, password: true },
+  });
+
+  const isDefaultPassword = adminAccount
+    ? bcrypt.compareSync("admin123", adminAccount.password)
+    : false;
+
+  const adminName = adminAccount?.nama || session.user?.name || "Bapak/Ibu Pustakawan";
+
+  const todayStr = new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(now);
 
   return (
-    <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans selection:bg-sky-500 selection:text-white transition-colors duration-300">
-      {/* Aurora glow background */}
-      <div className="pointer-events-none fixed inset-0 overflow-hidden -z-10" aria-hidden="true">
-        <div className="absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full bg-sky-400/20 dark:bg-sky-600/15 blur-[130px] animate-aurora-1" />
-        <div className="absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full bg-blue-300/25 dark:bg-blue-600/15 blur-[140px] animate-aurora-2" />
-        <div className="absolute -bottom-32 left-1/3 w-[44rem] h-[44rem] rounded-full bg-cyan-300/20 dark:bg-indigo-600/12 blur-[140px] animate-aurora-3" />
+    <div className="p-3 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
+      {/* Top Header Bar */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+              Dashboard Utama
+            </h1>
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Sistem Aktif
+            </span>
+          </div>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+            <span>Perpustakaan SMK Negeri 1 Beringin • {todayStr}</span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-center">
+          <Link
+            href="/"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-xl transition-all shadow-2xs"
+            title="Buka Halaman Depan Siswa"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Katalog Publik</span>
+          </Link>
+          <ThemeToggle />
+          <AdminProfileDropdown userName={adminName} />
+        </div>
+      </header>
+
+      {/* Banner Peringatan Keamanan jika masih password default */}
+      {isDefaultPassword && <SecurityAlertBanner userName={adminName} />}
+
+      {/* Welcome & Quick Action Bar */}
+      <div className="bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-700 rounded-2xl p-4 sm:p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/15 text-[11px] font-medium backdrop-blur-xs">
+            <Sparkles className="w-3 h-3 text-sky-200" />
+            <span>Panel Operasional Sirkulasi &amp; Katalog</span>
+          </div>
+          <h2 className="text-lg sm:text-xl font-bold tracking-tight">
+            Selamat Bertugas, {adminName}!
+          </h2>
+          <p className="text-xs sm:text-sm text-sky-100/90 max-w-xl">
+            Kelola transaksi peminjaman siswa, scan barcode kartu anggota, dan periksa ketersediaan buku secara langsung.
+          </p>
+        </div>
+
+        {/* Quick Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <Link
+            href="/admin/sirkulasi"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-bold text-xs shadow-xs transition-all hover:scale-[1.02]"
+          >
+            <ScanLine className="w-3.5 h-3.5 text-sky-600" />
+            <span>Scan Cepat</span>
+          </Link>
+          <Link
+            href="/admin/transaksi"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
+          >
+            <ArrowLeftRight className="w-3.5 h-3.5" />
+            <span>Pinjam / Kembali</span>
+          </Link>
+          <Link
+            href="/admin/buku/create"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
+          >
+            <PlusCircle className="w-3.5 h-3.5" />
+            <span>Tambah Buku</span>
+          </Link>
+          <Link
+            href="/admin/anggota/create"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
+          >
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Tambah Anggota</span>
+          </Link>
+          <Link
+            href="/kiosk"
+            target="_blank"
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white font-semibold text-xs border border-white/20 transition-all backdrop-blur-xs"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span>Layar Kios</span>
+          </Link>
+        </div>
       </div>
 
-      {/* Top Navbar */}
-      <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16 gap-2 sm:gap-4">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <img
-                  src="/assets/logo.png"
-                  alt="Logo SMK Negeri 1 Beringin"
-                  className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl object-contain bg-white/60 dark:bg-white/10 border border-stone-200 dark:border-white/20 p-1 shrink-0"
-                />
-                <img
-                  src="/assets/logo-kolaborasi.png"
-                  alt="Logo Kolaborasi Sumut Berkah"
-                  className="h-6 sm:h-8 w-auto object-contain shrink-0 hidden xs:block"
-                />
-              </div>
-              <div className="min-w-0 border-l border-stone-200 dark:border-slate-800 pl-2 sm:pl-3">
-                <h1 className="text-xs sm:text-base font-bold text-stone-900 dark:text-white leading-tight truncate flex items-center gap-1.5 sm:gap-2">
-                  <span>Admin Perpustakaan</span>
-                  <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
-                    Command Center
-                  </span>
-                </h1>
-                <p className="text-[10px] sm:text-xs text-stone-500 dark:text-slate-400 hidden sm:block truncate">Sistem Manajemen Buku &amp; Peminjaman</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-              <ThemeToggle />
-              <Link 
-                href="/" 
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700 border border-stone-300/80 dark:border-slate-700/80 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl transition-all shadow-xs shrink-0"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>Katalog Publik</span>
-              </Link>
-              <Link
-                href="/"
-                className="sm:hidden inline-flex items-center justify-center w-8.5 h-8.5 text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white bg-stone-100 dark:bg-slate-800 border border-stone-300/80 dark:border-slate-700/80 rounded-xl transition-colors shrink-0"
-                title="Katalog Publik"
-              >
-                <ExternalLink className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              </Link>
-              
-              <div className="pl-1 sm:pl-2 border-l border-stone-200 dark:border-slate-800 shrink-0">
-                <AdminProfileDropdown userName={session.user?.name || "Administrator"} />
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      <div className="relative z-10 max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 space-y-4 sm:space-y-8">
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 animate-fade-up stats-compact">
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
-            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
+      {/* KPI Metric Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4 animate-fade-up">
+        {/* Card 1: Total Koleksi */}
+        <Link
+          href="/admin/buku"
+          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Total Koleksi
-            </p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-stone-900 dark:text-white stat-number">{totalBuku}</p>
-            <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 mt-1">Judul terdaftar</p>
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-slate-700 dark:group-hover:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
+              <BookOpen className="w-4 h-4" />
+            </div>
           </div>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
+            {totalBuku}
+          </p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            Judul buku terdaftar →
+          </p>
+        </Link>
 
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
-            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
+        {/* Card 2: Total Eksemplar */}
+        <Link
+          href="/admin/buku"
+          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Total Eksemplar
-            </p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-teal-600 dark:text-teal-400 stat-number">
-              {totalEksemplar}
-            </p>
-            <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 mt-1">Copy fisik</p>
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-slate-700 dark:group-hover:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
+              <Layers className="w-4 h-4" />
+            </div>
           </div>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
+            {totalEksemplar}
+          </p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            Fisik buku ber-barcode →
+          </p>
+        </Link>
 
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
-            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
+        {/* Card 3: Sedang Dipinjam */}
+        <Link
+          href="/admin/transaksi"
+          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Sedang Dipinjam
-            </p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 stat-number">{bukuDipinjam}</p>
-            <p className="text-[10px] sm:text-[11px] text-sky-600/90 dark:text-sky-400/80 mt-1">Buku aktif</p>
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
+              <ArrowLeftRight className="w-4 h-4" />
+            </div>
           </div>
+          <p className="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400 tracking-tight tabular-nums">
+            {bukuDipinjam}
+          </p>
+          <p className="text-[10px] sm:text-[11px] text-sky-600/90 dark:text-sky-400/80 font-medium mt-1">
+            Sirkulasi aktif →
+          </p>
+        </Link>
 
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm">
-            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
+        {/* Card 4: Total Anggota */}
+        <Link
+          href="/admin/anggota"
+          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
               Total Anggota
-            </p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 stat-number">
-              {totalAnggota}
-            </p>
-            <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 mt-1 truncate">
-              Siswa: {totalAnggotaSiswa} • Guru/Staf: {totalAnggotaGuruStaf}
-            </p>
+            </span>
+            <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-slate-700 dark:group-hover:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
+              <Users className="w-4 h-4" />
+            </div>
+          </div>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
+            {totalAnggota}
+          </p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
+            {totalAnggotaSiswa} Siswa • {totalAnggotaGuruStaf} Guru →
+          </p>
+        </Link>
+
+        {/* Card 5: Denda Belum Bayar */}
+        <Link
+          href="/admin/transaksi"
+          className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-rose-500/50 dark:hover:border-rose-500/50 hover:shadow-sm transition-all col-span-2 sm:col-span-1 group block"
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+              Denda Belum Bayar
+            </span>
+            <div
+              className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${
+                totalDenda > 0
+                  ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300"
+              }`}
+            >
+              <AlertCircle className="w-4 h-4" />
+            </div>
+          </div>
+          <p
+            className={`text-2xl sm:text-3xl font-bold tracking-tight tabular-nums flex items-baseline ${
+              totalDenda > 0
+                ? "text-rose-600 dark:text-rose-400"
+                : "text-slate-900 dark:text-white"
+            }`}
+          >
+            <span className="text-sm sm:text-base font-semibold opacity-70 mr-1">Rp</span>
+            <span>{totalDenda.toLocaleString("id-ID")}</span>
+          </p>
+          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            {totalDenda > 0 ? "Tertunggak sistem →" : "Semua denda lunas"}
+          </p>
+        </Link>
+      </div>
+
+      {/* Peminjaman Aktif & Jatuh Tempo Terdekat */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 sm:p-6 shadow-2xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                Sirkulasi Aktif &amp; Batas Kembali Terdekat
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Peminjaman yang perlu perhatian dan pengembalian tepat waktu
+              </p>
+            </div>
           </div>
 
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-3.5 sm:p-5 rounded-2xl border border-stone-200/90 dark:border-slate-800 hover:border-stone-300 dark:hover:border-slate-700 transition-all shadow-sm col-span-2 sm:col-span-1">
-            <p className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-stone-500 dark:text-slate-400 mb-1 stat-label">
-              Denda Belum Bayar
-            </p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 stat-number flex items-baseline">
-              <span className="text-base sm:text-lg font-bold opacity-80 mr-1">Rp</span>
-              <span>{totalDenda.toLocaleString("id-ID")}</span>
-            </p>
-            <p className="text-[10px] sm:text-[11px] text-rose-600/80 dark:text-rose-400/80 font-medium mt-1">Total tertunggak</p>
-          </div>
+          <Link
+            href="/admin/transaksi"
+            className="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 self-start sm:self-center"
+          >
+            <span>Buka Semua Transaksi</span>
+            <ChevronRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
-        {/* Categorized Menu Dashboard */}
-        <AdminDashboardMenuClient />
+        {upcomingReturns.length === 0 ? (
+          <div className="py-8 text-center text-slate-500 dark:text-slate-400">
+            <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 mb-2 opacity-80" />
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+              Tidak ada buku yang sedang dipinjam saat ini
+            </p>
+            <p className="text-xs mt-0.5">Semua buku tersedia rapi di rak koleksi.</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
+                  <th className="py-2.5 px-3">Peminjam</th>
+                  <th className="py-2.5 px-3">Buku &amp; Barcode</th>
+                  <th className="py-2.5 px-3">Tgl Pinjam</th>
+                  <th className="py-2.5 px-3">Batas Kembali</th>
+                  <th className="py-2.5 px-3 text-right">Status Waktu</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                {upcomingReturns.map((trx) => {
+                  const peminjamName =
+                    trx.anggota?.nama || trx.siswa?.nama || "Peminjam Tanpa Nama";
+                  const peminjamKelas =
+                    trx.anggota?.kelasRef?.nama_kelas ||
+                    trx.siswa?.kelas ||
+                    trx.anggota?.jenis ||
+                    "-";
+                  const bukuJudul =
+                    trx.eksemplar?.buku?.judul ||
+                    trx.buku?.judul ||
+                    "Buku Perpustakaan";
+                  const barcodeKode =
+                    trx.eksemplar?.kode || trx.buku?.kode_buku || "-";
 
-        {/* Visual Infografis & Interactive Trends */}
-        <AdminAnalyticsDashboard data={analyticsData} />
+                  const returnDate = new Date(trx.batas_kembali);
+                  const isOverdue = returnDate.getTime() < now.getTime();
+                  const diffDays = Math.ceil(
+                    (returnDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
+                  );
 
-
+                  return (
+                    <tr
+                      key={trx.id}
+                      className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
+                    >
+                      <td className="py-3 px-3">
+                        <p className="font-semibold text-slate-900 dark:text-white truncate max-w-[200px]">
+                          {peminjamName}
+                        </p>
+                        <p className="text-[10px] text-slate-400 truncate">
+                          {peminjamKelas}
+                        </p>
+                      </td>
+                      <td className="py-3 px-3">
+                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[280px]">
+                          {bukuJudul}
+                        </p>
+                        <span className="inline-block font-mono text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                          {barcodeKode}
+                        </span>
+                      </td>
+                      <td className="py-3 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                        {new Date(trx.tgl_pinjam).toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                        })}
+                      </td>
+                      <td className="py-3 px-3 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                        {returnDate.toLocaleDateString("id-ID", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="py-3 px-3 text-right whitespace-nowrap">
+                        {isOverdue ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+                            <AlertTriangle className="w-3 h-3" />
+                            Terlambat {Math.abs(diffDays)} hari
+                          </span>
+                        ) : diffDays === 0 ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
+                            Jatuh tempo hari ini
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                            Sisa {diffDays} hari
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
+
+      {/* Visual Infografis & Interactive Trends */}
+      <AdminAnalyticsDashboard data={analyticsData} />
     </div>
   );
 }
-

@@ -25,7 +25,6 @@ import {
   Building2,
   BookOpen,
   ArrowRight,
-  Sparkles,
   Edit3,
   HelpCircle,
   FileCheck,
@@ -557,7 +556,7 @@ export function StockOpnameDetailClient({
           {isAuditActive && (
             <button
               onClick={() => setShowFinishModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 hover:shadow-lg transition-all cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-semibold shadow-sm transition-colors cursor-pointer"
             >
               <CheckCircle2 className="w-4 h-4" />
               Selesaikan Audit
@@ -610,18 +609,18 @@ export function StockOpnameDetailClient({
       {/* Progress Line */}
       <div className="w-full h-3 bg-stone-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner print:hidden">
         <div
-          className="h-full bg-gradient-to-r from-blue-600 via-sky-500 to-emerald-400 transition-all duration-500 rounded-full"
+          className="h-full bg-blue-600 transition-all duration-300 rounded-full"
           style={{ width: `${summary.persentase}%` }}
         />
       </div>
 
       {/* QUICK SCAN HUB (Only shown when session is active) */}
       {isAuditActive && (
-        <div className="bg-gradient-to-br from-white via-sky-50/30 to-blue-50/40 dark:from-slate-900 dark:via-slate-900/90 dark:to-slate-800/80 rounded-2xl border border-sky-200/80 dark:border-slate-800 shadow-lg p-5 sm:p-6 print:hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-5 sm:p-6 print:hidden">
           <div className="flex items-center justify-between gap-4 mb-4 flex-wrap">
             <div className="flex items-center gap-2.5">
-              <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-500/30">
-                <Scan className="w-5 h-5 animate-pulse" />
+              <div className="p-2.5 bg-blue-600 text-white rounded-xl shadow-sm">
+                <Scan className="w-5 h-5" />
               </div>
               <div>
                 <h2 className="text-base font-bold text-stone-900 dark:text-white flex items-center gap-2">
@@ -825,7 +824,7 @@ export function StockOpnameDetailClient({
                   }
                   className="px-3.5 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold rounded-lg transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer shrink-0"
                 >
-                  <Sparkles className="w-3.5 h-3.5" />
+                  <RefreshCw className="w-3.5 h-3.5" />
                   Perbarui Lokasi ke Rak Ini Sekarang
                 </button>
               )}

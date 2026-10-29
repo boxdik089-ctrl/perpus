@@ -191,9 +191,9 @@ export default function LaporanClient({ initialTransaksi }: { initialTransaksi: 
               <Button
                 size="sm"
                 onClick={handlePrint}
-                className="cursor-pointer text-xs flex items-center gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold rounded-xl shadow-lg shadow-emerald-500/20"
+                className="cursor-pointer text-xs flex items-center gap-1.5 bg-emerald-700 hover:bg-emerald-600 text-white font-medium rounded-xl shadow-sm"
               >
-                <Printer className="w-3.5 h-3.5 text-slate-950" />
+                <Printer className="w-3.5 h-3.5 text-white" />
                 <span className="hidden sm:inline">Cetak Laporan PDF</span>
               </Button>
             </div>
@@ -223,7 +223,7 @@ export default function LaporanClient({ initialTransaksi }: { initialTransaksi: 
         </div>
 
         {/* Filter Controls */}
-        <div className="bg-white dark:bg-slate-900/70 rounded-3xl border border-stone-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-2xl backdrop-blur-xl p-4 sm:p-5 space-y-3.5 print:hidden">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-3.5 print:hidden">
           <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
             {/* Search */}
             <div className="relative flex-1">
@@ -329,7 +329,7 @@ export default function LaporanClient({ initialTransaksi }: { initialTransaksi: 
         </div>
 
         {/* Tabel Data Rekap Laporan */}
-        <div className="bg-white dark:bg-slate-900/70 rounded-3xl border border-stone-200/90 dark:border-slate-800/80 shadow-sm dark:shadow-2xl backdrop-blur-xl overflow-hidden print:bg-white print:border-black print:rounded-none">
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm overflow-hidden print:bg-white print:border-black print:rounded-none">
           <div className="px-5 py-4 border-b border-stone-200 dark:border-slate-800 flex justify-between items-center print:hidden">
             <h3 className="font-bold text-stone-900 dark:text-white text-sm">Data Rekap Transaksi Sirkulasi</h3>
             <span className="text-xs bg-emerald-50 dark:bg-slate-800/80 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-500/20 px-3 py-1 rounded-full font-bold">

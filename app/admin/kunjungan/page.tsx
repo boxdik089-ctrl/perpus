@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import KunjunganClient from "@/components/admin/KunjunganClient";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function KunjunganPage() {
   const session = await getServerSession(authOptions);

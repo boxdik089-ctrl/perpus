@@ -1,17 +1,14 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
-import LeaderboardPembaca, { TopReaderItem } from "./LeaderboardPembaca";
 import PustakawanAiWidget from "@/components/ai/PustakawanAiWidget";
 import { 
   Search, 
   BookOpen, 
   User, 
   CheckCircle2, 
-  XCircle, 
   LogIn, 
-  Sparkles, 
   Info, 
   X, 
   Star, 
@@ -21,24 +18,44 @@ import {
   Mic,
   MicOff,
   MapPin,
-  BookMarked,
   RotateCcw,
   ArrowRight,
-  FileText,
-  ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  Filter,
   Laptop,
-  CreditCard,
-  QrCode,
   Share2,
   Copy,
   Check,
-  Smartphone,
+  Loader2,
+  ShieldCheck,
+  Sparkles,
+  QrCode,
+  Code,
+  Server,
+  Utensils,
+  Wrench,
+  Layers,
+  CreditCard,
+  Library,
+  Flame,
+  BookmarkCheck,
+  Clock,
+  Compass,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { createUlasan } from "@/actions/ulasan";
 import { Button } from "@/components/ui/Button";
-import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useTheme } from "@/components/theme/ThemeProvider";
+import BookMarqueeSection from "./BookMarqueeSection";
+import { Book } from "@/components/ui/book";
+import PublicNavbar from "@/components/layout/PublicNavbar";
+import { CatalogCustomDropdown, DropdownOption } from "./CatalogCustomDropdown";
+import HeroShowcaseSection from "./HeroShowcaseSection";
 
-type BukuItem = {
+export type BukuItem = {
   id: string;
   judul: string;
   penulis: string;
@@ -48,43 +65,128 @@ type BukuItem = {
   stok_total: number;
   stok_tersedia: number;
   klasifikasi: string | null;
+  kategori?: string | null;
   is_referensi: boolean;
   rakNama: string | null;
 };
 
-type UlasanItem = {
+export type UlasanItem = {
   id: string;
   bukuId: string;
   nama: string;
-  rating: number; // 1 - 5
+  rating: number;
   komentar: string;
   tanggal: string;
 };
 
+// Generative hardcover styling for books without image cover (No empty ugly placeholders)
+function getGenerativeCoverTheme(judul: string) {
+  const themes = [
+    { bg: "from-[#0f172a] via-[#1e1b4b] to-[#020617]", accent: "text-indigo-400", border: "border-indigo-500/30", tag: "bg-indigo-500/20 text-indigo-300" },
+    { bg: "from-[#064e3b] via-[#022c22] to-[#0a0a0c]", accent: "text-emerald-400", border: "border-emerald-500/30", tag: "bg-emerald-500/20 text-emerald-300" },
+    { bg: "from-[#451a03] via-[#291204] to-[#0a0a0c]", accent: "text-amber-400", border: "border-amber-500/30", tag: "bg-amber-500/20 text-amber-300" },
+    { bg: "from-[#581c87] via-[#3b0764] to-[#09090b]", accent: "text-purple-400", border: "border-purple-500/30", tag: "bg-purple-500/20 text-purple-300" },
+    { bg: "from-[#1e293b] via-[#0f172a] to-[#020617]", accent: "text-sky-400", border: "border-sky-500/30", tag: "bg-sky-500/20 text-sky-300" },
+  ];
+  let code = 0;
+  for (let i = 0; i < judul.length; i++) {
+    code = (code + judul.charCodeAt(i)) % themes.length;
+  }
+  return themes[code];
+}
+
 export default function KatalogBukuClient({ 
   initialBuku, 
-  topReaders = [] 
+  initialUlasan = [],
 }: { 
   initialBuku: BukuItem[];
-  topReaders?: TopReaderItem[];
+  topReaders?: any[];
+  initialUlasan?: UlasanItem[];
 }) {
+  const { data: session, status } = useSession();
   const { isDark } = useTheme();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStok, setFilterStok] = useState<"ALL" | "EBOOK" | "AVAILABLE" | "POPULAR" | "OUT">("ALL");
+  const [activeCategory, setActiveCategory] = useState<string>("ALL");
+  const [activeFormat, setActiveFormat] = useState<string>("ALL");
   const [selectedBook, setSelectedBook] = useState<BukuItem | null>(null);
   const [activeModalTab, setActiveModalTab] = useState<"INFO" | "REVIEWS">("INFO");
 
-  // Reviews state with localStorage persistence
-  const [ulasanMap, setUlasanMap] = useState<Record<string, UlasanItem[]>>({});
+  // Headroom: Smart Floating Navbar that hides on scroll down and reveals on scroll up
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > 70) {
+        if (currentScrollY > lastScrollY.current + 8) {
+          // Scrolling down -> hide navbar
+          setIsNavVisible(false);
+        } else if (currentScrollY < lastScrollY.current - 8) {
+          // Scrolling up -> reveal navbar
+          setIsNavVisible(true);
+        }
+      } else {
+        // At the top of the page -> always show navbar
+        setIsNavVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Reviews state with database persistence
+  const [ulasanMap, setUlasanMap] = useState<Record<string, UlasanItem[]>>(() => {
+    const map: Record<string, UlasanItem[]> = {};
+    if (initialUlasan && initialUlasan.length > 0) {
+      initialUlasan.forEach((u) => {
+        if (!map[u.bukuId]) map[u.bukuId] = [];
+        map[u.bukuId].push(u);
+      });
+    }
+    return map;
+  });
   const [newReviewerName, setNewReviewerName] = useState("");
   const [newRating, setNewRating] = useState<number>(5);
   const [newKomentar, setNewKomentar] = useState("");
+  const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewSuccess, setReviewSuccess] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
   const [listening, setListening] = useState(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [copiedLink, setCopiedLink] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // Navigasi buku yang direkomendasikan AI
+
+  const ebookCount = useMemo(() => {
+    return initialBuku.filter((b) => b.is_ebook || b.file_url).length;
+  }, [initialBuku]);
+
+  const physicalCount = useMemo(() => {
+    return initialBuku.filter((b) => !b.is_ebook && !b.file_url).length;
+  }, [initialBuku]);
+
+  const totalAvailableCopies = useMemo(() => {
+    return initialBuku.reduce((acc, b) => acc + (b.stok_tersedia || 0), 0);
+  }, [initialBuku]);
+
+  // Shortcut Ctrl + K atau Cmd + K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        document.getElementById("katalog-section")?.scrollIntoView({ behavior: "smooth" });
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // AI navigation callback
   const handleSelectBookFromAi = (bookId: string, bookTitle: string) => {
     const target = initialBuku.find((b) => b.id === bookId);
     if (target) {
@@ -96,7 +198,7 @@ export default function KatalogBukuClient({
     }
   };
 
-  // Auto-search jika ada parameter ?cari= atau ?q= di URL dari link share WA
+  // URL query sync (?cari= atau ?q=)
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -109,13 +211,13 @@ export default function KatalogBukuClient({
     if (!selectedBook) return;
     const origin = typeof window !== "undefined" ? window.location.origin : "https://perpustakaan.tiksmkn1beringin.my.id";
     const targetUrl = `${origin}?cari=${encodeURIComponent(selectedBook.judul)}`;
-    const pesan = `📚 *Rekomendasi Buku Perpustakaan SMKN 1 Beringin*\n\n` +
-      `📖 *Judul:* ${selectedBook.judul}\n` +
-      `✍️ *Penulis:* ${selectedBook.penulis}\n` +
+    const pesan = `*Rekomendasi Pustaka SMKN 1 Beringin*\n\n` +
+      `*Judul:* ${selectedBook.judul}\n` +
+      `*Penulis:* ${selectedBook.penulis}\n` +
       (selectedBook.is_ebook || selectedBook.file_url 
-        ? `⚡ *Tersedia E-Book:* Bisa langsung dibaca online di HP/Laptop!\n` 
-        : `📍 *Lokasi Rak:* ${selectedBook.rakNama || "Sirkulasi"} (Stok tersedia: ${selectedBook.stok_tersedia})\n`) +
-      `\nYuk cek & baca bukunya di sini:\n👉 ${targetUrl}`;
+        ? `*E-Book Digital:* Siap dibaca online instan di HP/Laptop!\n` 
+        : `*Lokasi Rak Fisik:* ${selectedBook.rakNama || "Sirkulasi Utama"} (Stok: ${selectedBook.stok_tersedia})\n`) +
+      `\nBuka katalog lengkap:\n${targetUrl}`;
 
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(pesan)}`, "_blank");
   };
@@ -129,7 +231,7 @@ export default function KatalogBukuClient({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  // Voice search (Web Speech API — Chrome/Edge/Safari/Android)
+  // Voice search
   const handleVoiceSearch = async () => {
     const SR =
       (typeof window !== "undefined" &&
@@ -149,7 +251,6 @@ export default function KatalogBukuClient({
       return;
     }
 
-    // Minta izin mikrofon eksplisit
     try {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -172,7 +273,6 @@ export default function KatalogBukuClient({
         if (text) setSearchTerm(text);
       };
       rec.onerror = (err: any) => {
-        console.warn("Catalog voice error:", err?.error);
         setListening(false);
         if (err?.error === "not-allowed") {
           alert("Akses mikrofon diblokir. Mohon izinkan mikrofon di pengaturan browser.");
@@ -183,99 +283,171 @@ export default function KatalogBukuClient({
       (window as any).__rec = rec;
       rec.start();
     } catch (err: any) {
-      console.error("Voice search error:", err);
       setListening(false);
     }
   };
 
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("perpus_ulasan_buku");
-      if (saved) {
-        setUlasanMap(JSON.parse(saved));
-      } else {
-        // Initialize default seed reviews for existing books
-        const initMap: Record<string, UlasanItem[]> = {};
-        initialBuku.forEach((b, idx) => {
-          initMap[b.id] = [
-            {
-              id: `seed-${b.id}-1`,
-              bukuId: b.id,
-              nama: idx % 2 === 0 ? "Ahmad Rizky (Kelas 8B)" : "Dewi Sartika (Kelas 9C)",
-              rating: idx % 3 === 0 ? 5 : 4,
-              komentar:
-                idx % 2 === 0
-                  ? "Materinya sangat lengkap dan contoh soalnya mudah dipelajari."
-                  : "Ceritanya sangat seru, saya selesai baca dalam waktu 3 hari!",
-              tanggal: "08 Sep 2026",
-            },
-          ];
-        });
-        setUlasanMap(initMap);
-        localStorage.setItem("perpus_ulasan_buku", JSON.stringify(initMap));
-      }
-    } catch {
-      // ignore localStorage errors
+    if (initialUlasan && initialUlasan.length > 0) {
+      const map: Record<string, UlasanItem[]> = {};
+      initialUlasan.forEach((u) => {
+        if (!map[u.bukuId]) map[u.bukuId] = [];
+        map[u.bukuId].push(u);
+      });
+      setUlasanMap(map);
     }
-  }, [initialBuku]);
+  }, [initialUlasan]);
 
-  // Hitung rata-rata rating per buku
   const getBookRatingInfo = (bookId: string) => {
     const list = ulasanMap[bookId] || [];
-    if (list.length === 0) return { avg: 4.5, count: 0 };
+    if (list.length === 0) return { avg: 5.0, count: 0 };
     const sum = list.reduce((acc, curr) => acc + curr.rating, 0);
     return { avg: Number((sum / list.length).toFixed(1)), count: list.length };
   };
 
-  // Submit review baru
-  const handleAddReview = (e: React.FormEvent) => {
+  const handleAddReview = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedBook || !newReviewerName.trim() || !newKomentar.trim()) return;
+    if (!selectedBook || !newReviewerName.trim() || !newKomentar.trim() || submittingReview) return;
 
-    const newReview: UlasanItem = {
-      id: "rev-" + Date.now(),
-      bukuId: selectedBook.id,
-      nama: newReviewerName.trim(),
-      rating: newRating,
-      komentar: newKomentar.trim(),
-      tanggal: "Hari ini",
-    };
+    setSubmittingReview(true);
+    setReviewError(null);
 
-    const currentList = ulasanMap[selectedBook.id] || [];
-    const updatedMap = {
-      ...ulasanMap,
-      [selectedBook.id]: [newReview, ...currentList],
-    };
-
-    setUlasanMap(updatedMap);
     try {
-      localStorage.setItem("perpus_ulasan_buku", JSON.stringify(updatedMap));
+      const res = await createUlasan({
+        bukuId: selectedBook.id,
+        nama: newReviewerName.trim(),
+        rating: newRating,
+        komentar: newKomentar.trim(),
+      });
+
+      if (res.ok && res.ulasan) {
+        const created: UlasanItem = {
+          id: res.ulasan.id,
+          bukuId: selectedBook.id,
+          nama: res.ulasan.nama,
+          rating: res.ulasan.rating,
+          komentar: res.ulasan.komentar,
+          tanggal: "Hari ini",
+        };
+
+        setUlasanMap((prev) => {
+          const currentList = prev[selectedBook.id] || [];
+          return {
+            ...prev,
+            [selectedBook.id]: [created, ...currentList],
+          };
+        });
+
+        setNewReviewerName("");
+        setNewKomentar("");
+        setNewRating(5);
+        setReviewSuccess(true);
+        setTimeout(() => setReviewSuccess(false), 4000);
+      } else {
+        setReviewError(res.error || "Gagal mengirim ulasan.");
+      }
     } catch {
-      // ignore
+      setReviewError("Terjadi kendala saat menyimpan ulasan ke database.");
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  // Dynamic category counts for unified pill design
+  const categoryCounts = useMemo(() => {
+    let pplg = 0;
+    let tjkt = 0;
+    let boga = 0;
+    let otomotif = 0;
+    let ready = 0;
+
+    for (const b of initialBuku) {
+      const text = `${b.judul} ${b.kategori || ""}`.toLowerCase();
+      if (text.includes("perangkat lunak") || text.includes("pplg") || text.includes("pemrograman") || text.includes("react") || text.includes("java") || text.includes("c++") || text.includes("algoritma") || text.includes("database")) pplg++;
+      if (text.includes("jaringan") || text.includes("tjkt") || text.includes("server") || text.includes("mikrotik") || text.includes("cisco") || text.includes("linux") || text.includes("fiber")) tjkt++;
+      if (text.includes("boga") || text.includes("kuliner") || text.includes("masakan")) boga++;
+      if (text.includes("otomotif") || text.includes("mesin") || text.includes("motor") || text.includes("mobil")) otomotif++;
+      if (b.stok_tersedia > 0) ready++;
     }
 
-    setNewReviewerName("");
-    setNewKomentar("");
-    setNewRating(5);
-    setReviewSuccess(true);
-    setTimeout(() => setReviewSuccess(false), 3000);
-  };
+    return { pplg, tjkt, boga, otomotif, ready };
+  }, [initialBuku]);
+
+  // Unique database categories
+  const dynamicCategories = useMemo(() => {
+    const set = new Set<string>();
+    initialBuku.forEach((b) => {
+      if (b.kategori && b.kategori.trim()) {
+        set.add(b.kategori.trim());
+      }
+    });
+    return Array.from(set).sort();
+  }, [initialBuku]);
+
+  // Dynamic Dropdown Options for Category & Jurusan (21st.dev Styled Custom Select)
+  const categoryDropdownOptions: DropdownOption[] = useMemo(() => [
+    { id: "ALL", label: "Semua Jurusan & Kategori", count: initialBuku.length, icon: BookOpen, group: "Umum" },
+    { id: "PPLG", label: "Rekayasa Perangkat Lunak", count: categoryCounts.pplg, icon: Code, group: "Jurusan Kejuruan" },
+    { id: "TJKT", label: "Teknik Jaringan Komputer", count: categoryCounts.tjkt, icon: Server, group: "Jurusan Kejuruan" },
+    { id: "BOGA", label: "Tata Boga & Kuliner", count: categoryCounts.boga, icon: Utensils, group: "Jurusan Kejuruan" },
+    { id: "OTOMOTIF", label: "Teknik Otomotif", count: categoryCounts.otomotif, icon: Wrench, group: "Jurusan Kejuruan" },
+    ...dynamicCategories.map((cat) => ({
+      id: cat,
+      label: cat,
+      icon: BookmarkCheck,
+      group: "Kategori Koleksi",
+    })),
+    { id: "AVAILABLE", label: "Hanya Siap Dipinjam", count: categoryCounts.ready, icon: CheckCircle2, group: "Status Koleksi" },
+    { id: "POPULAR", label: "Rating Terpopuler", icon: Star, group: "Status Koleksi" },
+  ], [initialBuku.length, categoryCounts, dynamicCategories]);
+
+  // Dynamic Dropdown Options for Format
+  const formatDropdownOptions: DropdownOption[] = useMemo(() => [
+    { id: "ALL", label: "Semua Format", count: initialBuku.length, icon: Layers },
+    { id: "FISIK", label: "Buku Fisik di Rak", count: physicalCount, icon: Library },
+    { id: "EBOOK", label: "E-Book Online Instan", count: ebookCount, icon: Laptop },
+  ], [initialBuku.length, physicalCount, ebookCount]);
 
   // Realtime search & filter
   const filteredBuku = useMemo(() => {
     let result = initialBuku.filter((book) => {
       const matchSearch =
         book.judul.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.penulis.toLowerCase().includes(searchTerm.toLowerCase());
+        book.penulis.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (book.kategori && book.kategori.toLowerCase().includes(searchTerm.toLowerCase()));
 
       if (!matchSearch) return false;
-      if (filterStok === "EBOOK") return Boolean(book.is_ebook || book.file_url);
-      if (filterStok === "AVAILABLE") return book.stok_tersedia > 0;
-      if (filterStok === "OUT") return book.stok_tersedia === 0;
+
+      // Format filter (ALL | EBOOK | FISIK)
+      const hasEbook = Boolean(book.is_ebook || book.file_url);
+      if (activeFormat === "EBOOK" && !hasEbook) return false;
+      if (activeFormat === "FISIK" && hasEbook) return false;
+
+      // Category filter
+      if (activeCategory === "AVAILABLE") return book.stok_tersedia > 0;
+      if (activeCategory === "PPLG") {
+        const text = `${book.judul} ${book.kategori || ""}`.toLowerCase();
+        return text.includes("perangkat lunak") || text.includes("pplg") || text.includes("pemrograman") || text.includes("react") || text.includes("java") || text.includes("c++") || text.includes("algoritma") || text.includes("database");
+      }
+      if (activeCategory === "TJKT") {
+        const text = `${book.judul} ${book.kategori || ""}`.toLowerCase();
+        return text.includes("jaringan") || text.includes("tjkt") || text.includes("server") || text.includes("mikrotik") || text.includes("cisco") || text.includes("linux") || text.includes("fiber");
+      }
+      if (activeCategory === "BOGA") {
+        const text = `${book.judul} ${book.kategori || ""}`.toLowerCase();
+        return text.includes("boga") || text.includes("kuliner") || text.includes("masakan");
+      }
+      if (activeCategory === "OTOMOTIF") {
+        const text = `${book.judul} ${book.kategori || ""}`.toLowerCase();
+        return text.includes("otomotif") || text.includes("mesin") || text.includes("motor") || text.includes("mobil");
+      }
+      if (activeCategory !== "ALL" && activeCategory !== "POPULAR") {
+        return (book.kategori || "").toLowerCase() === activeCategory.toLowerCase();
+      }
       return true;
     });
 
-    if (filterStok === "POPULAR") {
+    if (activeCategory === "POPULAR") {
       result = [...result].sort((a, b) => {
         const ratingA = getBookRatingInfo(a.id).avg;
         const ratingB = getBookRatingInfo(b.id).avg;
@@ -284,338 +456,224 @@ export default function KatalogBukuClient({
     }
 
     return result;
-  }, [initialBuku, searchTerm, filterStok, ulasanMap]);
+  }, [initialBuku, searchTerm, activeCategory, activeFormat, ulasanMap]);
 
-  const ebookCount = useMemo(() => {
-    return initialBuku.filter((b) => b.is_ebook || b.file_url).length;
-  }, [initialBuku]);
+  // Pagination State & Logic
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
+
+  // Otomatis reset ke halaman 1 saat pencarian, kategori, atau format berubah
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, activeCategory, activeFormat]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredBuku.length / itemsPerPage));
+  const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages);
+
+  const paginatedBuku = useMemo(() => {
+    const startIndex = (validCurrentPage - 1) * itemsPerPage;
+    return filteredBuku.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredBuku, validCurrentPage, itemsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    if (page < 1 || page > totalPages || page === validCurrentPage) return;
+    setCurrentPage(page);
+    const catalogSection = document.getElementById("katalog-section");
+    if (catalogSection) {
+      const targetOffset = catalogSection.getBoundingClientRect().top + window.scrollY - 85;
+      window.scrollTo({ top: targetOffset, behavior: "smooth" });
+    }
+  };
+
+  const pageNumbers = useMemo(() => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      if (validCurrentPage <= 4) {
+        pages.push(1, 2, 3, 4, 5, "...", totalPages);
+      } else if (validCurrentPage >= totalPages - 3) {
+        pages.push(1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(1, "...", validCurrentPage - 1, validCurrentPage, validCurrentPage + 1, "...", totalPages);
+      }
+    }
+    return pages;
+  }, [totalPages, validCurrentPage]);
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans antialiased transition-colors duration-300 ${
-      isDark
-        ? "bg-slate-950 text-slate-100 selection:bg-sky-500 selection:text-white"
-        : "bg-slate-50 text-slate-900 selection:bg-sky-600 selection:text-white"
+    <div className={`min-h-screen flex flex-col font-sans antialiased transition-colors duration-300 selection:bg-sky-500 selection:text-white ${
+      isDark ? "bg-[#09090b] text-[#fafafa]" : "bg-[#fafafa] text-[#09090b]"
     }`}>
-      {/* Ambient background aurora glow - Disembunyikan di mobile demi 60fps scrolling lancar */}
-      <div className="hidden md:block fixed inset-0 pointer-events-none overflow-hidden -z-10" aria-hidden="true">
-        <div className={`absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full blur-[130px] animate-aurora-1 ${isDark ? "bg-sky-600/12" : "bg-sky-300/20"}`} />
-        <div className={`absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full blur-[140px] animate-aurora-2 ${isDark ? "bg-blue-600/12" : "bg-blue-300/20"}`} />
-        <div className={`absolute -bottom-32 left-1/3 w-[44rem] h-[44rem] rounded-full blur-[140px] animate-aurora-3 ${isDark ? "bg-cyan-600/10" : "bg-cyan-300/18"}`} />
-      </div>
 
-      {/* Top Navbar */}
-      <header className={`backdrop-blur-md md:backdrop-blur-xl border-b sticky top-0 z-30 shadow-xs transition-colors duration-300 ${
-        isDark
-          ? "bg-slate-900/90 border-slate-800/80 shadow-black/20"
-          : "bg-[#faf8f4]/95 border-[#e5e1d7] text-stone-800 shadow-stone-200/40"
-      }`}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 sm:h-16 gap-2">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-                <img
-                  src="/assets/logo.png"
-                  alt="Logo SMK Negeri 1 Beringin"
-                  className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl object-contain p-1 shrink-0 shadow-sm ${
-                    isDark
-                      ? "bg-white/10 border border-emerald-500/30 shadow-emerald-500/10"
-                      : "bg-white border border-stone-200 shadow-stone-200"
-                  }`}
-                />
-                <img
-                  src="/assets/logo-kolaborasi.png"
-                  alt="Logo Kolaborasi Sumut Berkah"
-                  className="hidden sm:block h-7 sm:h-9 w-auto object-contain shrink-0"
-                />
-              </div>
-              <div className="min-w-0">
-                <span className={`text-xs sm:text-base font-black tracking-tight block truncate ${isDark ? "text-white" : "text-stone-900"}`}>
-                  Perpustakaan Digital
-                </span>
-                <span className={`text-[10px] sm:text-[11px] font-semibold block -mt-0.5 truncate flex items-center gap-1 ${
-                  isDark ? "text-emerald-400" : "text-emerald-700"
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full animate-pulse inline-block shrink-0 ${
-                    isDark ? "bg-emerald-400" : "bg-emerald-600"
-                  }`} />
-                  <span className="truncate">SMKN 1 Beringin</span>
-                </span>
-              </div>
-            </div>
+      {/* Shared Unified Floating Island Navbar */}
+      <PublicNavbar currentPage="katalog" />
 
-            <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-              <button
-                onClick={() => {
-                  setFilterStok((prev) => (prev === "EBOOK" ? "ALL" : "EBOOK"));
-                  document.getElementById("katalog-section")?.scrollIntoView({ behavior: "smooth", block: "start" });
-                }}
-                className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer ${
-                  filterStok === "EBOOK"
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-emerald-600/30 ring-2 ring-emerald-500/50"
-                    : isDark
-                      ? "text-emerald-300 bg-emerald-950/80 hover:bg-emerald-900/80 border border-emerald-500/40 shadow-emerald-950/50"
-                      : "text-emerald-800 bg-emerald-100/70 hover:bg-emerald-100 border border-emerald-300/80"
-                }`}
-                title={filterStok === "EBOOK" ? "Tampilkan Semua Koleksi" : "Filter Hanya E-Book"}
-              >
-                <Laptop className="w-3.5 h-3.5 text-current" />
-                <span>E-Book ({ebookCount})</span>
-              </button>
-              <Link
-                href="/brosur"
-                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 border ${
-                  isDark
-                    ? "text-amber-300 bg-amber-950/40 hover:bg-amber-900/60 border-amber-500/40"
-                    : "text-amber-800 bg-amber-50 hover:bg-amber-100 border-amber-300"
-                }`}
-                title="Brosur Resmi Acara Smart School"
-              >
-                <Sparkles className="w-3.5 h-3.5 shrink-0 text-amber-500" />
-                <span className="hidden md:inline">Brosur Smart School</span>
-                <span className="md:hidden">Brosur</span>
-              </Link>
-              <Link
-                href="/kartu"
-                className={`inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer shrink-0 border ${
-                  isDark
-                    ? "text-slate-200 bg-slate-900/80 hover:bg-slate-800 border-slate-700/80 hover:border-emerald-500/50"
-                    : "text-stone-700 bg-stone-100 hover:bg-stone-200/80 border-stone-300/80"
-                }`}
-                title="Cek Kartu Perpustakaan Digital & QR Code Presensi"
-              >
-                <CreditCard className={`w-3.5 h-3.5 shrink-0 ${isDark ? "text-emerald-400" : "text-emerald-700"}`} />
-                <span className="hidden sm:inline">Kartu Siswa</span>
-                <span className="sm:hidden text-xs">Kartu</span>
-              </Link>
-              <Link
-                href="/login"
-                className="inline-flex items-center gap-1.5 px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-md shadow-emerald-600/20 active:scale-95 transition-all shrink-0"
-              >
-                <LogIn className="w-3.5 h-3.5 text-white shrink-0" />
-                <span className="hidden sm:inline">Login Petugas</span>
-                <span className="sm:hidden text-xs">Masuk</span>
-              </Link>
-              <ThemeToggle className="ml-1 shrink-0" />
-            </div>
+      {/* High-Impact Centered Hero Section (Pure Typography & Minimalist) */}
+      <HeroShowcaseSection
+        isDark={isDark}
+        books={initialBuku}
+        onSelectBook={(book) => {
+          setSelectedBook(book);
+          setActiveModalTab("INFO");
+        }}
+      />
+
+      {/* Infinite Book Marquee Showcase (Inspired by Malaka Books & Design DNA Animation) */}
+      <BookMarqueeSection
+        books={initialBuku}
+        onSelectBook={(book) => {
+          setSelectedBook(book);
+          setActiveModalTab("INFO");
+        }}
+        failedImages={failedImages}
+        onImageError={(id) => setFailedImages((prev) => ({ ...prev, [id]: true }))}
+        isDark={isDark}
+      />
+
+      {/* Main Catalog Section */}
+      <main id="katalog-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10 scroll-mt-20">
+
+        {/* Section Header: Bold, Proportional, and Single-Line */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+              Koleksi Pustaka Lengkap
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              Menampilkan <span className="font-bold text-sky-600 dark:text-sky-400">{filteredBuku.length}</span> dari {initialBuku.length} judul buku fisik &amp; e-book aktif
+            </p>
           </div>
         </div>
-      </header>
 
-      {/* Hero Header with SMK building photo background */}
-      <section className={`py-6 sm:py-16 px-3.5 sm:px-4 relative overflow-hidden border-b transition-colors duration-300 ${
-        isDark
-          ? "text-white border-slate-800/60"
-          : "text-white border-[#e5e1d7]"
-      }`}>
-        {/* Background photo with balanced deep modern tint */}
-        <img
-          src="/assets/gedung-smk-user.png"
-          alt="Gedung SMK Negeri 1 Beringin"
-          className={`absolute inset-0 w-full h-full object-cover transition-opacity ${
-            isDark ? "opacity-40" : "opacity-45"
-          }`}
-        />
-        {/* Sleek gradient overlay */}
-        <div className={`absolute inset-0 ${
+        {/* Unified Search & Dropdown Filter Bar: Sticky & Floating on scroll */}
+        <div className={`sticky top-3 sm:top-4 z-30 rounded-2xl border p-2 sm:p-2.5 mb-8 shadow-md backdrop-blur-xl transition-all duration-200 ${
           isDark
-            ? "bg-gradient-to-b from-slate-950/75 via-slate-950/55 to-slate-950"
-            : "bg-gradient-to-b from-stone-950/75 via-stone-900/60 to-stone-950/80"
-        }`} />
-        <div className="absolute inset-0 bg-blue-950/20 mix-blend-overlay pointer-events-none" />
-        
-        {/* Glowing animated aurora blobs */}
-        <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-          <div className="absolute -top-24 -left-20 w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-emerald-500/25 blur-3xl animate-blob" />
-          <div className="absolute top-10 right-0 w-80 sm:w-96 h-80 sm:h-96 rounded-full bg-teal-400/25 blur-3xl animate-blob [animation-delay:-5s]" />
-          <div className="absolute -bottom-28 left-1/3 w-64 sm:w-80 h-64 sm:h-80 rounded-full bg-blue-500/20 blur-3xl animate-blob [animation-delay:-9s]" />
-        </div>
-
-        <div className="max-w-4xl mx-auto text-center relative z-10 space-y-2.5 sm:space-y-4">
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-300 text-[10px] sm:text-xs font-semibold backdrop-blur-md animate-fade-up shadow-inner">
-            <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-emerald-400 shrink-0" />
-            <span className="truncate">Katalog Resmi &amp; E-Book SMKN 1 Beringin</span>
-          </div>
-          
-          <h1 className="text-xl sm:text-3xl md:text-5xl font-black tracking-tight text-white drop-shadow-md animate-fade-up [animation-delay:60ms] leading-snug">
-            Baca E-Book Online &amp; <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400">Koleksi Perpustakaan</span>
-          </h1>
-          
-          <p className="text-stone-200 text-xs sm:text-base max-w-2xl mx-auto animate-fade-up [animation-delay:120ms] font-normal leading-relaxed">
-            Buka dan baca buku pelajaran atau novel digital langsung dari HP atau Komputer Anda kapan saja.
-          </p>
-
-          {/* Interactive Search Bar */}
-          <div className="max-w-2xl mx-auto pt-2 sm:pt-4">
-            <div className={`relative flex items-center rounded-2xl shadow-xl overflow-hidden transition-all animate-fade-up [animation-delay:180ms] border ${
+            ? "bg-[#111218]/95 border-white/10 shadow-black/50"
+            : "bg-white/95 border-slate-200/90 shadow-slate-900/10"
+        }`}>
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 sm:gap-2.5">
+            {/* 1. Main Search Bar */}
+            <div className={`relative flex-1 flex items-center rounded-xl border transition-all ${
               isDark
-                ? "bg-slate-900 border-slate-700/80 ring-2 sm:ring-4 ring-emerald-500/10 focus-within:ring-emerald-400/30 focus-within:border-emerald-500/60"
-                : "bg-white border-stone-300/90 ring-2 sm:ring-4 ring-emerald-500/15 focus-within:ring-emerald-500/40 focus-within:border-emerald-600 shadow-stone-900/10"
+                ? "bg-white/[0.04] border-white/10 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/20"
+                : "bg-slate-50 border-slate-200 focus-within:border-sky-600 focus-within:ring-2 focus-within:ring-sky-500/15"
             }`}>
-              <div className={`pl-3.5 sm:pl-5 shrink-0 ${isDark ? "text-emerald-400" : "text-emerald-600"}`}>
-                <Search className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="pl-3.5 text-sky-500 shrink-0">
+                <Search className="w-4 h-4" />
               </div>
               <input
+                ref={searchInputRef}
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Cari judul, pengarang, pelajaran..."
-                className={`w-full px-2.5 sm:px-4 py-2.5 sm:py-4 text-xs sm:text-sm font-medium focus:outline-none bg-transparent ${
-                  isDark
-                    ? "text-slate-100 placeholder:text-slate-500"
-                    : "text-stone-900 placeholder:text-stone-400"
-                }`}
+                placeholder="Cari judul buku, penulis, jurusan (PPLG, TJKT)..."
+                className="w-full px-3 py-2.5 text-xs sm:text-sm font-medium focus:outline-none bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
-              {searchTerm && (
+              <div className="flex items-center gap-1 pr-2 shrink-0">
+                {searchTerm ? (
+                  <button
+                    onClick={() => setSearchTerm("")}
+                    className="p-1 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    title="Hapus pencarian"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <kbd className="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-white/[0.08] text-slate-500 dark:text-slate-400 border border-slate-300/60 dark:border-white/10 font-mono text-[9px] font-bold select-none">
+                    Ctrl K
+                  </kbd>
+                )}
                 <button
-                  onClick={() => setSearchTerm("")}
-                  className={`pr-2 text-xs font-bold cursor-pointer transition-colors shrink-0 ${
-                    isDark ? "text-slate-400 hover:text-slate-200" : "text-stone-400 hover:text-stone-700"
+                  type="button"
+                  onClick={handleVoiceSearch}
+                  title={listening ? "Berhenti mendengarkan" : "Cari menggunakan suara"}
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                    listening
+                      ? "bg-rose-500 text-white animate-pulse"
+                      : "text-sky-500 hover:bg-slate-200 dark:hover:bg-white/10"
                   }`}
                 >
-                  <RotateCcw className="w-4 h-4" />
+                  {listening ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5 text-sky-500" />}
                 </button>
+              </div>
+            </div>
+
+            {/* 2. Custom Styled Dropdown Filter: Kategori / Jurusan */}
+            <CatalogCustomDropdown
+              value={activeCategory}
+              options={categoryDropdownOptions}
+              onChange={setActiveCategory}
+              leadIcon={Filter}
+              colorScheme="sky"
+              placeholder="Pilih Kategori"
+            />
+
+            {/* 3. Custom Styled Dropdown Filter: Format (Buku Fisik / E-Book) */}
+            <CatalogCustomDropdown
+              value={activeFormat}
+              options={formatDropdownOptions}
+              onChange={setActiveFormat}
+              leadIcon={Layers}
+              colorScheme="emerald"
+              placeholder="Pilih Format"
+            />
+
+            {/* Reset Filter Button */}
+            {(searchTerm || activeCategory !== "ALL" || activeFormat !== "ALL") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm("");
+                  setActiveCategory("ALL");
+                  setActiveFormat("ALL");
+                }}
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all cursor-pointer shrink-0"
+                title="Reset semua filter"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            )}
+          </div>
+
+          {/* Active filter summary pill track */}
+          {(searchTerm || activeCategory !== "ALL" || activeFormat !== "ALL") && (
+            <div className="flex flex-wrap items-center gap-2 pt-2.5 mt-2.5 border-t border-slate-100 dark:border-white/5 text-[11px]">
+              <span className="text-slate-400 font-medium">Filter aktif:</span>
+              {searchTerm && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-semibold border border-sky-500/20">
+                  Cari: "{searchTerm}"
+                  <button onClick={() => setSearchTerm("")} className="hover:text-rose-500 ml-0.5 cursor-pointer">×</button>
+                </span>
               )}
-              {(() => {
-                const micCls = listening
-                  ? "shrink-0 w-10 h-10 sm:w-13 sm:h-13 flex items-center justify-center bg-rose-500 text-white animate-pulse"
-                  : isDark
-                    ? "shrink-0 w-10 h-10 sm:w-13 sm:h-13 flex items-center justify-center bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors border-l border-slate-800"
-                    : "shrink-0 w-10 h-10 sm:w-13 sm:h-13 flex items-center justify-center bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors border-l border-stone-200";
-                return (
-                  <button
-                    type="button"
-                    onClick={handleVoiceSearch}
-                    title={listening ? "Berhenti" : "Cari dengan suara (id-ID)"}
-                    className={micCls}
-                  >
-                    {listening ? <MicOff className="w-4 h-4 sm:w-5 sm:h-5" /> : <Mic className="w-4 h-4 sm:w-5 sm:h-5" />}
-                  </button>
-                );
-              })()}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Main Content Area */}
-      <main id="katalog-section" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-5 sm:py-10 flex-1 w-full relative z-10 scroll-mt-16">
-        
-        <LeaderboardPembaca isDark={isDark} readers={topReaders} />
-
-        {/* Filter Controls & Counters */}
-        <div className={`flex flex-col gap-3 pb-3.5 sm:pb-5 border-b mb-4 sm:mb-8 animate-fade-up ${
-          isDark ? "border-slate-800/80" : "border-[#e6e2da]"
-        }`}>
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
-            <div>
-              <h2 className={`text-sm sm:text-xl font-bold tracking-tight flex items-center gap-2 ${
-                isDark ? "text-white" : "text-stone-900"
-              }`}>
-                <BookOpen className={`w-4 h-4 sm:w-5 sm:h-5 shrink-0 ${isDark ? "text-emerald-400" : "text-emerald-700"}`} />
-                <span>Daftar Koleksi Buku</span>
-              </h2>
-              <p className={`text-[11px] sm:text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-stone-500"}`}>
-                Menampilkan <strong className={isDark ? "text-emerald-400" : "text-emerald-700"}>{filteredBuku.length}</strong> dari {initialBuku.length} judul buku
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 sm:gap-2 self-start sm:self-auto">
-              <span className={`inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-xs border ${
-                isDark
-                  ? "text-emerald-300 bg-emerald-950/60 border-emerald-500/30"
-                  : "text-emerald-800 bg-emerald-100/70 border-emerald-300/80"
-              }`}>
-                <Laptop className={`w-3 h-3 ${isDark ? "text-emerald-400" : "text-emerald-700"}`} />
-                <span>{ebookCount} E-Book</span>
-              </span>
-              <span className={`inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold px-2.5 py-1 rounded-full shadow-xs border ${
-                isDark
-                  ? "text-cyan-300 bg-cyan-950/60 border-cyan-500/30"
-                  : "text-teal-800 bg-teal-100/70 border-teal-300/80"
-              }`}>
-                <CheckCircle2 className={`w-3 h-3 ${isDark ? "text-cyan-400" : "text-teal-700"}`} />
-                <span>{initialBuku.filter((b) => b.stok_tersedia > 0).length} Fisik</span>
+              {activeCategory !== "ALL" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-500/20">
+                  Kategori: {activeCategory}
+                  <button onClick={() => setActiveCategory("ALL")} className="hover:text-rose-500 ml-0.5 cursor-pointer">×</button>
+                </span>
+              )}
+              {activeFormat !== "ALL" && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
+                  Format: {activeFormat === "EBOOK" ? "E-Book Online" : "Buku Fisik"}
+                  <button onClick={() => setActiveFormat("ALL")} className="hover:text-rose-500 ml-0.5 cursor-pointer">×</button>
+                </span>
+              )}
+              <span className="text-slate-400 font-mono text-[10px] ml-auto">
+                {filteredBuku.length} buku cocok
               </span>
             </div>
-          </div>
-
-          {/* Filter pills — horizontal scroll on mobile */}
-          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto pb-1.5 -mx-3 px-3 sm:mx-0 sm:px-0 no-scrollbar filter-scroll touch-pan-x">
-            <button
-              onClick={() => setFilterStok("ALL")}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 shrink-0 ${
-                filterStok === "ALL"
-                  ? isDark
-                    ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20"
-                    : "bg-emerald-700 text-white shadow-sm shadow-emerald-700/20"
-                  : isDark
-                    ? "bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
-                    : "bg-[#faf8f4] text-stone-700 hover:text-stone-900 hover:bg-white border border-[#e5e1d7] shadow-2xs"
-              }`}
-            >
-              Semua Koleksi
-            </button>
-            <button
-              onClick={() => setFilterStok("EBOOK")}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
-                filterStok === "EBOOK"
-                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/25"
-                  : isDark
-                    ? "bg-emerald-950/50 text-emerald-300 hover:bg-emerald-900/60 border border-emerald-500/40"
-                    : "bg-emerald-50 text-emerald-800 hover:bg-emerald-100/90 border border-emerald-200/90"
-              }`}
-            >
-              <Laptop className="w-3.5 h-3.5" />
-              <span> E-Book Online ({ebookCount})</span>
-            </button>
-            <button
-              onClick={() => setFilterStok("POPULAR")}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 flex items-center gap-1.5 shrink-0 ${
-                filterStok === "POPULAR"
-                  ? "bg-amber-400 text-slate-950 shadow-md shadow-amber-400/20"
-                  : isDark
-                    ? "bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
-                    : "bg-[#faf8f4] text-stone-700 hover:text-stone-900 hover:bg-white border border-[#e5e1d7] shadow-2xs"
-              }`}
-            >
-              <Star className="w-3.5 h-3.5 fill-current" />
-              <span>Paling Populer</span>
-            </button>
-            <button
-              onClick={() => setFilterStok("AVAILABLE")}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 shrink-0 ${
-                filterStok === "AVAILABLE"
-                  ? isDark
-                    ? "bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20"
-                    : "bg-teal-700 text-white shadow-sm shadow-teal-700/20"
-                  : isDark
-                    ? "bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
-                    : "bg-[#faf8f4] text-stone-700 hover:text-stone-900 hover:bg-white border border-[#e5e1d7] shadow-2xs"
-              }`}
-            >
-              Fisik Tersedia ({initialBuku.filter((b) => b.stok_tersedia > 0).length})
-            </button>
-            <button
-              onClick={() => setFilterStok("OUT")}
-              className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs font-bold cursor-pointer transition-all active:scale-95 shrink-0 ${
-                filterStok === "OUT"
-                  ? "bg-rose-500 text-white shadow-md shadow-rose-500/20"
-                  : isDark
-                    ? "bg-slate-900/80 text-slate-400 hover:text-white hover:bg-slate-800 border border-slate-800"
-                    : "bg-[#faf8f4] text-stone-700 hover:text-stone-900 hover:bg-white border border-[#e5e1d7] shadow-2xs"
-              }`}
-            >
-              Sedang Dipinjam Habis
-            </button>
-          </div>
+          )}
         </div>
 
-        {/* Book Grid - Compact & Responsive Layout */}
-        <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3.5">
-          {filteredBuku.map((book, idx) => {
-            const isTersedia = book.stok_tersedia > 0;
+        {/* Luxury Book Grid: Celebrating Genuine Covers, Rich 3D Hardcover Finish, and Clear Status */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
+          {paginatedBuku.map((book) => {
             const hasEbook = Boolean(book.is_ebook || book.file_url);
+            const isReady = book.stok_tersedia > 0;
             const hasValidCover = Boolean(book.cover_url && !failedImages[book.id]);
             const { avg, count } = getBookRatingInfo(book.id);
+            const fallbackTheme = getGenerativeCoverTheme(book.judul);
 
             return (
               <div
@@ -624,137 +682,70 @@ export default function KatalogBukuClient({
                   setSelectedBook(book);
                   setActiveModalTab("INFO");
                 }}
-                style={{ animationDelay: `${Math.min(idx * 30, 300)}ms` }}
-                className={`animate-fade-up transform-gpu rounded-xl sm:rounded-2xl transition-all duration-200 overflow-hidden flex flex-col h-full cursor-pointer group relative border ${
-                  isDark
-                    ? "bg-slate-900 border-slate-800/80 hover:border-emerald-500/40 shadow-md hover:shadow-xl hover:shadow-emerald-900/20 hover:-translate-y-1"
-                    : "bg-white border-[#e6e2da] hover:border-emerald-600/50 shadow-2xs hover:shadow-md hover:shadow-stone-200/80 hover:-translate-y-0.5"
-                } active:scale-[0.98]`}
+                className="group cursor-pointer flex flex-col h-full bg-white dark:bg-white/[0.02] hover:bg-slate-50/90 dark:hover:bg-white/[0.04] p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10 hover:border-sky-500/40 dark:hover:border-sky-500/40 shadow-xs hover:shadow-lg transition-all duration-300"
               >
-                {/* Book Cover - Compact aspect ratio with elegant proportion */}
-                <div className={`relative aspect-[3/4] w-full overflow-hidden flex items-center justify-center border-b shrink-0 ${
-                  isDark ? "bg-slate-950/80 border-slate-800/60" : "bg-[#f4f2ec] border-[#e6e2da]"
-                }`}>
-                  {hasValidCover ? (
-                    <img
-                      src={book.cover_url!}
-                      alt={book.judul}
-                      loading="lazy"
-                      decoding="async"
-                      onError={() => setFailedImages((prev) => ({ ...prev, [book.id]: true }))}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300 ease-out"
-                    />
-                  ) : (
-                    <div className="flex flex-col items-center justify-center text-stone-400 p-2 text-center">
-                      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center mb-1 shadow-inner ${
-                        isDark ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-emerald-100/60 border border-emerald-200"
-                      }`}>
-                        <BookOpen className={`w-4 h-4 sm:w-5 sm:h-5 ${isDark ? "text-emerald-400" : "text-emerald-700"}`} />
-                      </div>
-                      <span className={`text-[8px] sm:text-[10px] font-medium leading-tight ${isDark ? "text-slate-400" : "text-stone-500"}`}>Sampul Standar</span>
-                    </div>
-                  )}
-
-                  {/* Badges Overlay */}
-                  <div className="absolute top-1 right-1 sm:top-2 sm:right-2 flex flex-col items-end gap-1 z-10">
-                    {hasEbook && (
-                      <span className="inline-flex items-center gap-0.5 bg-emerald-600 text-white text-[7px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs">
-                        <Laptop className="w-2.5 h-2.5 shrink-0" />
-                        <span>E-Book</span>
-                      </span>
-                    )}
-                    {book.is_referensi && (
-                      <span className={`inline-flex items-center gap-0.5 text-[7px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs border ${
-                        isDark
-                          ? "bg-cyan-950/95 text-cyan-300 border-cyan-500/30"
-                          : "bg-sky-100/95 text-sky-800 border-sky-300/80"
-                      }`}>
-                        <span>Ref</span>
-                      </span>
-                    )}
-                    {isTersedia ? (
-                      <span className={`inline-flex items-center gap-0.5 text-[7px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs border ${
-                        isDark
-                          ? "bg-slate-950/90 text-emerald-400 border-emerald-500/40"
-                          : "bg-emerald-50/95 text-emerald-800 border-emerald-300/80"
-                      }`}>
-                        <CheckCircle2 className="w-2.5 h-2.5 shrink-0" />
-                        <span>{book.stok_tersedia} Ada</span>
-                      </span>
-                    ) : (
-                      <span className={`inline-flex items-center gap-0.5 text-[7px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs border ${
-                        isDark
-                          ? "bg-rose-950/90 text-rose-300 border-rose-500/40"
-                          : "bg-rose-50/95 text-rose-800 border-rose-300/80"
-                      }`}>
-                        <XCircle className="w-2.5 h-2.5 shrink-0" />
-                        <span>Habis</span>
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Rating Badge Overlay */}
-                  <div className="absolute bottom-1 left-1 sm:bottom-2 sm:left-2 z-10">
-                    <span className={`inline-flex items-center gap-0.5 text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md shadow-xs border ${
-                      isDark
-                        ? "bg-slate-950/95 text-amber-300 border-amber-500/25"
-                        : "bg-white/95 text-amber-800 border-amber-300/80"
-                    }`}>
-                      <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-500 shrink-0" />
-                      <span>{avg}</span>
-                      {count > 0 && <span className={`text-[7px] sm:text-[8px] ${isDark ? "text-slate-400" : "text-stone-500"}`}>({count})</span>}
-                    </span>
-                  </div>
+                {/* 3D Realistic Physical Book Component */}
+                <div className="w-full flex justify-center py-2 sm:py-3 relative select-none">
+                  <Book
+                    title={book.judul}
+                    author={book.penulis}
+                    coverUrl={hasValidCover ? book.cover_url : null}
+                    width={{ sm: 135, md: 155, lg: 172 }}
+                    category={book.kategori}
+                    textured={true}
+                    onError={() => setFailedImages((prev) => ({ ...prev, [book.id]: true }))}
+                  />
                 </div>
 
-                {/* Book Details */}
-                <div className="p-2 sm:p-3 flex-1 flex flex-col justify-between">
+                {/* Book Details Typography Below Cover */}
+                <div className="pt-2 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className={`font-bold text-[11px] sm:text-xs leading-snug line-clamp-2 min-h-[1.75rem] sm:min-h-[2rem] transition-colors ${
-                      isDark ? "text-slate-100 group-hover:text-emerald-300" : "text-stone-800 group-hover:text-emerald-700 font-semibold"
-                    }`}>
+                    {/* Category & Format Tags */}
+                    <div className="flex items-center justify-between gap-1 mb-1.5">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate max-w-[105px]">
+                        {book.kategori || "Umum"}
+                      </span>
+                      {hasEbook ? (
+                        <span className="inline-flex items-center gap-1 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          <Laptop className="w-2.5 h-2.5" />
+                          <span>E-Book</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                          <Library className="w-2.5 h-2.5" />
+                          <span>Fisik</span>
+                        </span>
+                      )}
+                    </div>
+
+                    <h3 className="font-bold text-xs sm:text-[14px] leading-snug line-clamp-2 text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                       {book.judul}
                     </h3>
-                    <p className={`text-[9px] sm:text-[10px] mt-0.5 flex items-center gap-1 line-clamp-1 font-normal ${
-                      isDark ? "text-slate-400" : "text-stone-500"
-                    }`}>
-                      <User className={`w-2.5 h-2.5 shrink-0 ${isDark ? "text-emerald-400/80" : "text-emerald-700/80"}`} />
-                      <span className="truncate">{book.penulis}</span>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate flex items-center gap-1.5 font-medium">
+                      <User className="w-3 h-3 text-sky-500 shrink-0" />
+                      <span>{book.penulis}</span>
                     </p>
                   </div>
 
-                  <div className={`mt-2 pt-1.5 border-t ${isDark ? "border-slate-800/80" : "border-[#f0ece4]"}`}>
+                  <div className="pt-2 flex items-center justify-between text-[11px] border-t border-slate-100 dark:border-white/5 mt-2">
                     {hasEbook ? (
-                      <div className="flex items-center gap-1">
-                        <Link
-                          href={`/buku/${book.id}/baca`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex-1 min-w-0 py-1 px-1.5 rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-[9px] sm:text-[10px] flex items-center justify-center gap-1 shadow-xs active:scale-95 transition-all truncate"
-                          title="Buka dan baca e-book ini secara langsung"
-                        >
-                          <FileText className="w-2.5 h-2.5 shrink-0 text-white" />
-                          <span className="truncate">Baca E-Book</span>
-                        </Link>
-                        <span className={`p-1 rounded-md border shrink-0 flex items-center justify-center ${
-                          isDark
-                            ? "bg-slate-800/80 text-slate-400 hover:text-emerald-400 border-slate-700/60"
-                            : "bg-[#faf8f4] text-stone-600 hover:text-emerald-700 border-[#e5e1d7]"
-                        }`}>
-                          <Info className="w-2.5 h-2.5" />
-                        </span>
-                      </div>
+                      <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 font-semibold text-[10px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
+                        <span>Online Instan</span>
+                      </span>
                     ) : (
-                      <div className="flex items-center justify-between text-[9px] sm:text-[10px]">
-                        <span className={`truncate ${isDark ? "text-slate-400" : "text-stone-500"}`}>
-                          Stok: <strong className={`font-bold ${isDark ? "text-emerald-400" : "text-emerald-700"}`}>{book.stok_tersedia}</strong>/{book.stok_total}
-                        </span>
-                        <span className={`font-bold inline-flex items-center gap-0.5 shrink-0 group-hover:translate-x-0.5 transition-transform ${
-                          isDark ? "text-emerald-400" : "text-emerald-700"
-                        }`}>
-                          Detail <Info className="w-2.5 h-2.5" />
-                        </span>
-                      </div>
+                      <span className={`inline-flex items-center gap-1 font-semibold text-[10px] ${
+                        isReady ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${isReady ? "bg-emerald-500" : "bg-rose-500"}`} />
+                        <span>{isReady ? `${book.stok_tersedia} Siap` : "Dipinjam"}</span>
+                      </span>
                     )}
+
+                    <span className="inline-flex items-center gap-1 text-amber-500 font-bold text-[10px]">
+                      <Star className="w-2.5 h-2.5 fill-amber-400" />
+                      <span>{avg}</span>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -762,113 +753,182 @@ export default function KatalogBukuClient({
           })}
         </div>
 
+        {/* Pagination Controls */}
+        {filteredBuku.length > 0 && totalPages > 1 && (
+          <div className={`mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl border ${
+            isDark
+              ? "bg-[#111218]/80 border-white/10"
+              : "bg-white/90 border-slate-200/90 shadow-xs"
+          }`}>
+            <div className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              Menampilkan <span className={`font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
+                {(validCurrentPage - 1) * itemsPerPage + 1} - {Math.min(validCurrentPage * itemsPerPage, filteredBuku.length)}
+              </span> dari <span className={`font-bold ${isDark ? "text-sky-400" : "text-sky-600"}`}>
+                {filteredBuku.length}
+              </span> judul buku
+            </div>
+
+            <div className="flex items-center gap-1.5 flex-wrap justify-center select-none">
+              <button
+                type="button"
+                onClick={() => handlePageChange(validCurrentPage - 1)}
+                disabled={validCurrentPage === 1}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-white/[0.04] text-slate-200 hover:bg-white/[0.08] border-white/10"
+                    : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                }`}
+                title="Halaman Sebelumnya"
+              >
+                <ChevronLeft className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Sebelumnya</span>
+              </button>
+
+              {pageNumbers.map((p, idx) =>
+                typeof p === "number" ? (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handlePageChange(p)}
+                    className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      validCurrentPage === p
+                        ? "bg-sky-500 text-white shadow-md shadow-sky-500/25 scale-105"
+                        : isDark
+                        ? "text-slate-300 hover:text-white bg-white/[0.03] hover:bg-white/[0.07] border border-white/10"
+                        : "text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ) : (
+                  <span key={idx} className="px-1 text-slate-400 font-mono text-xs select-none">
+                    ...
+                  </span>
+                )
+              )}
+
+              <button
+                type="button"
+                onClick={() => handlePageChange(validCurrentPage + 1)}
+                disabled={validCurrentPage === totalPages}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer shadow-2xs disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDark
+                    ? "bg-white/[0.04] text-slate-200 hover:bg-white/[0.08] border-white/10"
+                    : "bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200"
+                }`}
+                title="Halaman Selanjutnya"
+              >
+                <span className="hidden sm:inline">Selanjutnya</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <div className={`hidden sm:flex items-center gap-2 text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+              <span>Per halaman:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className={`px-2 py-1 rounded-xl border text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-sky-500 cursor-pointer ${
+                  isDark
+                    ? "bg-slate-900 text-slate-200 border-white/10"
+                    : "bg-white text-slate-800 border-slate-200"
+                }`}
+              >
+                <option value={15}>15 buku</option>
+                <option value={20}>20 buku</option>
+                <option value={30}>30 buku</option>
+                <option value={50}>50 buku</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {/* Empty State */}
         {filteredBuku.length === 0 && (
-          <div className="text-center py-12 sm:py-16 bg-slate-900/60 rounded-3xl border border-dashed border-slate-800 p-6 sm:p-8 backdrop-blur-md">
-            <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-3 shadow-inner">
-              <BookOpen className="w-7 h-7 sm:w-8 sm:h-8" />
+          <div className="text-center py-16 rounded-3xl border border-dashed border-slate-300 dark:border-slate-800 p-8">
+            <div className="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center mx-auto mb-3">
+              <BookOpen className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-slate-100 text-base">Tidak Ada Buku Ditemukan</h3>
-            <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-              Kata kunci &ldquo;{searchTerm}&rdquo; tidak cocok dengan judul atau nama penulis mana pun.
+            <h3 className="font-bold text-slate-900 dark:text-white text-base">Tidak Ada Buku Ditemukan</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+              Tidak ada koleksi buku fisik maupun e-book yang cocok dengan kata kunci &ldquo;{searchTerm}&rdquo;.
             </p>
             <button
               onClick={() => {
                 setSearchTerm("");
-                setFilterStok("ALL");
+                setActiveCategory("ALL");
               }}
-              className="mt-4 px-4 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 text-xs font-bold rounded-xl hover:from-emerald-400 hover:to-teal-400 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+              className="mt-4 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold rounded-xl transition-all cursor-pointer"
             >
-              Hapus Filter &amp; Tampilkan Semua
+              Reset Filter &amp; Pencarian
             </button>
           </div>
         )}
       </main>
 
-      {/* Book Detail & Review Modal (Mobile Bottom-Sheet on small screens) */}
+      {/* Book Detail & Reviews Modal */}
       {selectedBook && (
-        <div className={`fixed inset-0 z-50 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-pop ${
-          isDark ? "bg-slate-950/80" : "bg-slate-900/50"
-        }`}>
-          <div className={`rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-4 sm:p-7 shadow-2xl border relative max-h-[86dvh] sm:max-h-[88vh] overflow-y-auto overscroll-contain ring-1 pb-safe pb-6 sm:pb-7 transition-colors duration-200 ${
+        <div className="fixed inset-0 z-50 backdrop-blur-xl bg-black/75 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-200">
+          <div className={`rounded-t-3xl sm:rounded-3xl max-w-lg w-full p-5 sm:p-7 shadow-2xl border relative max-h-[88dvh] sm:max-h-[90vh] overflow-y-auto ${
             isDark
-              ? "bg-slate-900 text-slate-100 border-slate-800 ring-emerald-500/20"
-              : "bg-white text-slate-900 border-slate-200 ring-emerald-500/10 shadow-2xl"
+              ? "bg-[#111218] border-white/10 text-slate-100 shadow-black"
+              : "bg-white border-slate-200 text-slate-900"
           }`}>
-            {/* Mobile drag handle */}
-            <div className={`w-12 h-1 rounded-full mx-auto mb-3 sm:hidden ${isDark ? "bg-slate-700" : "bg-slate-300"}`} />
-
             <button
               onClick={() => setSelectedBook(null)}
-              className={`absolute top-3 right-3 sm:top-4 sm:right-4 p-2 rounded-full transition-colors cursor-pointer z-10 ${
-                isDark
-                  ? "text-slate-400 hover:text-white bg-slate-800/70 hover:bg-slate-800"
-                  : "text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200"
-              }`}
+              className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer z-10"
               title="Tutup Modal"
             >
               <X className="w-5 h-5" />
             </button>
 
-            {/* Modal Header / Book Info */}
-            <div className="flex gap-3.5 sm:gap-4">
-              <div className={`w-20 h-28 sm:w-24 sm:h-34 rounded-xl overflow-hidden shrink-0 border shadow-xl flex items-center justify-center ${
-                isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
-              }`}>
-                {selectedBook.cover_url ? (
-                  <img
-                    src={selectedBook.cover_url}
-                    alt={selectedBook.judul}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-emerald-500 bg-emerald-500/10">
-                    <BookOpen className="w-8 h-8" />
-                  </div>
-                )}
+            {/* Header / Book Info */}
+            <div className="flex gap-4">
+              <div className="shrink-0 select-none">
+                <Book
+                  title={selectedBook.judul}
+                  author={selectedBook.penulis}
+                  coverUrl={selectedBook.cover_url && !failedImages[selectedBook.id] ? selectedBook.cover_url : null}
+                  width={112}
+                  textured={true}
+                />
               </div>
 
-              <div className="flex-1 space-y-1.5 min-w-0">
+              <div className="flex-1 space-y-2 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  {(selectedBook.is_ebook || selectedBook.file_url) && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950 shadow-sm">
-                      <Laptop className="w-3 h-3" />
+                  {(selectedBook.is_ebook || selectedBook.file_url) ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-sky-600 text-white shadow-xs">
+                      <Laptop className="w-2.5 h-2.5" />
                       E-Book Online
                     </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-emerald-600 text-white shadow-xs">
+                      <Library className="w-2.5 h-2.5" />
+                      Buku Fisik
+                    </span>
                   )}
-                  <span
-                    className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
-                      selectedBook.stok_tersedia > 0
-                        ? isDark
-                          ? "bg-emerald-950/70 text-emerald-300 border-emerald-500/30"
-                          : "bg-emerald-50 text-emerald-700 border-emerald-300"
-                        : isDark
-                          ? "bg-rose-950/70 text-rose-300 border-rose-500/30"
-                          : "bg-rose-50 text-rose-700 border-rose-300"
-                    }`}
-                  >
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md ${
+                    selectedBook.stok_tersedia > 0 ? "bg-emerald-500/15 text-emerald-500" : "bg-rose-500/15 text-rose-500"
+                  }`}>
                     {selectedBook.stok_tersedia > 0 ? "Fisik Tersedia" : "Fisik Habis"}
                   </span>
-                  <span className={`text-xs font-bold flex items-center gap-0.5 border px-2 py-0.5 rounded-full ${
-                    isDark
-                      ? "text-amber-300 bg-amber-950/60 border-amber-500/30"
-                      : "text-amber-800 bg-amber-50 border-amber-300"
-                  }`}>
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    {getBookRatingInfo(selectedBook.id).avg}
+                  <span className="text-[10px] font-bold flex items-center gap-1 text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-md">
+                    <Star className="w-3 h-3 fill-amber-400" />
+                    <span>{getBookRatingInfo(selectedBook.id).avg}</span>
                   </span>
                 </div>
 
-                <h3 className={`font-bold text-sm sm:text-base leading-snug line-clamp-2 ${
-                  isDark ? "text-white" : "text-slate-900"
-                }`}>
+                <h3 className="font-black text-sm sm:text-base leading-snug line-clamp-2 text-slate-900 dark:text-white">
                   {selectedBook.judul}
                 </h3>
-                <p className={`text-[11px] sm:text-xs truncate ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-                  Penulis: <strong className={isDark ? "text-slate-200" : "text-slate-800"}>{selectedBook.penulis}</strong>
+                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  Penulis: <strong className="text-slate-800 dark:text-slate-200">{selectedBook.penulis}</strong>
                 </p>
-                <p className={`text-[10px] sm:text-[11px] ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-                  Stok Fisik: <strong className="text-emerald-500">{selectedBook.stok_tersedia}</strong> / {selectedBook.stok_total} buku
+                <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                  Stok Fisik: <strong className="text-sky-500 font-bold">{selectedBook.stok_tersedia}</strong> / {selectedBook.stok_total} buku
                 </p>
               </div>
             </div>
@@ -878,24 +938,23 @@ export default function KatalogBukuClient({
               <div className="mt-4 pt-1">
                 <Link
                   href={`/buku/${selectedBook.id}/baca`}
-                  className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 active:scale-[0.98] transition-all"
+                  className="w-full py-3 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-600/25 active:scale-[0.99] transition-all"
                 >
-                  <BookOpen className="w-4 h-4 text-slate-950" />
-                  <span>BACA E-BOOK ONLINE SEKARANG</span>
-                  <ArrowRight className="w-4 h-4 text-slate-950" />
+                  <BookOpen className="w-4 h-4" />
+                  <span>Buka &amp; Baca E-Book Sekarang</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             )}
 
-            {/* Share to WhatsApp & Copy Link Action Row */}
-            <div className="mt-3.5 flex items-center gap-2">
+            {/* Share WhatsApp & Copy Link */}
+            <div className="mt-3 flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleShareWhatsApp}
                 className="flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
-                title="Bagikan rekomendasi buku ini ke grup WhatsApp"
               >
-                <Share2 className="w-3.5 h-3.5 text-white shrink-0" />
+                <Share2 className="w-3.5 h-3.5" />
                 <span>Bagikan ke WhatsApp</span>
               </button>
               
@@ -906,247 +965,184 @@ export default function KatalogBukuClient({
                   copiedLink
                     ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
                     : isDark
-                      ? "bg-slate-800/80 hover:bg-slate-700 border-slate-700 text-slate-300"
+                      ? "bg-white/[0.06] hover:bg-white/[0.1] border-white/10 text-slate-300"
                       : "bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700"
                 }`}
-                title="Salin Tautan Buku"
               >
-                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" /> : <Copy className="w-3.5 h-3.5 shrink-0" />}
+                {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 <span className="hidden sm:inline">{copiedLink ? "Tersalin!" : "Salin Link"}</span>
               </button>
             </div>
 
-            {/* Modal Navigation Tabs */}
-            <div className={`mt-4 sm:mt-5 border-b flex items-center gap-4 ${
-              isDark ? "border-slate-800" : "border-slate-200"
-            }`}>
+            {/* Tabs */}
+            <div className="mt-5 border-b border-slate-200 dark:border-white/10 flex items-center gap-4">
               <button
                 onClick={() => setActiveModalTab("INFO")}
-                className={`pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer ${
+                className={`pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeModalTab === "INFO"
-                    ? "border-emerald-500 text-emerald-500"
-                    : isDark
-                      ? "border-transparent text-slate-400 hover:text-slate-200"
-                      : "border-transparent text-slate-500 hover:text-slate-900"
+                    ? "border-sky-500 text-sky-500"
+                    : "border-transparent text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
-                Info Pinjam &amp; Rak
+                <Library className="w-3.5 h-3.5" />
+                <span>Info Pinjam &amp; Rak Fisik</span>
               </button>
               <button
                 onClick={() => setActiveModalTab("REVIEWS")}
                 className={`pb-2.5 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeModalTab === "REVIEWS"
-                    ? "border-emerald-500 text-emerald-500"
-                    : isDark
-                      ? "border-transparent text-slate-400 hover:text-slate-200"
-                      : "border-transparent text-slate-500 hover:text-slate-900"
+                    ? "border-sky-500 text-sky-500"
+                    : "border-transparent text-slate-400 hover:text-slate-900 dark:hover:text-white"
                 }`}
               >
                 <MessageSquare className="w-3.5 h-3.5" />
-                <span>Ulasan ({(ulasanMap[selectedBook.id] || []).length})</span>
+                <span>Ulasan Pembaca ({(ulasanMap[selectedBook.id] || []).length})</span>
               </button>
             </div>
 
             {/* Tab 1: Info Peminjaman */}
             {activeModalTab === "INFO" && (
-              <div className="pt-4 space-y-3.5 animate-in fade-in duration-150">
-                <div className="grid grid-cols-2 gap-2.5 text-center">
-                  <div className={`p-3 rounded-2xl border ${
-                    isDark ? "bg-slate-950/80 border-slate-800" : "bg-slate-50 border-slate-200"
-                  }`}>
-                    <span className={`text-[10px] block font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>Sisa Stok Fisik</span>
-                    <span className="text-xl sm:text-2xl font-black text-emerald-500">
-                      {selectedBook.stok_tersedia}
-                    </span>
-                  </div>
-                  <div className={`p-3 rounded-2xl border ${
-                    isDark ? "bg-slate-950/80 border-slate-800" : "bg-slate-50 border-slate-200"
-                  }`}>
-                    <span className={`text-[10px] block font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>Total Stok Buku</span>
-                    <span className={`text-xl sm:text-2xl font-black ${isDark ? "text-slate-200" : "text-slate-800"}`}>
-                      {selectedBook.stok_total}
-                    </span>
-                  </div>
-                </div>
-
-                <div className={`border rounded-2xl p-3.5 sm:p-4 ${
-                  isDark
-                    ? "bg-emerald-950/40 border-emerald-500/30"
-                    : "bg-emerald-50 border-emerald-200"
+              <div className="pt-4 space-y-3.5">
+                <div className={`p-4 rounded-2xl border flex items-center gap-3.5 ${
+                  isDark ? "bg-white/[0.03] border-white/10" : "bg-slate-50 border-slate-200"
                 }`}>
-                  <p className={`text-xs font-bold flex items-center gap-1.5 mb-2 ${
-                    isDark ? "text-emerald-300" : "text-emerald-800"
-                  }`}>
-                    <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-emerald-500" />
-                    Lokasi Rak Fisik Perpustakaan
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="shrink-0 w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex flex-col items-center justify-center shadow-inner">
-                      <span className="text-[8px] sm:text-[9px] text-emerald-500 font-bold leading-none">RAK</span>
-                      <span className={`text-lg sm:text-xl font-black leading-none mt-0.5 ${
-                        isDark ? "text-emerald-300" : "text-emerald-700"
-                      }`}>
-                        {selectedBook.rakNama?.replace(/[^0-9]/g, "") || "?"}
-                      </span>
-                    </div>
-                    <div className="min-w-0">
-                      <p className={`text-xs sm:text-sm font-bold truncate ${
-                        isDark ? "text-white" : "text-slate-900"
-                      }`}>
-                        {selectedBook.rakNama ?? "Belum ditentukan"}
-                      </p>
-                      <p className={`text-[10px] sm:text-[11px] font-medium ${
-                        isDark ? "text-emerald-300/80" : "text-emerald-700"
-                      }`}>
-                        Klasifikasi: <strong className={`font-mono ${isDark ? "text-emerald-200" : "text-emerald-800"}`}>{selectedBook.klasifikasi ?? "—"}</strong>
-                      </p>
-                    </div>
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-sky-500/15 text-sky-500 flex flex-col items-center justify-center font-bold">
+                    <span className="text-[8px] uppercase">RAK</span>
+                    <span className="text-base font-black">{selectedBook.rakNama?.replace(/[^0-9]/g, "") || "1"}</span>
                   </div>
-                </div>
-
-                <div className={`border rounded-2xl p-3.5 text-[11px] flex items-start gap-2.5 ${
-                  isDark
-                    ? "bg-cyan-950/30 border-cyan-500/30 text-cyan-200"
-                    : "bg-sky-50 border-sky-200 text-sky-800"
-                }`}>
-                  <Info className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
                   <div>
-                    <p className={`font-bold mb-0.5 ${isDark ? "text-cyan-100" : "text-sky-900"}`}>Panduan Peminjaman:</p>
-                    <p className={`leading-relaxed text-[10px] sm:text-[11px] ${isDark ? "text-cyan-200/80" : "text-sky-700"}`}>
-                      Siswa dapat langsung membawa kartu anggota atau NISN ke meja sirkulasi perpustakaan atau melakukan pinjam mandiri di kios digital.
+                    <p className="text-sm font-bold text-slate-900 dark:text-white">
+                      {selectedBook.rakNama ?? "Sirkulasi Utama"}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                      Klasifikasi DDC: <strong className="font-mono text-slate-800 dark:text-slate-200">{selectedBook.klasifikasi ?? "—"}</strong>
                     </p>
                   </div>
+                </div>
+
+                <div className={`p-3.5 rounded-2xl border text-xs flex items-start gap-2.5 ${
+                  isDark ? "bg-sky-500/10 border-sky-500/20 text-sky-300" : "bg-sky-50 border-sky-200 text-sky-800"
+                }`}>
+                  <Info className="w-4 h-4 text-sky-500 shrink-0 mt-0.5" />
+                  <p className="leading-relaxed text-[11px]">
+                    Siswa dapat meminjam buku fisik secara langsung di meja sirkulasi perpustakaan atau melakukan peminjaman mandiri menggunakan kartu siswa di kios presensi perpustakaan.
+                  </p>
                 </div>
               </div>
             )}
 
             {/* Tab 2: Rating & Ulasan */}
             {activeModalTab === "REVIEWS" && (
-              <div className="pt-4 space-y-4 animate-in fade-in duration-150">
+              <div className="pt-4 space-y-4">
                 {reviewSuccess && (
-                  <div className={`p-3 border rounded-2xl text-xs flex items-center gap-2 shadow-inner ${
-                    isDark
-                      ? "bg-emerald-950/60 border-emerald-500/40 text-emerald-300"
-                      : "bg-emerald-50 border-emerald-300 text-emerald-800"
-                  }`}>
-                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-500" />
+                  <div className="p-3 border rounded-xl text-xs flex items-center gap-2 bg-emerald-500/15 border-emerald-500/30 text-emerald-400">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
                     <span>Terima kasih! Ulasan Anda berhasil ditambahkan.</span>
                   </div>
                 )}
 
-                {/* Form Tulis Ulasan */}
-                <form onSubmit={handleAddReview} className={`border rounded-2xl p-3.5 sm:p-4 space-y-3 ${
-                  isDark ? "bg-slate-950/80 border-slate-800" : "bg-slate-50 border-slate-200"
+                <form onSubmit={handleAddReview} className={`border rounded-2xl p-3.5 space-y-3 ${
+                  isDark ? "bg-white/[0.03] border-white/10" : "bg-slate-50 border-slate-200"
                 }`}>
-                  <h4 className={`text-xs font-bold flex items-center gap-1.5 ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}>
+                  <h4 className="text-xs font-bold flex items-center gap-1.5 text-slate-900 dark:text-white">
                     <ThumbsUp className="w-3.5 h-3.5 text-emerald-500" />
-                    Beri Rating &amp; Ulasan Buku
+                    Beri Ulasan Buku
                   </h4>
 
-                  {/* Star Selector */}
-                  <div>
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setNewRating(star)}
-                          className="p-1 text-slate-400 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
-                        >
-                          <Star
-                            className={`w-5 h-5 ${
-                              star <= newRating ? "fill-amber-400 text-amber-400" : isDark ? "text-slate-700" : "text-slate-300"
-                            }`}
-                          />
-                        </button>
-                      ))}
-                      <span className="text-xs font-bold text-amber-500 ml-2">
-                        {newRating} / 5 Bintang
-                      </span>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setNewRating(star)}
+                        className="p-1 text-slate-400 hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                      >
+                        <Star
+                          className={`w-5 h-5 ${
+                            star <= newRating ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-700"
+                          }`}
+                        />
+                      </button>
+                    ))}
+                    <span className="text-xs font-bold text-amber-500 ml-2">
+                      {newRating} / 5
+                    </span>
+                  </div>
+
+                  <input
+                    type="text"
+                    placeholder="Nama Anda (contoh: Siti - XII PPLG 1)"
+                    value={newReviewerName}
+                    onChange={(e) => setNewReviewerName(e.target.value)}
+                    className="w-full text-xs h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+                    required
+                  />
+
+                  <textarea
+                    placeholder="Tulis ulasan Anda mengenai buku ini..."
+                    value={newKomentar}
+                    onChange={(e) => setNewKomentar(e.target.value)}
+                    rows={2}
+                    className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 resize-none"
+                    required
+                  />
+
+                  {reviewError && (
+                    <div className="p-2.5 rounded-xl border text-xs text-rose-500 border-rose-500/20 bg-rose-500/10">
+                      {reviewError}
                     </div>
-                  </div>
-
-                  {/* Reviewer Name */}
-                  <div>
-                    <input
-                      type="text"
-                      placeholder="Nama Anda (contoh: Siti - 9A)"
-                      value={newReviewerName}
-                      onChange={(e) => setNewReviewerName(e.target.value)}
-                      className={`w-full text-xs h-9 px-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                        isDark
-                          ? "border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500"
-                          : "border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
-                      }`}
-                      required
-                    />
-                  </div>
-
-                  {/* Review Comment */}
-                  <div>
-                    <textarea
-                      placeholder="Tulis ulasan atau kesanmu setelah membaca buku ini..."
-                      value={newKomentar}
-                      onChange={(e) => setNewKomentar(e.target.value)}
-                      rows={2}
-                      className={`w-full text-xs p-2.5 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none ${
-                        isDark
-                          ? "border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500"
-                          : "border-slate-300 bg-white text-slate-900 placeholder:text-slate-400"
-                      }`}
-                      required
-                    />
-                  </div>
+                  )}
 
                   <div className="flex justify-end">
-                    <Button type="submit" size="sm" className="text-xs h-8.5 px-4 cursor-pointer rounded-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 shadow-md shadow-emerald-500/20">
-                      <Send className="w-3 h-3 mr-1.5 text-slate-950" />
-                      Kirim Ulasan
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={submittingReview}
+                      className="text-xs h-8 px-4 font-bold bg-sky-600 hover:bg-sky-500 text-white rounded-xl shadow-xs disabled:opacity-50"
+                    >
+                      {submittingReview ? (
+                        <>
+                          <Loader2 className="w-3 h-3 mr-1.5 animate-spin" />
+                          Mengirim...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-3 h-3 mr-1.5" />
+                          Kirim Ulasan
+                        </>
+                      )}
                     </Button>
                   </div>
                 </form>
 
-                {/* List Ulasan Siswa */}
+                {/* Reviews List */}
                 <div className="space-y-2.5">
-                  <h4 className={`text-xs font-bold ${isDark ? "text-slate-300" : "text-slate-700"}`}>
-                    Ulasan Pembaca ({(ulasanMap[selectedBook.id] || []).length}):
-                  </h4>
-
                   {(ulasanMap[selectedBook.id] || []).map((rev) => (
-                    <div key={rev.id} className={`p-3.5 border rounded-2xl space-y-1.5 ${
-                      isDark ? "bg-slate-950/60 border-slate-800" : "bg-slate-50 border-slate-200"
+                    <div key={rev.id} className={`p-3 rounded-xl border space-y-1 ${
+                      isDark ? "bg-white/[0.02] border-white/5" : "bg-slate-50 border-slate-200"
                     }`}>
                       <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-500 border border-emerald-500/30 font-bold text-[10px] flex items-center justify-center">
-                            {rev.nama.charAt(0).toUpperCase()}
-                          </div>
-                          <span className={`text-xs font-bold truncate ${isDark ? "text-slate-200" : "text-slate-800"}`}>{rev.nama}</span>
-                        </div>
-                        <span className={`text-[10px] ${isDark ? "text-slate-500" : "text-slate-400"}`}>{rev.tanggal}</span>
+                        <span className="text-xs font-bold text-slate-900 dark:text-slate-100">{rev.nama}</span>
+                        <span className="text-[10px] text-slate-400">{rev.tanggal}</span>
                       </div>
-
                       <div className="flex items-center gap-0.5">
                         {[1, 2, 3, 4, 5].map((s) => (
                           <Star
                             key={s}
                             className={`w-3 h-3 ${
-                              s <= rev.rating ? "fill-amber-400 text-amber-400" : isDark ? "text-slate-800" : "text-slate-200"
+                              s <= rev.rating ? "fill-amber-400 text-amber-400" : "text-slate-300 dark:text-slate-800"
                             }`}
                           />
                         ))}
                       </div>
-
-                      <p className={`text-[11px] sm:text-xs leading-relaxed pt-0.5 ${isDark ? "text-slate-300" : "text-slate-600"}`}>
+                      <p className="text-[11px] text-slate-600 dark:text-slate-300 pt-0.5">
                         &ldquo;{rev.komentar}&rdquo;
                       </p>
                     </div>
                   ))}
 
                   {(!ulasanMap[selectedBook.id] || ulasanMap[selectedBook.id].length === 0) && (
-                    <p className={`text-xs text-center py-4 italic ${isDark ? "text-slate-500" : "text-slate-400"}`}>
+                    <p className="text-xs text-center py-4 italic text-slate-400">
                       Belum ada ulasan untuk buku ini. Jadilah yang pertama memberikan ulasan!
                     </p>
                   )}
@@ -1157,36 +1153,20 @@ export default function KatalogBukuClient({
         </div>
       )}
 
-      {/* Footer */}
-      <footer className={`border-t pt-8 pb-28 sm:pt-10 sm:pb-24 mt-8 sm:mt-12 text-center text-xs relative z-10 transition-colors duration-300 ${
-        isDark ? "bg-slate-900 border-slate-800/80 text-slate-400" : "bg-slate-100 border-slate-200 text-slate-600"
-      }`}>
-        <div className="flex items-center justify-center gap-2 mb-2">
-          <img src="/assets/logo.png" alt="SMK Negeri 1 Beringin" className="w-5 h-5 sm:w-6 sm:h-6 object-contain opacity-90" />
-          <img src="/assets/logo-kolaborasi.png" alt="Kolaborasi Sumut Berkah" className="h-4 sm:h-5 w-auto object-contain opacity-90" />
-          <span className={`font-bold text-[11px] sm:text-xs ${isDark ? "text-slate-300" : "text-slate-700"}`}>Perpustakaan Digital SMK Negeri 1 Beringin</span>
+      {/* Official Footer with Both School Logo and Kolaborasi Sumut Berkah */}
+      <footer className="border-t border-slate-200 dark:border-white/10 py-10 mt-16 text-center text-xs text-slate-500 relative z-10">
+        <div className="flex items-center justify-center gap-2.5 mb-2">
+          <img src="/assets/logo.png" alt="SMK Negeri 1 Beringin" className="w-6 h-6 object-contain opacity-90" />
+          <img src="/assets/logo-kolaborasi.png" alt="Kolaborasi Sumut Berkah" className="h-5 w-auto object-contain opacity-90" />
+          <span className="font-bold text-slate-800 dark:text-slate-200">Perpustakaan Digital SMK Negeri 1 Beringin</span>
         </div>
-        <p className={`text-[11px] sm:text-xs ${isDark ? "text-slate-400" : "text-slate-600"}`}>
-          © {new Date().getFullYear()} Hak Cipta Dilindungi Undang-Undang. Seluruh hak cipta dan lisensi perangkat lunak dilindungi secara eksklusif.
-        </p>
-        <p className={`text-[10px] sm:text-[11px] mt-2 flex flex-wrap items-center justify-center gap-1.5 ${isDark ? "text-slate-500" : "text-slate-500"}`}>
-          <span>Dibuat &amp; Dikembangkan oleh</span>
-          <a
-            href="https://instagram.com/dprxz_"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-500 dark:hover:text-emerald-300 transition-colors underline decoration-emerald-500/30"
-          >
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-              <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-            </svg>
-            <span>Dika Armadana (@dprxz_)</span>
-          </a>
+        <p className="text-[11px] text-slate-400">
+          © {new Date().getFullYear()} Perpustakaan SMK Negeri 1 Beringin. Hak cipta dilindungi.
         </p>
       </footer>
 
       {/* Floating AI Pustakawan Widget */}
-      <PustakawanAiWidget isDark={isDark} onSelectBook={handleSelectBookFromAi} />
+      <PustakawanAiWidget onSelectBook={handleSelectBookFromAi} />
     </div>
   );
 }

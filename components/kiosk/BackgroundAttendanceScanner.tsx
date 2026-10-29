@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { createKunjunganByScan } from "@/actions/kunjungan";
 import { speak } from "@/lib/voice";
-import { CheckCircle2, UserCheck, AlertCircle, X, Sparkles } from "lucide-react";
+import { CheckCircle2, UserCheck, AlertCircle, X } from "lucide-react";
 
 /**
  * Cek apakah sebuah kode adalah barcode/ISBN buku.
@@ -327,7 +327,7 @@ export default function BackgroundAttendanceScanner() {
                   : "bg-rose-500/20 text-rose-300"
               }`}
             >
-              <Sparkles className="w-3 h-3" />
+              <UserCheck className="w-3 h-3" />
               Presensi Otomatis
             </span>
           </div>

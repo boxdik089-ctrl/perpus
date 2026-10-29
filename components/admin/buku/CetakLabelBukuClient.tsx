@@ -8,7 +8,6 @@ import {
   Download,
   CheckSquare,
   Square,
-  Sparkles,
   Layers,
   Settings2,
   RefreshCw,
@@ -615,7 +614,7 @@ export function CetakLabelBukuClient({
   return (
     <div className="space-y-6">
       {/* Action Header Card */}
-      <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl p-4 sm:p-6 rounded-3xl border border-stone-200/90 dark:border-slate-800 shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <span className="p-2 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
@@ -637,7 +636,7 @@ export function CetakLabelBukuClient({
             type="button"
             onClick={handlePrintBrowser}
             disabled={selectedItems.length === 0}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs sm:text-sm shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
             <span>Cetak Langsung ({selectedItems.length})</span>
@@ -663,7 +662,7 @@ export function CetakLabelBukuClient({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: Book Selector (5 Cols) */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-stone-200/90 dark:border-slate-800 shadow-xl p-4 sm:p-5 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-stone-200/80 dark:border-slate-800 pb-3">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -798,7 +797,7 @@ export function CetakLabelBukuClient({
         {/* Right Column: Settings & Live Preview (7 Cols) */}
         <div className="lg:col-span-7 space-y-6">
           {/* Settings Card */}
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-stone-200/90 dark:border-slate-800 shadow-xl p-4 sm:p-5 space-y-4">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-4">
             <div className="flex items-center gap-2 border-b border-stone-200/80 dark:border-slate-800 pb-3">
               <Settings2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <h3 className="font-bold text-sm text-stone-900 dark:text-white">
@@ -926,7 +925,7 @@ export function CetakLabelBukuClient({
           </div>
 
           {/* Live Print Preview Sheet */}
-          <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl border border-stone-200/90 dark:border-slate-800 shadow-xl p-4 sm:p-5 space-y-3">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-4 sm:p-5 space-y-3">
             <div className="flex items-center justify-between border-b border-stone-200/80 dark:border-slate-800 pb-2.5">
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />

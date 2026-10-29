@@ -13,9 +13,11 @@ interface UbahPasswordModalProps {
 
 export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -29,6 +31,7 @@ export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordMod
   if (!isOpen || !mounted) return null;
 
   const handleReset = () => {
+    setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
     setStatus(null);
@@ -44,13 +47,23 @@ export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordMod
     e.preventDefault();
     setStatus(null);
 
+    if (!currentPassword) {
+      setStatus({ type: "error", message: "Password saat ini wajib diisi." });
+      return;
+    }
+
     if (!newPassword || !confirmPassword) {
       setStatus({ type: "error", message: "Harap isi kolom password baru dan konfirmasi." });
       return;
     }
 
-    if (newPassword.length < 6) {
-      setStatus({ type: "error", message: "Password baru minimal harus 6 karakter." });
+    if (newPassword.length < 8) {
+      setStatus({ type: "error", message: "Password baru minimal harus 8 karakter." });
+      return;
+    }
+
+    if (newPassword === currentPassword) {
+      setStatus({ type: "error", message: "Password baru tidak boleh sama dengan password saat ini." });
       return;
     }
 
@@ -63,14 +76,14 @@ export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordMod
 
     try {
       const res = await ubahPasswordAdmin({
+        currentPassword,
         newPassword,
         confirmPassword,
       });
 
       if (res.ok) {
         setStatus({ type: "success", message: res.message });
-        setNewPassword("");
-        setConfirmPassword("");
+        handleReset();
         setTimeout(() => {
           handleClose();
         }, 1800);
@@ -145,6 +158,34 @@ export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordMod
             </div>
           )}
 
+          {/* Current Password Field */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-stone-700 dark:text-slate-300 flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+              <span>Password Saat Ini</span>
+            </label>
+            <div className="relative">
+              <input
+                type={showCurrent ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Masukkan password saat ini"
+                disabled={isLoading}
+                required
+                autoFocus
+                className="w-full h-10 px-3 pr-10 text-xs sm:text-sm rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800/80 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                tabIndex={-1}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone-400 hover:text-stone-600 dark:hover:text-slate-200 cursor-pointer"
+              >
+                {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+
           {/* New Password Field */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-stone-700 dark:text-slate-300 flex items-center gap-1.5">
@@ -156,10 +197,9 @@ export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordMod
                 type={showNew ? "text" : "password"}
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Minimal 6 karakter"
+                placeholder="Minimal 8 karakter kombinasi huruf & angka"
                 disabled={isLoading}
                 required
-                autoFocus
                 className="w-full h-10 px-3 pr-10 text-xs sm:text-sm rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-50 dark:bg-slate-800/80 text-stone-900 dark:text-white placeholder:text-stone-400 dark:placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-sky-500/30 focus:border-sky-500 transition-all"
               />
               <button
@@ -214,7 +254,7 @@ export function UbahPasswordModal({ isOpen, onClose, userName }: UbahPasswordMod
             <button
               type="submit"
               disabled={isLoading}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white text-xs sm:text-sm font-bold shadow-md shadow-sky-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all cursor-pointer"
+              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-semibold shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors cursor-pointer"
             >
               {isLoading ? (
                 <>

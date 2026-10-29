@@ -7,6 +7,9 @@ import ThemeToggle from "@/components/theme/ThemeToggle";
 import { getEksemplarForLabels, getLabelFilterOptions } from "@/actions/label-buku";
 import { CetakLabelBukuClient } from "@/components/admin/buku/CetakLabelBukuClient";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export default async function CetakLabelBukuPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
@@ -18,12 +21,7 @@ export default async function CetakLabelBukuPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 print:bg-white print:text-slate-900 print:min-h-0 relative overflow-x-hidden selection:bg-emerald-500 selection:text-white transition-colors duration-300">
-      {/* Background glowing aurora blobs */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10 print-hidden">
-        <div className="absolute -top-32 -left-20 w-[42rem] h-[42rem] rounded-full bg-emerald-400/20 dark:bg-emerald-600/15 blur-[130px] animate-aurora-1" />
-        <div className="absolute top-1/3 -right-24 w-[40rem] h-[40rem] rounded-full bg-teal-300/25 dark:bg-teal-600/15 blur-[140px] animate-aurora-2" />
-        <div className="absolute -bottom-32 left-1/3 w-[44rem] h-[44rem] rounded-full bg-cyan-300/20 dark:bg-cyan-600/12 blur-[140px] animate-aurora-3" />
-      </div>
+
 
       {/* Top Navbar */}
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs print-hidden">
