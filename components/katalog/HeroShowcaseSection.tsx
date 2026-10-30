@@ -143,9 +143,9 @@ export default function HeroShowcaseSection({
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
           {/* Mobile Open Book Preview - Well proportioned */}
-          <div className="relative w-full max-w-[360px] sm:max-w-[420px] aspect-[1386/1051] flex items-center justify-center my-1 drop-shadow-2xl">
+          <div className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-[1350/1139] flex items-center justify-center my-1 drop-shadow-2xl">
             <img
-              src="/assets/showcase/buku-3d-open-beringin.png?v=3.2"
+              src="/assets/showcase/buku-3d-open-beringin.png?v=5.0"
               alt="Buku Profil SMKN 1 Beringin"
               className="w-full h-full object-contain select-none pointer-events-none"
               draggable={false}
@@ -237,10 +237,10 @@ export default function HeroShowcaseSection({
         </div>
 
         {/* ─── DESKTOP LAYOUT (>=1024px) ─── */}
-        <div className="hidden lg:flex items-center justify-between gap-8 xl:gap-14 w-full">
+        <div className="hidden lg:flex items-center justify-between gap-6 xl:gap-10 2xl:gap-14 w-full">
 
           {/* ═══ LEFT COLUMN: 3D OPEN BOOK SHOWCASE (BALANCED & ELEGANT) ═══ */}
-          <div className="w-[50%] xl:w-[52%] 2xl:w-[54%] max-w-[680px] xl:max-w-[760px] 2xl:max-w-[820px] flex flex-col items-center lg:items-start shrink-0">
+          <div className="w-[50%] xl:w-[52%] 2xl:w-[54%] max-w-[680px] xl:max-w-[760px] 2xl:max-w-[820px] flex flex-col items-center lg:items-start min-w-0 shrink-0">
             <div
               ref={containerRef}
               onMouseMove={handleMouseMove}
@@ -260,7 +260,7 @@ export default function HeroShowcaseSection({
               >
                 {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo */}
                 <img
-                  src="/assets/showcase/buku-3d-open-beringin.png?v=3.2"
+                  src="/assets/showcase/buku-3d-open-beringin.png?v=5.0"
                   alt="Buku Profil Perpustakaan SMKN 1 Beringin"
                   className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
                   draggable={false}
@@ -301,7 +301,7 @@ export default function HeroShowcaseSection({
           </div>
 
           {/* ═══ RIGHT COLUMN: TYPOGRAPHY, STATS, CTAs ═══ */}
-          <div className="w-[50%] xl:w-[48%] 2xl:w-[46%] flex flex-col items-start gap-6 xl:gap-7 shrink-0">
+          <div className="flex-1 min-w-0 max-w-[620px] flex flex-col items-start gap-6 xl:gap-7">
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
