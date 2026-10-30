@@ -166,11 +166,6 @@ export default function HeroShowcaseSection({
 
           {/* Typography */}
           <div className="flex flex-col items-center text-center gap-4 px-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
-              <BookOpen className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-              <span>Perpustakaan Digital SMKN 1 Beringin</span>
-            </div>
-
             <h1 className={`text-4xl sm:text-5xl font-black tracking-tight leading-[1.08] ${
               isDark ? "text-white" : "text-slate-900"
             }`}>
@@ -287,12 +282,6 @@ export default function HeroShowcaseSection({
 
           {/* ═══ RIGHT COLUMN: TYPOGRAPHY, STATS, CTAs ═══ */}
           <div className="flex-1 min-w-0 max-w-[620px] flex flex-col items-start gap-6 xl:gap-7">
-
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
-              <BookOpen className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-              <span>Perpustakaan Digital SMKN 1 Beringin</span>
-            </div>
 
             {/* Main Headline */}
             <h1 className={`text-4xl xl:text-5xl 2xl:text-6xl font-black tracking-tight leading-[1.08] ${
