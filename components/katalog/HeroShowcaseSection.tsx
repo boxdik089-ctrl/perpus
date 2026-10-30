@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
 import Book3DMockup from "./Book3DMockup";
@@ -21,66 +21,6 @@ export default function HeroShowcaseSection({
   const [isHovered, setIsHovered] = useState(false);
   const [mounted, setMounted] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
-
-  // Curated list of iconic library books from the public catalog
-  const catalogFeaturedBooks = useMemo(() => {
-    const defaultFeatured = [
-      {
-        id: "cmvqcdhoy0000lg2p014f0xks",
-        judul: "Atomic Habits",
-        penulis: "James Clear",
-        cover_url: "/uploads/covers/real-atomic-habits.jpg",
-        kategori: "Pengembangan Diri",
-      },
-      {
-        id: "cmvqcdhpb0009lg2ponykgfe6",
-        judul: "Filosofi Teras",
-        penulis: "Henry Manampiring",
-        cover_url: "/uploads/covers/real-filosofi-teras.png",
-        kategori: "Filsafat & Psikologi",
-      },
-      {
-        id: "cmvqcdhps000plg2p4ony20uh",
-        judul: "The Psychology of Money",
-        penulis: "Morgan Housel",
-        cover_url: "/uploads/covers/real-psychology-money.png",
-        kategori: "Keuangan & Bisnis",
-      },
-      {
-        id: "cmvqcdhqr001ulg2padl5wr2b",
-        judul: "Laut Bercerita",
-        penulis: "Leila S. Chudori",
-        cover_url: "/uploads/covers/real-laut-bercerita.jpg",
-        kategori: "Sastra & Fiksi",
-      },
-    ];
-
-    if (!books || books.length === 0) return defaultFeatured;
-
-    const findBook = (query: string) =>
-      books.find((b) => b.judul && b.judul.toLowerCase().includes(query.toLowerCase()));
-
-    const bAtomic = findBook("Atomic Habits");
-    const bFilosofi = findBook("Filosofi Teras");
-    const bPsychology = findBook("Psychology of Money");
-    const bLaut = findBook("Laut Bercerita") || findBook("Bumi Manusia");
-
-    const found = [bAtomic, bFilosofi, bPsychology, bLaut].filter(Boolean);
-    if (found.length >= 3) {
-      return found.map((b) => ({
-        id: b.id,
-        judul: b.judul.split(":")[0],
-        penulis: b.penulis || "Penulis",
-        cover_url: b.cover_url,
-        kategori: b.kategori || "Buku Pilihan",
-      }));
-    }
-
-    return defaultFeatured;
-  }, [books]);
-
-  const [activeBookIndex, setActiveBookIndex] = useState<number>(0);
-  const activeBook = catalogFeaturedBooks[activeBookIndex] || catalogFeaturedBooks[0];
 
   useEffect(() => {
     setMounted(true);
@@ -147,22 +87,6 @@ export default function HeroShowcaseSection({
           <div className="w-full max-w-[420px] sm:max-w-[460px] my-1">
             <Book3DMockup isDark={isDark} />
           </div>
-
-          {/* Active book pill */}
-          <button
-            type="button"
-            onClick={() => onSelectBook?.(activeBook)}
-            className={`group inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold backdrop-blur-md border shadow-xs cursor-pointer active:scale-95 ${
-              isDark ? "bg-white/[0.08] border-white/12 text-slate-200" : "bg-white border-sky-200/80 text-slate-800 shadow-sm"
-            }`}
-          >
-            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse shrink-0" />
-            <span className="truncate max-w-[240px]">
-              <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
-              <span className="opacity-75 font-normal"> — {activeBook.penulis}</span>
-            </span>
-            <ArrowUpRight className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-          </button>
 
           {/* Typography */}
           <div className="flex flex-col items-center text-center gap-4 px-2">
@@ -256,27 +180,6 @@ export default function HeroShowcaseSection({
                   isHovered={isHovered}
                 />
               </div>
-            </div>
-
-            {/* Active book pill under the book */}
-            <div className="mt-3 pl-2">
-              <button
-                type="button"
-                onClick={() => onSelectBook?.(activeBook)}
-                className={`group inline-flex items-center gap-2.5 px-4 py-2 rounded-full text-xs sm:text-sm font-semibold backdrop-blur-md transition-all duration-300 border shadow-md cursor-pointer active:scale-95 ${
-                  isDark
-                    ? "bg-white/[0.08] hover:bg-white/[0.14] border-white/12 text-slate-200 hover:border-sky-400/50 shadow-black/40"
-                    : "bg-white hover:bg-slate-50 border-sky-200/80 text-slate-800 shadow-slate-300/40 hover:border-blue-400"
-                }`}
-                title={`Buka detail dan peminjaman buku ${activeBook.judul}`}
-              >
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse shrink-0" />
-                <span className="truncate max-w-[260px] xl:max-w-[320px]">
-                  <strong className={isDark ? "text-blue-400" : "text-blue-600"}>{activeBook.judul}</strong>
-                  <span className="opacity-75 font-normal"> — {activeBook.penulis}</span>
-                </span>
-                <ArrowUpRight className="w-4 h-4 text-blue-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform shrink-0" />
-              </button>
             </div>
           </div>
 
