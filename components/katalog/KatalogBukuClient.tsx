@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
+import PustakawanAiWidget from "@/components/ai/PustakawanAiWidget";
 import { 
   Search, 
   BookOpen, 
@@ -184,6 +185,18 @@ export default function KatalogBukuClient({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // AI navigation callback
+  const handleSelectBookFromAi = (bookId: string, bookTitle: string) => {
+    const target = initialBuku.find((b) => b.id === bookId);
+    if (target) {
+      setSelectedBook(target);
+      setActiveModalTab("INFO");
+    } else {
+      setSearchTerm(bookTitle);
+      document.getElementById("katalog-section")?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   // URL query sync (?cari= atau ?q=)
   useEffect(() => {
@@ -1151,6 +1164,9 @@ export default function KatalogBukuClient({
           © {new Date().getFullYear()} Perpustakaan SMK Negeri 1 Beringin. Hak cipta dilindungi.
         </p>
       </footer>
+
+      {/* Floating AI Pustakawan Widget */}
+      <PustakawanAiWidget onSelectBook={handleSelectBookFromAi} />
     </div>
   );
 }
