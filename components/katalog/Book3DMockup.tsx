@@ -66,12 +66,77 @@ export default function BookMockup({
         }}
       >
         <div className="relative w-full h-full flex items-center justify-center select-none overflow-visible">
-          {/* Bayangan Lantai Utama di Bawah Buku */}
-          <div
-            className={`absolute bottom-6 w-[88%] max-w-[780px] h-14 blur-2xl rounded-full pointer-events-none transition-opacity duration-300 ${
-              isDark ? "bg-black/55" : "bg-slate-900/25"
-            }`}
-          />
+          {/* Sorot Cahaya Lampu Meja Baca (Reading Spotlight Beam) di Mode Gelap */}
+          {isDark && (
+            <div
+              className="absolute -top-36 left-1/2 -translate-x-1/2 w-[760px] h-[520px] pointer-events-none -z-10 opacity-75 transition-opacity duration-700"
+              style={{
+                background:
+                  "radial-gradient(ellipse 60% 65% at 50% 12%, rgba(224, 242, 254, 0.28) 0%, rgba(56, 189, 248, 0.14) 38%, transparent 72%)",
+                filter: "blur(42px)",
+              }}
+            />
+          )}
+
+          {/* Aura Spotlight Belakang Buku (Stage Lighting di Mode Gelap) */}
+          {isDark && (
+            <div
+              className="absolute -inset-10 pointer-events-none -z-10 blur-[85px] opacity-90 transition-opacity duration-700"
+              style={{
+                background:
+                  "radial-gradient(ellipse 70% 55% at 48% 46%, rgba(37, 99, 235, 0.42) 0%, rgba(56, 189, 248, 0.18) 42%, transparent 75%)",
+              }}
+            />
+          )}
+
+          {/* Partikel Cahaya Halus Suasana Perpustakaan Malam (Ambient Light Motes) */}
+          {isDark && (
+            <div className="absolute inset-0 pointer-events-none -z-10 overflow-visible">
+              {[
+                { top: "16%", left: "18%", delay: 0, duration: 7, size: "w-1.5 h-1.5" },
+                { top: "24%", left: "82%", delay: 2.2, duration: 8.5, size: "w-1 h-1" },
+                { top: "68%", left: "14%", delay: 1.2, duration: 7.5, size: "w-1 h-1" },
+                { top: "42%", left: "88%", delay: 3.1, duration: 9, size: "w-1.5 h-1.5" },
+                { top: "82%", left: "50%", delay: 4.0, duration: 6.5, size: "w-1 h-1" },
+                { top: "30%", left: "54%", delay: 1.8, duration: 8, size: "w-1 h-1" },
+              ].map((mote, i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    y: [-10, 10, -10],
+                    x: [-5, 5, -5],
+                    opacity: [0.2, 0.65, 0.2],
+                  }}
+                  transition={{
+                    duration: mote.duration,
+                    delay: mote.delay,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                  className={`absolute rounded-full bg-sky-200 blur-[0.6px] shadow-[0_0_10px_rgba(56,189,248,0.9)] ${mote.size}`}
+                  style={{ top: mote.top, left: mote.left }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Dual Floor Lighting (Lantai Bercahaya + Contact Shadow) */}
+          {isDark ? (
+            <>
+              {/* Refleksi Permukaan Lantai Halus */}
+              <div
+                className="absolute bottom-2 w-[92%] max-w-[800px] h-16 blur-2xl rounded-full pointer-events-none"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, rgba(56, 189, 248, 0.28) 0%, rgba(37, 99, 235, 0.15) 45%, transparent 75%)",
+                }}
+              />
+              {/* Contact Shadow Pekat */}
+              <div className="absolute bottom-5 w-[84%] max-w-[740px] h-9 bg-black/85 blur-md rounded-full pointer-events-none" />
+            </>
+          ) : (
+            <div className="absolute bottom-6 w-[88%] max-w-[780px] h-14 bg-slate-900/25 blur-2xl rounded-full pointer-events-none transition-opacity duration-300" />
+          )}
 
           <div
             className="relative flex flex-row items-center justify-center max-w-[920px] w-full"
@@ -90,10 +155,11 @@ export default function BookMockup({
             >
               {/* Papan Hardcover Biru Dongker di Belakang Sampul & Tumpukan Kertas */}
               <div
-                className="absolute -inset-y-1.5 -left-1.5 -right-4 bg-[#0B2249] rounded-l-md rounded-r-sm"
-                style={{
-                  boxShadow: "-20px 30px 45px rgba(10, 25, 50, 0.38)",
-                }}
+                className={`absolute -inset-y-1.5 -left-1.5 -right-4 bg-[#0B2249] rounded-l-md rounded-r-sm transition-all duration-300 ${
+                  isDark
+                    ? "border-l border-t border-b border-sky-400/30 shadow-[0_0_30px_rgba(37,99,235,0.4),-15px_25px_45px_rgba(0,0,0,0.85)]"
+                    : "shadow-[-20px_30px_45px_rgba(10,25,50,0.38)]"
+                }`}
               />
 
               {/* Ketebalan Blok Kertas Sisi Kanan Sampul (Efek Lembaran Kertas) */}
@@ -119,7 +185,13 @@ export default function BookMockup({
               />
 
               {/* Permukaan Utama Sampul Depan */}
-              <div className="relative w-full h-full bg-white rounded-l-[4px] rounded-r-[2px] overflow-hidden flex flex-col border border-slate-200/80 z-20 shadow-inner">
+              <div
+                className={`relative w-full h-full bg-white rounded-l-[4px] rounded-r-[2px] overflow-hidden flex flex-col border z-20 shadow-inner transition-colors duration-300 ${
+                  isDark
+                    ? "border-sky-500/30 shadow-[0_0_20px_rgba(37,99,235,0.2)]"
+                    : "border-slate-200/80"
+                }`}
+              >
                 {/* Lekukan Engsel Hardcover Kiri (Groove) */}
                 <div className="absolute inset-y-0 left-0 w-4 bg-gradient-to-r from-black/25 via-white/50 to-black/10 z-30 pointer-events-none" />
                 <div className="absolute inset-y-0 left-4 w-[1.5px] bg-black/15 z-30 pointer-events-none" />
@@ -181,7 +253,9 @@ export default function BookMockup({
               initial={{ opacity: 1, rotateY: 8, rotateZ: -1.8, x: -10 }}
               animate={{ opacity: 1, rotateY: 6, rotateZ: -1.5, x: -12 }}
               transition={{ duration: 0.7, delay: 0.1, ease: "easeOut" }}
-              className="relative z-10 w-full max-w-[540px] mt-4"
+              className={`relative z-10 w-full max-w-[540px] mt-4 transition-all duration-300 ${
+                isDark ? "drop-shadow-[0_25px_40px_rgba(0,0,0,0.85)]" : ""
+              }`}
               style={{ transformStyle: "preserve-3d" }}
             >
               {/* Kontainer Spread Halaman 12 & 13 */}

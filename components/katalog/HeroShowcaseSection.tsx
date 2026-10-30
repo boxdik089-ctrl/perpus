@@ -54,13 +54,15 @@ export default function HeroShowcaseSection({
         }`} />
 
         {/* Soft radial glow behind the book */}
-        <div className={`absolute top-1/2 -translate-y-1/2 left-[10%] w-[750px] h-[750px] rounded-full blur-[140px] transition-colors duration-500 ${
-          isDark ? "bg-blue-900/40" : "bg-sky-200/70"
+        <div className={`absolute top-1/2 -translate-y-1/2 left-[5%] lg:left-[12%] w-[680px] h-[680px] rounded-full blur-[110px] transition-all duration-700 pointer-events-none ${
+          isDark
+            ? "bg-gradient-to-tr from-blue-700/30 via-sky-600/20 to-transparent"
+            : "bg-sky-200/70"
         }`} />
 
         {/* Soft right accent */}
-        <div className={`absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] transition-colors duration-500 ${
-          isDark ? "bg-indigo-950/30" : "bg-blue-100/50"
+        <div className={`absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] transition-colors duration-500 pointer-events-none ${
+          isDark ? "bg-blue-950/40" : "bg-blue-100/50"
         }`} />
 
         {/* Subtle dot-grid */}
