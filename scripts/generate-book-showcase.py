@@ -257,8 +257,8 @@ def main():
     # - Kontur atas Halaman 1 & 2 presisi mengikuti lekukan kertas asli murni (sky dome dihilangkan)
     # - Di bawah logo pill mengambang (kartu logo dihilangkan 100%)
     # - Sisi kanan buku melengkung anggun mengikuti kontur halaman 2 dan tumpukan kertas asli
-    # - Tanpa bocoran teks banner kanan (huruf terpotong R, K, d, b)
-    # - Bawah buku lega di bawah nomor halaman 12 dan 13 serta bevel bawah 3D
+    # - Tanpa bocoran teks banner kanan (huruf terpotong R, K, d, b dihilangkan 100%)
+    # - Bawah buku lega di bawah nomor halaman 12 dan 13 serta bebas gumpalan abu-abu/mound
     book_poly_2x = np.array([
         # 1. Puncak Spine & Garis Atas Cover Depan
         [30, 312],
@@ -268,23 +268,39 @@ def main():
         [680, 150],     # Puncak cover depan pada engsel
 
         # 2. Engsel ke Atas Halaman 1 (Paper Block Margin Asli)
-        [680, 235],
-        [700, 238],
-        [740, 234],
-        [780, 232],
-        [820, 233],
+        [682, 205],
+        [700, 208],
+        [720, 212],
+        [740, 218],
+        [760, 224],
+        [780, 228],
+        [800, 232],
+        [820, 234],
+        [840, 236],
         [860, 238],
+        [880, 242],
         [900, 246],
+        [920, 253],
         [940, 261],
+        [960, 271],
         [980, 286],
-        [1010, 312],    # Lembah antara Halaman 1 dan 2
+        [1000, 309],
+        [1010, 314],
+        [1020, 316],    # Lembah antara Halaman 1 dan 2
 
         # 3. Puncak Lengkungan Atas Halaman 2 (BAB 2) - Di Bawah Logo Pill!
-        [1050, 306],
+        [1040, 309],
+        [1060, 305],
+        [1080, 302],
         [1100, 302],    # Puncak Halaman 2
-        [1150, 308],
+        [1120, 303],
+        [1140, 306],
+        [1160, 310],
+        [1180, 314],
         [1200, 320],
+        [1220, 325],
         [1240, 332],
+        [1260, 338],
         [1275, 345],
         [1300, 363],    # Sudut kanan atas Halaman 2
 
@@ -292,27 +308,27 @@ def main():
         [1309, 400],
         [1315, 450],
         [1321, 500],
-        [1329, 550],
+        [1328, 550],
         [1336, 600],
         [1342, 650],
-        [1350, 700],
-        [1357, 750],
-        [1364, 800],
-        [1370, 850],
-        [1377, 900],
-        [1385, 950],
-        [1393, 1000],
-        [1397, 1035],
-        [1397, 1055],   # Sudut kanan bawah tumpukan kertas (nomor 13 utuh)
+        [1348, 700],
+        [1352, 750],
+        [1354, 800],
+        [1355, 850],
+        [1355, 900],
+        [1354, 940],
+        [1352, 980],
+        [1350, 1010],
+        [1344, 1035],
+        [1336, 1055],   # Sudut kanan bawah tumpukan kertas (nomor 13 utuh, bebas teks banner)
 
-        # 5. Garis Bawah Halaman 2 & 1 (Lega di bawah nomor 13 & 12)
-        [1375, 1065],
-        [1300, 1070],
-        [1200, 1070],
-        [1100, 1065],
-        [1000, 1065],
-        [900, 1055],
-        [800, 1035],    # Dasar engsel tengah
+        # 5. Garis Bawah Halaman 2 & 1 (Lega di bawah nomor 13 & 12, bebas gumpalan abu-abu)
+        [1300, 1055],
+        [1200, 1060],
+        [1100, 1055],
+        [1000, 1050],
+        [900, 1040],
+        [800, 1025],    # Dasar engsel tengah
 
         # 6. Garis Bawah Cover Depan & Bevel 3D
         [600, 1045],
@@ -330,11 +346,17 @@ def main():
     poly_mask = np.zeros((bh, bw), dtype=np.uint8)
     cv2.fillPoly(poly_mask, [book_poly_2x], 255)
 
+    # Inpaint / clamp warna tepi luar sejauh 4px agar transisi antialiasing 100% murni
+    # dari warna asli buku (bebas kontaminasi langit biru atau meja cokelat)
+    dilated_mask = cv2.dilate(poly_mask, np.ones((7, 7), np.uint8))
+    border_fringe_mask = cv2.bitwise_and(dilated_mask, cv2.bitwise_not(poly_mask))
+    clean_composite = cv2.inpaint(composite, border_fringe_mask, 4, cv2.INPAINT_TELEA)
+
     # Antialiasing gaussian sub-pixel presisi
     smooth_alpha = cv2.GaussianBlur(poly_mask.astype(np.float32), (5, 5), 1.0)
 
-    # Gabungkan composite BGR dengan alpha channel murni
-    b_ch, g_ch, r_ch = cv2.split(composite)
+    # Gabungkan composite bersih dengan alpha channel murni
+    b_ch, g_ch, r_ch = cv2.split(clean_composite)
     rgba = cv2.merge([b_ch, g_ch, r_ch, smooth_alpha.astype(np.uint8)])
 
     # Crop presisi ke bounding box non-transparan

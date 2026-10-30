@@ -143,9 +143,9 @@ export default function HeroShowcaseSection({
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
           {/* Mobile Open Book Preview - Well proportioned */}
-          <div className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-[1395/1028] flex items-center justify-center my-1 drop-shadow-2xl">
+          <div className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-[1353/1028] flex items-center justify-center my-1 drop-shadow-2xl">
             <img
-              src="/assets/showcase/buku-3d-open-beringin.png?v=6.0"
+              src="/assets/showcase/buku-3d-open-beringin.png?v=7.0"
               alt="Buku Profil SMKN 1 Beringin"
               className="w-full h-full object-contain select-none pointer-events-none"
               draggable={false}
@@ -260,7 +260,7 @@ export default function HeroShowcaseSection({
               >
                 {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo */}
                 <img
-                  src="/assets/showcase/buku-3d-open-beringin.png?v=6.0"
+                  src="/assets/showcase/buku-3d-open-beringin.png?v=7.0"
                   alt="Buku Profil Perpustakaan SMKN 1 Beringin"
                   className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
                   draggable={false}
