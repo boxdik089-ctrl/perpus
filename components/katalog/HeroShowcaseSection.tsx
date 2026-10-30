@@ -90,15 +90,13 @@ export default function HeroShowcaseSection({
 
           {/* Typography */}
           <div className="flex flex-col items-center text-center gap-4 px-2">
-            <h1 className={`text-4xl sm:text-5xl font-black tracking-tight leading-[1.08] ${
+            <h1 className={`text-3xl sm:text-4xl font-black tracking-tight leading-[1.15] ${
               isDark ? "text-white" : "text-slate-900"
             }`}>
-              Baca.{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-sky-400 to-indigo-500">
-                Jelajahi.
+              Perpustakaan Digital{" "}
+              <span className={isDark ? "text-blue-400" : "text-[#00367E]"}>
+                SMKN 1 Beringin
               </span>
-              <br />
-              Berkembang.
             </h1>
 
             <p className={`text-sm sm:text-base leading-relaxed max-w-sm ${
@@ -187,15 +185,13 @@ export default function HeroShowcaseSection({
           <div className="flex-1 min-w-0 max-w-[620px] flex flex-col items-start gap-6 xl:gap-7">
 
             {/* Main Headline */}
-            <h1 className={`text-4xl xl:text-5xl 2xl:text-6xl font-black tracking-tight leading-[1.08] ${
+            <h1 className={`text-4xl xl:text-5xl 2xl:text-6xl font-black tracking-tight leading-[1.1] ${
               isDark ? "text-white" : "text-slate-900"
             }`}>
-              Baca.{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-sky-400 to-indigo-500">
-                Jelajahi.
+              Perpustakaan Digital{" "}
+              <span className={isDark ? "text-blue-400" : "text-[#00367E]"}>
+                SMKN 1 Beringin
               </span>
-              <br />
-              Berkembang.
             </h1>
 
             {/* Description */}

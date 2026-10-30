@@ -18,3 +18,4 @@ Follow these core directives across all coding, styling, and copy generation in 
 - **Banned Clichés:** Avoid generic AI buzzwords (*delve, tapestry, landscape, pivotal, robust, seamlessly, beacon, revolutionary, unlock, elevate, di era digital yang serba cepat ini*).
 - **Authentic Vocational Context:** Write genuine Indonesian educational copy suitable for SMKN 1 Beringin (*SMK Bisa, SMK Hebat, Vokasi Kuat Menguatkan Indonesia*).
 - **Explain WHY, Not WHAT:** Do not narrate obvious code operations line-by-line. Only document non-obvious constraints and business rules.
+

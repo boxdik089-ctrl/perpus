@@ -24,3 +24,4 @@ You are strictly prohibited from outputting lazy, generic, bloated, or boilerpla
 
 ## 4. Comments & Narration (Zero Line-by-Line Fluff)
 - **Explain WHY, Not WHAT:** Do not narrate obvious code operations. Only document critical business constraints or non-obvious workarounds.
+

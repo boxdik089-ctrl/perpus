@@ -37,3 +37,4 @@ Enforce strict quality gates across UI design, code architecture, documentation,
 ## 4. Documentation & Communication (Zero Conversational Fluff)
 - **Explain WHY, Never WHAT:** Do not write narrative comments that merely restate what the code syntax is doing (e.g., `// filter the books`, `// render the container`). Only document non-obvious constraints, architectural decisions, or browser-specific workarounds.
 - **Direct & Action-Oriented:** Keep responses direct, clear, and actionable. Avoid repetitive apologies, sycophantic praise, or bloated explanations of simple edits.
+
