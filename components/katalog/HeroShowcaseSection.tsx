@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
+import { ArrowUpRight, BookOpen } from "lucide-react";
 import Book3DMockup from "./Book3DMockup";
 
 interface HeroShowcaseSectionProps {
@@ -167,7 +167,7 @@ export default function HeroShowcaseSection({
           {/* Typography */}
           <div className="flex flex-col items-center text-center gap-4 px-2">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 text-blue-500 shrink-0" />
               <span>Perpustakaan Digital SMKN 1 Beringin</span>
             </div>
 
@@ -290,7 +290,7 @@ export default function HeroShowcaseSection({
 
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/25 text-blue-600 dark:text-blue-400 text-xs font-semibold backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+              <BookOpen className="w-3.5 h-3.5 text-blue-500 shrink-0" />
               <span>Perpustakaan Digital SMKN 1 Beringin</span>
             </div>
 
