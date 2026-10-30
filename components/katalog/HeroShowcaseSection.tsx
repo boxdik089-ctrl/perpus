@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen, Sparkles } from "lucide-react";
+import Book3DMockup from "./Book3DMockup";
 
 interface HeroShowcaseSectionProps {
   isDark: boolean;
@@ -142,14 +143,9 @@ export default function HeroShowcaseSection({
 
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
-          {/* Mobile Open Book Preview - Well proportioned */}
-          <div className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-[1353/1028] flex items-center justify-center my-1 drop-shadow-2xl">
-            <img
-              src="/assets/showcase/buku-3d-open-beringin.png?v=7.0"
-              alt="Buku Profil SMKN 1 Beringin"
-              className="w-full h-full object-contain select-none pointer-events-none"
-              draggable={false}
-            />
+          {/* Mobile Open Book Preview - Vector Crisp 3D Mockup */}
+          <div className="w-full max-w-[420px] sm:max-w-[460px] my-1">
+            <Book3DMockup isDark={isDark} />
           </div>
 
           {/* Active book pill */}
@@ -254,26 +250,15 @@ export default function HeroShowcaseSection({
                 className="relative transition-all duration-300 ease-out"
                 style={{
                   transformStyle: "preserve-3d",
-                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(${isHovered ? "-8px" : "0px"}) scale(${isHovered ? 1.02 : 1})`,
                   animation: mounted ? "openBookFloat 6s ease-in-out infinite" : "none",
                 }}
               >
-                {/* Clean transparent 3D open book featuring real SMKN 1 Beringin building & logo */}
-                <img
-                  src="/assets/showcase/buku-3d-open-beringin.png?v=7.0"
-                  alt="Buku Profil Perpustakaan SMKN 1 Beringin"
-                  className="w-full h-auto object-contain select-none pointer-events-none drop-shadow-2xl"
-                  draggable={false}
-                />
-
-                {/* Soft interactive floor shadow */}
-                <div
-                  className={`absolute -bottom-6 left-6 right-6 h-8 rounded-full blur-2xl pointer-events-none transition-opacity duration-300 ${
-                    isDark ? "bg-black/65" : "bg-blue-950/20"
-                  }`}
-                  style={{
-                    transform: `scale(${isHovered ? 1.05 : 0.95})`,
-                  }}
+                {/* Vector Crisp 3D Open Book Mockup */}
+                <Book3DMockup
+                  isDark={isDark}
+                  rotateX={rotateX}
+                  rotateY={rotateY}
+                  isHovered={isHovered}
                 />
               </div>
             </div>
