@@ -143,7 +143,7 @@ export default function HeroShowcaseSection({
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
           {/* Mobile Open Book Preview - Well proportioned */}
-          <div className="relative w-full max-w-[360px] sm:max-w-[420px] aspect-[1664/1208] flex items-center justify-center my-1 drop-shadow-2xl">
+          <div className="relative w-full max-w-[360px] sm:max-w-[420px] aspect-[1411/1259] flex items-center justify-center my-1 drop-shadow-2xl">
             <img
               src="/assets/showcase/buku-smkn1-beringin.png"
               alt="Buku Profil SMKN 1 Beringin"
