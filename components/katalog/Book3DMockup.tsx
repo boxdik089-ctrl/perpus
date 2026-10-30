@@ -272,14 +272,14 @@ export default function BookMockup({
                       BAB 2
                     </span>
                     <h3 className="text-[19px] font-serif font-bold text-slate-900 leading-[1.22] mb-3.5">
-                      Jargon Beringin
+                      Semangat Vokasi
                     </h3>
                     <div className="w-12 h-[1.5px] bg-slate-700/80 mb-5" />
-                    <p className="text-[11px] font-serif text-slate-800 leading-[1.75] text-left">
-                      Jargon &ldquo;Bersama, Kita Bisa Raih Masa Depan&rdquo;
-                      mencerminkan semangat seluruh warga SMKN 1 Beringin untuk
-                      saling mendukung, bekerja sama, dan terus berusaha mewujudkan
-                      cita-cita serta masa depan yang lebih baik.
+                    <p className="text-[11px] sm:text-[11.5px] font-serif text-slate-800 leading-[1.75] text-justify">
+                      Berlandaskan semboyan &ldquo;SMK Bisa, SMK Hebat&rdquo;,
+                      pendidikan vokasi berfokus mencetak talenta muda yang
+                      terampil, mandiri, dan berkarakter unggul—siap bekerja,
+                      berwirausaha, serta adaptif menghadapi era industri modern.
                     </p>
                   </div>
 
@@ -314,9 +314,9 @@ export default function BookMockup({
                     </div>
 
                     <p className="font-serif italic font-semibold text-slate-800 text-[10.5px] leading-snug mt-1">
-                      Beringin Maju, Siswa Hebat,
+                      SMK Bisa, SMK Hebat,
                       <br />
-                      Indonesia Kuat
+                      Vokasi Kuat Menguatkan Indonesia
                     </p>
                   </div>
 
