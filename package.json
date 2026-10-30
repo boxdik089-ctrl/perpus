@@ -14,7 +14,8 @@
     "contract:emit": "prisma contract emit",
     "remotion": "remotion studio remotion/index.ts",
     "remotion:render": "remotion render remotion/index.ts PerpusMotionGraphic out/perpus-motion.mp4",
-    "render:tiktok": "remotion render remotion/index.ts TikTokShowcase-9x16 out/tiktok-perpus.mp4"
+    "render:tiktok": "remotion render remotion/index.ts TikTokShowcase-9x16 out/tiktok-perpus.mp4",
+    "generate:book": "python3 scripts/generate-book-showcase.py"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
