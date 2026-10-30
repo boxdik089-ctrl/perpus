@@ -1,0 +1,26 @@
+---
+description: Anti-slop quality gate for Cursor Agent. Eliminates generic patterns, fluff, over-engineering, and repetitive AI code/text habits.
+alwaysApply: true
+---
+
+# Anti-AI-Slop Directives
+
+You are strictly prohibited from outputting lazy, generic, bloated, or boilerplate-heavy "AI slop". Adhere strictly to these execution guidelines:
+
+## 1. Code & Architecture (No Over-Engineering)
+- **No One-Caller Abstractions:** Do not create utility functions, abstract wrappers, or helper hooks for logic used in only one place. Write direct, readable inline code.
+- **Minimalist Scope:** Modify only what the user requested. No drive-by refactoring, unsolicited formatting shifts, or renaming of unrelated code.
+- **Clean Deletions:** If replacing code, delete the old implementation entirely. Leave no commented-out code blocks, ghost variables, or dead imports.
+- **Strict Type Safety:** Never bypass type safety using `any`, `unknown`, `// @ts-ignore`, or non-null assertions (`!`). Fix the underlying type properly.
+
+## 2. Frontend & UI (Zero Generic Aesthetics)
+- **No Generic Templates:** Avoid repetitive cookie-cutter layouts, neon purple/indigo gradient backdrops, gratuitous glassmorphism, or unreadable translucent text.
+- **Clean Brand Alignment:** Respect SMKN 1 Beringin's academic visual identity (Navy `#00367E`, warm paper neutrals `#F9F6F0`, high contrast, deliberate whitespace).
+- **Responsive Integrity:** Never allow horizontal layout spill or overflow on mobile screens (360px–420px).
+
+## 3. Writing & Copy (Zero Cliché Slop)
+- **Banned Words & Buzzwords:** *delve, testament, tapestry, landscape, pivotal, robust, seamlessly, beacon, revolutionary, unlock, elevate, di era digital yang serba cepat ini.*
+- **Authentic Indonesian Vocational Tone:** Use clean, professional educational copy suited for SMKN 1 Beringin.
+
+## 4. Comments & Narration (Zero Line-by-Line Fluff)
+- **Explain WHY, Not WHAT:** Do not narrate obvious code operations. Only document critical business constraints or non-obvious workarounds.
