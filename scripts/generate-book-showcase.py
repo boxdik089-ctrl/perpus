@@ -33,7 +33,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOGO_PATH = os.path.join(BASE_DIR, "public/assets/logo.png")
 BUILDING_PATH = os.path.join(BASE_DIR, "public/assets/gedung-smk.jpg")
 TEMPLATE_PATH = os.path.join(BASE_DIR, "public/assets/showcase/template-open-book.jpg")
-OUTPUT_PATH = os.path.join(BASE_DIR, "public/assets/showcase/buku-smkn1-beringin.png")
+OUTPUT_PATH = os.path.join(BASE_DIR, "public/assets/showcase/buku-3d-open-beringin.png")
+OUTPUT_LEGACY_PATH = os.path.join(BASE_DIR, "public/assets/showcase/buku-smkn1-beringin.png")
 
 # Font Fallback
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
@@ -173,7 +174,6 @@ def main():
     # 4. Subtitle Cover
     draw.text((title_x + 4, title_y + 275), SUBTITLE_COVER, font=font_sub, fill=(186, 230, 253, 230))
 
-    # Konversi ke OpenCV BGR
     cover_2d_np = cv2.cvtColor(np.array(cover), cv2.COLOR_RGBA2BGR)
 
     # ==============================================================================
@@ -187,12 +187,12 @@ def main():
     base_2x = base_pil.resize((base_pil.width * 2, base_pil.height * 2), Image.Resampling.LANCZOS)
     base_np = cv2.cvtColor(np.array(base_2x), cv2.COLOR_RGB2BGR)
 
-    # Penajaman halaman terbuka pada sisi kanan
+    # Penajaman halus halaman terbuka pada sisi kanan
     gaussian = cv2.GaussianBlur(base_np, (0, 0), 2.0)
     base_sharp = cv2.addWeighted(base_np, 1.35, gaussian, -0.35, 0)
     bh, bw, _ = base_sharp.shape
 
-    # Koordinat 4 sudut cover depan pada skala 2x (76, 296), (676, 152), (796, 1016), (196, 1148)
+    # Koordinat 4 sudut cover depan pada skala 2x
     src_pts = np.float32([[0, 0], [CW, 0], [CW, CH], [0, CH]])
     dst_pts_2x = np.float32([[76, 296], [676, 152], [796, 1016], [196, 1148]])
 
@@ -217,31 +217,62 @@ def main():
         composite[:, :, c] = np.clip(composite[:, :, c].astype(np.float32) * (1.0 - spine_crease * 0.35), 0, 255).astype(np.uint8)
 
     # ==============================================================================
-    # ✂️ 3/4 ISOLASI BUKU TERBUKA & MASK TRANSPARAN ULTRA BERSIH
+    # ✂️ 3/4 ISOLASI BUKU TERBUKA DENGAN KONTUR PRESISI TANPA HALO
     # ==============================================================================
     print("✂️ 3/4 Memisahkan latar belakang & defringing antialias...")
+
+    # Poligon batas luar presisi buku terbuka (menghilangkan sisa latar di kiri spine)
+    book_poly_2x = np.array([
+        [38, 312],     # Puncak spine kiri
+        [200, 260],
+        [400, 210],
+        [550, 178],
+        [676, 152],    # Puncak engsel tengah (spine top)
+        [750, 168],
+        [850, 188],
+        [950, 208],
+        [1040, 226],
+        [1120, 244],
+        [1200, 255],
+        [1260, 230],
+        [1310, 180],
+        [1350, 120],    # Puncak kanan halaman 13
+        [1380, 240],
+        [1395, 380],
+        [1400, 520],
+        [1398, 660],
+        [1395, 800],
+        [1385, 920],
+        [1370, 980],    # Ujung kanan bawah halaman 13
+        [1280, 995],
+        [1160, 1010],
+        [1040, 1030],
+        [900, 1000],
+        [796, 1016],    # Dasar engsel tengah (spine bottom)
+        [600, 1040],
+        [400, 1075],
+        [210, 1148],    # Sudut bawah cover depan
+        [110, 1112],    # Dasar spine kiri
+        [92, 912],
+        [74, 712],
+        [56, 512],
+        [38, 312]      # Kembali ke puncak spine kiri
+    ], dtype=np.int32)
+
+    poly_mask = np.zeros((bh, bw), dtype=np.uint8)
+    cv2.fillPoly(poly_mask, [book_poly_2x], 255)
+
+    # Deteksi warna foreground terhadap background asli
     bg_color = np.array([253, 249, 244], dtype=np.float32)
     diff = np.linalg.norm(composite.astype(np.float32) - bg_color, axis=2)
+    color_mask = (diff > 10).astype(np.uint8) * 255
 
-    # Batasi hanya area buku (x < 1400)
-    seg_mask = np.zeros((bh, bw), dtype=np.uint8)
-    seg_mask[:, :1400] = (diff[:, :1400] > 14).astype(np.uint8) * 255
+    # Core poligon solid + tepi halus
+    core_poly = cv2.erode(poly_mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
+    final_mask = np.maximum(core_poly, cv2.bitwise_and(poly_mask, color_mask))
 
-    # Filter komponen terbesar (hanya buku terbuka utuh)
-    num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(seg_mask)
-    areas = stats[1:, cv2.CC_STAT_AREA]
-    largest_idx = 1 + np.argmax(areas)
-    clean_mask = (labels == largest_idx).astype(np.uint8) * 255
-
-    # Isi seluruh celah/lubang di dalam area buku
-    contours, hierarchy = cv2.findContours(clean_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    filled_mask = np.zeros_like(clean_mask)
-    cv2.drawContours(filled_mask, contours, -1, 255, -1)
-
-    # Erosi 1px & Gaussian blur untuk tepian antialiased tanpa artefak putih
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
-    eroded_mask = cv2.erode(filled_mask, kernel, iterations=1)
-    smooth_alpha = cv2.GaussianBlur(eroded_mask.astype(np.float32), (3, 3), 0.7)
+    # Antialiasing gaussian sub-pixel
+    smooth_alpha = cv2.GaussianBlur(final_mask.astype(np.float32), (5, 5), 1.0)
 
     # Unmatte: hilangkan kontribusi warna background dari pixel semi-transparan
     a_norm = np.clip(smooth_alpha / 255.0, 0.0, 1.0)[:, :, np.newaxis]
@@ -259,7 +290,7 @@ def main():
 
     # Crop presisi ke bounding box non-transparan
     y_indices, x_indices = np.where(smooth_alpha > 8)
-    pad = 12
+    pad = 10
     ymin = max(0, y_indices.min() - pad)
     ymax = min(rgba.shape[0], y_indices.max() + pad)
     xmin = max(0, x_indices.min() - pad)
@@ -274,7 +305,10 @@ def main():
     # ==============================================================================
     os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
     trimmed_pil.save(OUTPUT_PATH, optimize=True)
-    print(f"✅ 4/4 Selesai! Aset buku 3D tersimpan di: {OUTPUT_PATH}")
+    trimmed_pil.save(OUTPUT_LEGACY_PATH, optimize=True)
+    print(f"✅ 4/4 Selesai! Aset buku 3D tersimpan di:")
+    print(f"   -> {OUTPUT_PATH}")
+    print(f"   -> {OUTPUT_LEGACY_PATH}")
     print(f"   Dimensi Retina: {trimmed_pil.width} x {trimmed_pil.height} px")
 
 
