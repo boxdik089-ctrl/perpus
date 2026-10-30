@@ -138,17 +138,10 @@ export default async function AdminDashboard() {
               />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
-                  <span className="sm:hidden">SMKN 1 Beringin</span>
-                  <span className="hidden sm:inline">SMK Negeri 1 Beringin</span>
-                </span>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="sm:hidden">Aktif</span>
-                  <span className="hidden sm:inline">Sistem Aktif</span>
-                </span>
-              </div>
+              <h2 className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+                <span className="sm:hidden">SMKN 1 Beringin</span>
+                <span className="hidden sm:inline">SMK Negeri 1 Beringin</span>
+              </h2>
               <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
                 Panel Manajemen Perpustakaan
               </p>
