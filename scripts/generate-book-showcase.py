@@ -253,58 +253,72 @@ def main():
     print("✂️ 3/4 Memisahkan latar belakang & defringing antialias...")
 
     # Poligon batas luar presisi buku terbuka utuh:
-    # - Atas Halaman 1 & 2 melengkung tinggi -> BAB 1 & BAB 2 terlihat 100% utuh tanpa terpotong
-    # - Tepi kanan Halaman 2 melengkung alami -> tidak bocor ke teks hero section template
-    # - Bawah buku lega -> nomor halaman 12 dan teks motto bawah terlihat utuh
+    # - Cover depan & spine kiri lengkap 100%
+    # - Kontur atas Halaman 1 & 2 presisi mengikuti lekukan kertas asli murni (sky dome dihilangkan)
+    # - Di bawah logo pill mengambang (kartu logo dihilangkan 100%)
+    # - Sisi kanan buku melengkung anggun mengikuti kontur halaman 2 dan tumpukan kertas asli
+    # - Tanpa bocoran teks banner kanan (huruf terpotong R, K, d, b)
+    # - Bawah buku lega di bawah nomor halaman 12 dan 13 serta bevel bawah 3D
     book_poly_2x = np.array([
         # 1. Puncak Spine & Garis Atas Cover Depan
         [30, 312],
         [200, 260],
         [400, 210],
         [550, 178],
-        [676, 152],     # Puncak engsel tengah (spine top)
-        
-        # 2. Puncak Lengkungan Atas Halaman 1 (BAB 1) - MELENGKUNG TINGGI, BAB 1 UTUH!
-        [700, 95],
-        [740, 65],
-        [790, 45],
-        [840, 48],
-        [890, 68],
-        [940, 96],
-        [990, 122],
-        [1040, 142],    # Lembah antara Halaman 1 dan 2
-        
-        # 3. Puncak Lengkungan Atas Halaman 2 (BAB 2) - UTUH PENUH DI ATAS JARGON!
-        [1100, 108],
-        [1160, 65],
-        [1220, 38],
-        [1270, 35],
-        [1310, 42],
-        [1335, 60],     # Sudut kanan atas halaman 2
-        [1345, 100],
-        
-        # 4. Tepi Lengkungan Kanan Halaman 2 (Bersih, Presisi, Tanpa Bocor ke Teks Hero Kanan)
-        [1350, 200],
-        [1352, 340],
-        [1352, 480],
-        [1350, 620],
-        [1348, 760],
-        [1342, 860],
-        [1330, 940],
-        [1315, 980],    # Sudut kanan bawah halaman 2
-        
-        # 5. Garis Bawah Halaman 2 & 1 (Lega di bawah teks 'Beringin Maju' & nomor halaman)
-        [1260, 1020],
-        [1160, 1035],
-        [1040, 1050],
-        [920, 1025],
-        [796, 1020],    # Dasar engsel tengah (spine bottom)
-        
-        # 6. Garis Bawah Cover Depan
+        [680, 150],     # Puncak cover depan pada engsel
+
+        # 2. Engsel ke Atas Halaman 1 (Paper Block Margin Asli)
+        [680, 235],
+        [700, 238],
+        [740, 234],
+        [780, 232],
+        [820, 233],
+        [860, 238],
+        [900, 246],
+        [940, 261],
+        [980, 286],
+        [1010, 312],    # Lembah antara Halaman 1 dan 2
+
+        # 3. Puncak Lengkungan Atas Halaman 2 (BAB 2) - Di Bawah Logo Pill!
+        [1050, 306],
+        [1100, 302],    # Puncak Halaman 2
+        [1150, 308],
+        [1200, 320],
+        [1240, 332],
+        [1275, 345],
+        [1300, 363],    # Sudut kanan atas Halaman 2
+
+        # 4. Tepi Lengkungan Kanan Halaman 2 & Tumpukan Kertas (Murni Tanpa Bocor Teks)
+        [1309, 400],
+        [1315, 450],
+        [1321, 500],
+        [1329, 550],
+        [1336, 600],
+        [1342, 650],
+        [1350, 700],
+        [1357, 750],
+        [1364, 800],
+        [1370, 850],
+        [1377, 900],
+        [1385, 950],
+        [1393, 1000],
+        [1397, 1035],
+        [1397, 1055],   # Sudut kanan bawah tumpukan kertas (nomor 13 utuh)
+
+        # 5. Garis Bawah Halaman 2 & 1 (Lega di bawah nomor 13 & 12)
+        [1375, 1065],
+        [1300, 1070],
+        [1200, 1070],
+        [1100, 1065],
+        [1000, 1065],
+        [900, 1055],
+        [800, 1035],    # Dasar engsel tengah
+
+        # 6. Garis Bawah Cover Depan & Bevel 3D
         [600, 1045],
         [400, 1080],
         [210, 1150],    # Sudut bawah cover depan
-        
+
         # 7. Tepi Luar Spine Kiri (Hardcover Silinder)
         [106, 1118],    # Dasar spine kiri
         [90, 912],
@@ -316,31 +330,12 @@ def main():
     poly_mask = np.zeros((bh, bw), dtype=np.uint8)
     cv2.fillPoly(poly_mask, [book_poly_2x], 255)
 
-    # Deteksi warna foreground terhadap background asli
-    bg_color = np.array([253, 249, 244], dtype=np.float32)
-    diff = np.linalg.norm(composite.astype(np.float32) - bg_color, axis=2)
-    color_mask = (diff > 10).astype(np.uint8) * 255
+    # Antialiasing gaussian sub-pixel presisi
+    smooth_alpha = cv2.GaussianBlur(poly_mask.astype(np.float32), (5, 5), 1.0)
 
-    # Core poligon solid + tepi halus
-    core_poly = cv2.erode(poly_mask, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
-    final_mask = np.maximum(core_poly, cv2.bitwise_and(poly_mask, color_mask))
-
-    # Antialiasing gaussian sub-pixel
-    smooth_alpha = cv2.GaussianBlur(final_mask.astype(np.float32), (5, 5), 1.0)
-
-    # Unmatte: hilangkan kontribusi warna background dari pixel semi-transparan
-    a_norm = np.clip(smooth_alpha / 255.0, 0.0, 1.0)[:, :, np.newaxis]
-    comp_float = composite.astype(np.float32)
-    unmatted_bgr = comp_float.copy()
-    mask_semi = (a_norm[:, :, 0] > 0.05) & (a_norm[:, :, 0] < 0.98)
-
-    for c in range(3):
-        ch = comp_float[:, :, c]
-        unmatted_ch = (ch - (1.0 - a_norm[:, :, 0]) * bg_color[c]) / np.maximum(a_norm[:, :, 0], 0.05)
-        unmatted_bgr[mask_semi, c] = np.clip(unmatted_ch[mask_semi], 0, 255)
-
-    ub, ug, ur = cv2.split(unmatted_bgr.astype(np.uint8))
-    rgba = cv2.merge([ub, ug, ur, smooth_alpha.astype(np.uint8)])
+    # Gabungkan composite BGR dengan alpha channel murni
+    b_ch, g_ch, r_ch = cv2.split(composite)
+    rgba = cv2.merge([b_ch, g_ch, r_ch, smooth_alpha.astype(np.uint8)])
 
     # Crop presisi ke bounding box non-transparan
     y_indices, x_indices = np.where(smooth_alpha > 8)
