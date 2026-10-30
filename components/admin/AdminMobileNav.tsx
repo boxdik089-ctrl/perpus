@@ -238,16 +238,13 @@ export function AdminMobileNav() {
                 }`}
               >
                 <div
-                  className={`relative p-1 rounded-xl transition-all duration-150 ${
+                  className={`p-1 rounded-xl transition-all duration-150 ${
                     isCurrent
                       ? "bg-sky-500/15 dark:bg-sky-500/20 scale-105"
                       : "hover:bg-stone-100 dark:hover:bg-slate-800/60"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
-                  {isCurrent && (
-                    <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-sky-500 shadow-xs" />
-                  )}
                 </div>
                 <span className="text-[10px] leading-tight mt-0.5 tracking-tight truncate max-w-[58px]">
                   {item.label}
