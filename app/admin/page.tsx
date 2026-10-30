@@ -95,6 +95,16 @@ export default async function AdminDashboard() {
 
   const adminName = adminAccount?.nama || session.user?.name || "Bapak/Ibu Pustakawan";
 
+  const hour = now.getHours();
+  const greetingTime =
+    hour >= 4 && hour < 11
+      ? "Selamat Pagi"
+      : hour >= 11 && hour < 15
+      ? "Selamat Siang"
+      : hour >= 15 && hour < 18
+      ? "Selamat Sore"
+      : "Selamat Malam";
+
   const todayStr = new Intl.DateTimeFormat("id-ID", {
     weekday: "long",
     day: "numeric",
@@ -104,36 +114,92 @@ export default async function AdminDashboard() {
 
   return (
     <div className="p-3 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
-      {/* Top Header Bar */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200/80 dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              Dashboard Utama
-            </h1>
-            <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Sistem Aktif
-            </span>
-          </div>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1.5">
-            <Calendar className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span>Perpustakaan SMK Negeri 1 Beringin • {todayStr}</span>
-          </p>
+      {/* ─── EXECUTIVE DASHBOARD HERO HEADER ─── */}
+      <header className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-sm p-4 sm:p-6 lg:p-7 transition-all">
+        {/* Soft background accents */}
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-500/5 dark:bg-blue-400/5 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-sky-500/5 dark:bg-sky-400/5 blur-3xl pointer-events-none" />
+        <div className="absolute right-6 bottom-2 opacity-[0.035] dark:opacity-[0.06] pointer-events-none select-none hidden md:block">
+          <img
+            src="/assets/logo.png"
+            alt="Watermark SMKN 1 Beringin"
+            className="w-44 h-44 object-contain"
+          />
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 self-end sm:self-center">
-          <Link
-            href="/"
-            target="_blank"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 sm:py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 rounded-xl transition-all shadow-2xs"
-            title="Buka Halaman Depan Siswa"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Katalog Publik</span>
-          </Link>
-          <ThemeToggle />
-          <AdminProfileDropdown userName={adminName} />
+        {/* Top Control Bar: Logo, School Identity, & Action Tools */}
+        <div className="flex items-center justify-between gap-2 pb-3.5 border-b border-slate-100 dark:border-slate-800/80">
+          <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 p-1 flex items-center justify-center shrink-0 shadow-2xs">
+              <img
+                src="/assets/logo.png"
+                alt="Logo SMKN 1 Beringin"
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white tracking-tight truncate">
+                  <span className="sm:hidden">SMKN 1 Beringin</span>
+                  <span className="hidden sm:inline">SMK Negeri 1 Beringin</span>
+                </span>
+                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25 shrink-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="sm:hidden">Aktif</span>
+                  <span className="hidden sm:inline">Sistem Aktif</span>
+                </span>
+              </div>
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                Panel Manajemen Perpustakaan
+              </p>
+            </div>
+          </div>
+
+          {/* Action Toolbar */}
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <Link
+              href="/"
+              target="_blank"
+              className="inline-flex items-center gap-1.5 h-8 sm:h-9 px-2.5 sm:px-3 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 bg-slate-100/80 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700/80 rounded-xl transition-all shadow-2xs cursor-pointer"
+              title="Buka Halaman Depan Siswa"
+            >
+              <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Katalog Publik</span>
+            </Link>
+            <ThemeToggle />
+            <AdminProfileDropdown userName={adminName} />
+          </div>
+        </div>
+
+        {/* Bottom Hero Content: Greeting & Live Information Chips */}
+        <div className="pt-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+          <div>
+            <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-1">
+              {greetingTime}
+            </span>
+            <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
+              Selamat Bertugas,{" "}
+              <span className="text-[#00367E] dark:text-sky-400">
+                {adminName}
+              </span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-xl leading-relaxed">
+              Pantau sirkulasi peminjaman buku, data keanggotaan siswa, dan statistik operasional perpustakaan secara real-time.
+            </p>
+          </div>
+
+          {/* Quick Badges / Date & Stats Pills */}
+          <div className="flex flex-wrap items-center gap-2 self-start md:self-end shrink-0">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-2xs">
+              <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+              <span>{todayStr}</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-800/40 text-sky-800 dark:text-sky-300 text-xs font-semibold shadow-2xs">
+              <BookOpen className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+              <span>{totalBuku} Judul Koleksi</span>
+            </div>
+          </div>
         </div>
       </header>
 
