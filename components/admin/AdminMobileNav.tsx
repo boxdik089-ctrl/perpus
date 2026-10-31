@@ -20,7 +20,6 @@ import {
   LogOut,
   X,
   ChevronRight,
-  School,
   FileSpreadsheet,
   MessageCircle,
   Star,
@@ -74,7 +73,7 @@ export function AdminMobileNav() {
       label: "Anggota",
       href: "/admin/anggota",
       icon: Users,
-      isActive: pathname.startsWith("/admin/anggota") || pathname.startsWith("/admin/siswa"),
+      isActive: pathname.startsWith("/admin/anggota"),
     },
   ];
 
@@ -175,12 +174,6 @@ export function AdminMobileNav() {
           href: "/admin/anggota/cetak-kartu",
           icon: QrCode,
           color: "text-teal-500 bg-teal-500/10",
-        },
-        {
-          name: "Data Kelas & Siswa",
-          href: "/admin/siswa",
-          icon: School,
-          color: "text-blue-500 bg-blue-500/10",
         },
         {
           name: "Laporan & Statistik",
