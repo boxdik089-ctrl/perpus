@@ -68,21 +68,21 @@ export default function PrintLabelDialog({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 print-hidden"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 dark:bg-slate-950/80 backdrop-blur-xs p-4 print-hidden"
           onClick={() => setOpen(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4"
+            className="bg-white dark:bg-slate-900 border border-stone-200 dark:border-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 space-y-4"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Printer className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold text-white">Cetak Label Fisik</h3>
+                <Printer className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                <h3 className="text-base font-bold text-stone-900 dark:text-white">Cetak Label Fisik</h3>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors"
+                className="text-stone-400 hover:text-stone-900 dark:text-slate-400 dark:hover:text-white p-1 rounded-lg hover:bg-stone-100 dark:hover:bg-slate-800 transition-colors"
                 aria-label="Tutup"
               >
                 <X className="w-5 h-5" />
@@ -90,14 +90,14 @@ export default function PrintLabelDialog({
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 p-1 bg-slate-950/70 border border-slate-800 rounded-xl">
+            <div className="flex gap-2 p-1 bg-stone-100 dark:bg-slate-950/70 border border-stone-200 dark:border-slate-800 rounded-xl">
               <button
                 type="button"
                 onClick={() => setTab('BARCODE')}
                 className={`flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   tab === 'BARCODE'
                     ? 'bg-emerald-700 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-stone-600 dark:text-slate-400 hover:text-stone-900 dark:hover:text-slate-200'
                 }`}
               >
                 <Barcode className="w-4 h-4" />
@@ -109,7 +109,7 @@ export default function PrintLabelDialog({
                 className={`flex-1 flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   tab === 'PUNGGUNG'
                     ? 'bg-emerald-700 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-stone-600 dark:text-slate-400 hover:text-stone-900 dark:hover:text-slate-200'
                 }`}
               >
                 <BookText className="w-4 h-4" />
@@ -118,18 +118,18 @@ export default function PrintLabelDialog({
             </div>
 
             {/* Preview Box */}
-            <div className="flex flex-col items-center gap-3 py-6 px-4 bg-white rounded-2xl border border-slate-200 text-slate-900 shadow-inner">
+            <div className="flex flex-col items-center gap-3 py-6 px-4 bg-stone-50 dark:bg-slate-950 rounded-2xl border border-stone-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 shadow-inner">
               {tab === 'BARCODE' ? (
                 <BarcodeLabel kode={kode} judul={judul} rakNama={rakNama} size="large" />
               ) : (
                 <div className="flex flex-col items-center gap-2">
                   <SpineLabel callNumber={callNumber} />
-                  <p className="text-[11px] font-mono font-bold text-slate-600">{callNumber}</p>
+                  <p className="text-[11px] font-mono font-bold text-stone-600 dark:text-slate-400">{callNumber}</p>
                 </div>
               )}
             </div>
 
-            <p className="text-xs text-slate-400 text-center">
+            <p className="text-xs text-stone-500 dark:text-slate-400 text-center">
               {tab === 'BARCODE'
                 ? 'Ukuran standar 70 × 35 mm. Tempel di cover bagian dalam.'
                 : 'Ukuran standar 40 × 60 mm. Tempel di punggung buku.'}
@@ -147,7 +147,7 @@ export default function PrintLabelDialog({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="px-5 h-11 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-sm transition-all border border-slate-700 cursor-pointer"
+                className="px-5 h-11 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-stone-700 dark:text-slate-300 font-semibold text-sm transition-all border border-stone-300 dark:border-slate-700 cursor-pointer"
               >
                 Batal
               </button>

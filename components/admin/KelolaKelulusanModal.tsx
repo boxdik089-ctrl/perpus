@@ -79,12 +79,12 @@ export function KelolaKelulusanModal() {
       <button
         type="button"
         onClick={handleOpen}
-        className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3 sm:px-3.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/20 hover:border-rose-500/30 text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-xs shrink-0"
+        className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-700 dark:text-rose-400 border border-rose-500/20 hover:border-rose-500/30 text-xs sm:text-sm font-bold transition-all cursor-pointer shadow-xs shrink-0"
         title="Hapus permanen siswa kelas 12 yang telah tamat/lulus"
       >
         <GraduationCap className="w-4 h-4 text-rose-600 dark:text-rose-400" />
-        <span className="hidden xs:inline">Kelulusan Kelas 12</span>
-        <span className="xs:hidden">Tamat</span>
+        <span className="hidden sm:inline">Kelulusan</span>
+        <span className="hidden 2xl:inline"> Kelas 12</span>
       </button>
 
       {/* Modal Dialog */}

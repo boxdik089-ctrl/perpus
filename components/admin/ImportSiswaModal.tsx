@@ -518,10 +518,12 @@ export function ImportSiswaModal() {
       <button
         onClick={handleOpen}
         type="button"
-        className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-3.5 rounded-xl bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white border border-stone-300/80 dark:border-slate-800 text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer"
+        className="inline-flex items-center gap-1.5 h-9 sm:h-10 px-2.5 sm:px-3.5 rounded-xl bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800 text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white border border-stone-300/80 dark:border-slate-800 text-xs sm:text-sm font-semibold shadow-xs transition-all cursor-pointer shrink-0"
+        title="Import Data Siswa dari Excel / Dapodik"
       >
         <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-        <span>Import Excel</span>
+        <span className="hidden sm:inline">Import</span>
+        <span className="hidden xl:inline"> Excel</span>
       </button>
 
       {/* Modal Dialog */}

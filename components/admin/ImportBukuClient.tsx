@@ -104,14 +104,14 @@ export function ImportBukuClient() {
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-stone-200 dark:border-slate-800 shadow-sm p-6 sm:p-8 space-y-5">
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h2 className="text-lg sm:text-xl font-black text-stone-900 dark:text-white tracking-tight">Upload File CSV</h2>
-            <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-0.5 font-medium">
+            <h2 className="text-lg sm:text-xl font-bold text-stone-900 dark:text-white">Upload File CSV</h2>
+            <p className="text-xs sm:text-sm text-stone-500 dark:text-slate-400 mt-0.5">
               Input puluhan/ratusan buku sekaligus. Eksemplar 8-digit + lokasi rak ter-generate otomatis.
             </p>
           </div>
           <button
             onClick={downloadTemplate}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-stone-200 dark:border-slate-700 bg-stone-100 hover:bg-stone-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-emerald-700 hover:text-emerald-800 dark:text-emerald-400 dark:hover:text-emerald-300 text-xs font-bold transition-all cursor-pointer shadow-xs"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-xl border border-stone-300 dark:border-slate-700 bg-stone-100 hover:bg-stone-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 text-xs font-bold transition-all cursor-pointer shadow-xs"
           >
             <FileDown className="w-4 h-4" />
             Download Template CSV
@@ -133,7 +133,7 @@ export function ImportBukuClient() {
               }
             }
           }}
-          className="border-2 border-dashed border-stone-300 hover:border-emerald-500 dark:border-slate-700/80 dark:hover:border-emerald-500/60 bg-stone-50/80 hover:bg-stone-100/70 dark:bg-slate-950/60 dark:hover:bg-slate-950/90 rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all group"
+          className="border-2 border-dashed border-stone-300 dark:border-slate-700/80 hover:border-emerald-500 dark:hover:border-emerald-500/60 bg-stone-50/70 hover:bg-stone-100/70 dark:bg-slate-950/60 dark:hover:bg-slate-950/90 rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all group"
         >
           <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center mx-auto mb-3 group-hover:scale-105 transition-transform">
             <FileSpreadsheet className="w-7 h-7" />
@@ -145,7 +145,7 @@ export function ImportBukuClient() {
               Klik atau seret file CSV ke area ini
             </p>
           )}
-          <p className="text-xs text-stone-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-stone-400 dark:text-slate-500 mt-1">
             Format: .csv (Microsoft Excel: Save As → CSV UTF-8)
           </p>
           <input
@@ -159,7 +159,7 @@ export function ImportBukuClient() {
 
         {err && (
           <div className="flex items-start gap-2.5 bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300 rounded-xl px-4 py-3 text-sm">
-            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+            <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500 dark:text-rose-400" />
             <span className="font-medium">{err}</span>
           </div>
         )}
@@ -168,7 +168,7 @@ export function ImportBukuClient() {
           <button
             onClick={handlePreview}
             disabled={busy === "preview"}
-            className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
+            className="w-full h-12 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm shadow-xs disabled:opacity-50 flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
             {busy === "preview" ? (
               <>
@@ -234,7 +234,7 @@ export function ImportBukuClient() {
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="bg-stone-100/90 dark:bg-slate-950/70 text-stone-600 dark:text-slate-400 font-bold uppercase tracking-wider text-left">
+                <tr className="bg-stone-100 dark:bg-slate-950/70 text-stone-600 dark:text-slate-400 font-bold uppercase tracking-wider text-left border-b border-stone-200 dark:border-slate-800">
                   <th className="px-5 py-3">Judul</th>
                   <th className="px-5 py-3">Penulis</th>
                   <th className="px-5 py-3">Kategori</th>
@@ -250,7 +250,7 @@ export function ImportBukuClient() {
                     key={i}
                     className="hover:bg-stone-50 dark:hover:bg-slate-800/40 transition-colors"
                   >
-                    <td className="px-5 py-3 font-semibold text-stone-900 dark:text-white max-w-[220px] truncate">
+                    <td className="px-5 py-3 font-medium text-stone-900 dark:text-white max-w-[220px] truncate">
                       {r.judul}
                     </td>
                     <td className="px-5 py-3 text-stone-600 dark:text-slate-300 max-w-[160px] truncate">
@@ -259,7 +259,7 @@ export function ImportBukuClient() {
                     <td className="px-5 py-3 text-stone-600 dark:text-slate-300">{r.kategori}</td>
                     <td className="px-5 py-3">
                       {r.klasifikasi ? (
-                        <span className="font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                        <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
                           {r.klasifikasi}
                         </span>
                       ) : (
@@ -282,17 +282,17 @@ export function ImportBukuClient() {
               </tbody>
             </table>
             {preview.length > 50 && (
-              <p className="text-xs text-stone-500 dark:text-slate-400 px-5 py-2.5 bg-stone-50 dark:bg-slate-950/50">
+              <p className="text-xs text-stone-500 dark:text-slate-400 px-5 py-2.5 bg-stone-50 dark:bg-slate-950/50 border-t border-stone-200 dark:border-slate-800">
                 Menampilkan 50 dari {preview.length} baris...
               </p>
             )}
           </div>
 
-          <div className="flex items-center gap-3 px-6 py-4 border-t border-stone-200 dark:border-slate-800">
+          <div className="flex items-center gap-3 px-6 py-4 border-t border-stone-200 dark:border-slate-800 bg-stone-50/50 dark:bg-slate-900/50">
             <button
               onClick={handleImport}
               disabled={busy === "import"}
-              className="h-11 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+              className="h-11 px-6 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-sm disabled:opacity-50 flex items-center gap-2 transition-all cursor-pointer shadow-xs"
             >
               {busy === "import" ? (
                 <>
@@ -308,7 +308,7 @@ export function ImportBukuClient() {
             <button
               onClick={reset}
               disabled={busy === "import"}
-              className="h-11 px-5 rounded-xl border border-stone-300 hover:border-stone-400 dark:border-slate-700 dark:hover:border-slate-600 text-stone-700 hover:text-stone-900 dark:text-slate-300 dark:hover:text-white text-sm font-semibold bg-stone-100 hover:bg-stone-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 transition-all cursor-pointer"
+              className="h-11 px-5 rounded-xl border border-stone-300 dark:border-slate-700 hover:border-stone-400 dark:hover:border-slate-600 text-stone-700 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white text-sm font-semibold bg-stone-100 hover:bg-stone-200 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 transition-all cursor-pointer"
             >
               Batal
             </button>

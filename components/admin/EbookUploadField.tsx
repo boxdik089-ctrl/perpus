@@ -68,23 +68,23 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
   };
 
   return (
-    <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+    <div className="bg-white dark:bg-slate-900/90 border border-stone-200 dark:border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
             <FileText className="w-4 h-4" />
           </div>
           <div>
-            <span className="text-xs sm:text-sm font-bold text-white block">
+            <span className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white block">
               E-Book Digital (PDF Reader Online)
             </span>
-            <span className="text-[10px] sm:text-[11px] text-slate-400 block">
+            <span className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 block">
               Memungkinkan siswa &amp; guru membaca buku langsung di web
             </span>
           </div>
         </div>
 
-        <label className="flex items-center gap-2 cursor-pointer bg-slate-950/80 px-3 py-1.5 rounded-xl border border-slate-800 hover:border-emerald-500/40 transition-colors">
+        <label className="flex items-center gap-2 cursor-pointer bg-stone-100 dark:bg-slate-950/80 px-3 py-1.5 rounded-xl border border-stone-200 dark:border-slate-800 hover:border-emerald-500/40 transition-colors">
           <input
             type="checkbox"
             name="is_ebook"
@@ -92,7 +92,7 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
             onChange={(e) => setIsEbook(e.target.checked)}
             className="w-4 h-4 accent-emerald-500 rounded cursor-pointer"
           />
-          <span className="text-xs font-bold text-emerald-300">Aktifkan E-Book</span>
+          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300">Aktifkan E-Book</span>
         </label>
       </div>
 
@@ -100,7 +100,7 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
       <input type="hidden" name="file_url" value={fileUrl} />
 
       {isEbook && (
-        <div className="space-y-3 pt-2 border-t border-slate-800/80 animate-in fade-in duration-200">
+        <div className="space-y-3 pt-2 border-t border-stone-200 dark:border-slate-800/80 animate-in fade-in duration-200">
           {/* Mode Switcher */}
           <div className="flex items-center gap-2">
             <button
@@ -108,8 +108,8 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
               onClick={() => setMode("UPLOAD")}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all ${
                 mode === "UPLOAD"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs"
-                  : "bg-slate-950/60 text-slate-400 hover:text-white border border-slate-800"
+                  ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 shadow-xs"
+                  : "bg-stone-100 dark:bg-slate-950/60 text-stone-600 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-slate-800"
               }`}
             >
               <Upload className="w-3.5 h-3.5" />
@@ -120,8 +120,8 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
               onClick={() => setMode("URL")}
               className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all ${
                 mode === "URL"
-                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs"
-                  : "bg-slate-950/60 text-slate-400 hover:text-white border border-slate-800"
+                  ? "bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/40 shadow-xs"
+                  : "bg-stone-100 dark:bg-slate-950/60 text-stone-600 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white border border-stone-200 dark:border-slate-800"
               }`}
             >
               <LinkIcon className="w-3.5 h-3.5" />
@@ -134,7 +134,7 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
             <div className="space-y-2">
               <div 
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 bg-slate-950/60 rounded-2xl p-4 text-center cursor-pointer transition-colors group"
+                className="border-2 border-dashed border-stone-300 dark:border-slate-700 hover:border-emerald-500/50 bg-stone-50/70 dark:bg-slate-950/60 rounded-2xl p-4 text-center cursor-pointer transition-colors group"
               >
                 <input
                   ref={fileInputRef}
@@ -146,18 +146,18 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
                 
                 {isUploading ? (
                   <div className="flex flex-col items-center justify-center py-2 space-y-2">
-                    <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
-                    <span className="text-xs text-slate-300 font-medium">Sedang mengunggah file PDF...</span>
+                    <Loader2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 animate-spin" />
+                    <span className="text-xs text-stone-600 dark:text-slate-300 font-medium">Sedang mengunggah file PDF...</span>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center space-y-1.5">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 group-hover:bg-emerald-500/20 group-hover:scale-105 transition-all flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-500/20 group-hover:scale-105 transition-all flex items-center justify-center">
                       <Upload className="w-5 h-5" />
                     </div>
-                    <span className="text-xs font-bold text-slate-200">
+                    <span className="text-xs font-bold text-stone-800 dark:text-slate-200">
                       Klik untuk memilih file PDF
                     </span>
-                    <span className="text-[11px] text-slate-500">
+                    <span className="text-[11px] text-stone-400 dark:text-slate-500">
                       Ukuran maksimal 50 MB
                     </span>
                   </div>
@@ -169,7 +169,7 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
           {/* Mode URL */}
           {mode === "URL" && (
             <div>
-              <label className="text-[11px] text-slate-400 block mb-1 font-medium">
+              <label className="text-[11px] text-stone-500 dark:text-slate-400 block mb-1 font-medium">
                 URL / Tautan File PDF E-Book
               </label>
               <input
@@ -177,35 +177,35 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
                 value={fileUrl}
                 onChange={(e) => setFileUrl(e.target.value)}
                 placeholder="https://example.com/buku.pdf atau https://drive.google.com/..."
-                className="w-full h-10 border border-slate-700/80 rounded-xl px-3.5 text-xs text-slate-100 placeholder:text-slate-500 bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono"
+                className="w-full h-10 border border-stone-300 dark:border-slate-700/80 rounded-xl px-3.5 text-xs text-stone-900 dark:text-slate-100 placeholder:text-stone-400 dark:placeholder:text-slate-500 bg-stone-50 dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 font-mono"
               />
             </div>
           )}
 
           {/* Upload Status & Feedback */}
           {uploadError && (
-            <p className="text-xs text-rose-400 bg-rose-950/60 border border-rose-500/30 p-2.5 rounded-xl">
+            <p className="text-xs text-rose-700 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-500/30 p-2.5 rounded-xl">
               {uploadError}
             </p>
           )}
 
           {uploadSuccess && (
-            <p className="text-xs text-emerald-300 bg-emerald-950/60 border border-emerald-500/30 p-2.5 rounded-xl flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <p className="text-xs text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-500/30 p-2.5 rounded-xl flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
               File PDF berhasil diunggah!
             </p>
           )}
 
           {/* Current File Preview & Actions */}
           {fileUrl && (
-            <div className="flex items-center justify-between gap-3 bg-slate-950/90 border border-emerald-500/30 p-3 rounded-xl">
+            <div className="flex items-center justify-between gap-3 bg-stone-50 dark:bg-slate-950/90 border border-emerald-500/30 p-3 rounded-xl">
               <div className="flex items-center gap-2.5 min-w-0">
-                <FileText className="w-5 h-5 text-emerald-400 shrink-0" />
+                <FileText className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 <div className="min-w-0">
-                  <span className="text-xs font-bold text-slate-200 block truncate">
+                  <span className="text-xs font-bold text-stone-800 dark:text-slate-200 block truncate">
                     {fileUrl.split("/").pop()}
                   </span>
-                  <span className="text-[10px] text-emerald-400 font-mono block">
+                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-mono block">
                     File E-Book Terpasang
                   </span>
                 </div>
@@ -216,7 +216,7 @@ export function EbookUploadField({ initialFileUrl = "", initialIsEbook = false }
                   href={fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors flex items-center gap-1 text-[11px] font-semibold"
+                  className="p-1.5 rounded-lg bg-stone-200 hover:bg-stone-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-stone-700 dark:text-slate-300 hover:text-stone-900 dark:hover:text-white transition-colors flex items-center gap-1 text-[11px] font-semibold"
                   title="Buka PDF"
                 >
                   <Eye className="w-3.5 h-3.5 text-emerald-400" />
