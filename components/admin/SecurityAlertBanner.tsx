@@ -12,23 +12,18 @@ export function SecurityAlertBanner({ userName }: { userName: string }) {
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-2xl border border-amber-300 dark:border-amber-800/80 bg-gradient-to-r from-amber-500/15 via-orange-500/10 to-amber-500/10 p-4 sm:p-5 shadow-sm animate-fade-up">
+      <div className="relative overflow-hidden rounded-2xl border border-amber-300/80 dark:border-amber-800/80 bg-amber-50/70 dark:bg-amber-950/30 p-4 sm:p-5 shadow-2xs animate-fade-up">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 shadow-xs">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/25">
               <ShieldAlert className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                  Perhatian Keamanan
-                </span>
-                <span className="text-xs text-amber-900/80 dark:text-amber-200/80 font-semibold">
-                  Password Bawaan Aktif
-                </span>
-              </div>
-              <p className="text-xs sm:text-sm text-amber-950 dark:text-amber-100 font-medium mt-1 leading-relaxed">
-                Akun petugas ini masih menggunakan password bawaan standar (<code className="px-1.5 py-0.5 rounded-md bg-amber-200/70 dark:bg-amber-900/70 font-mono text-[11px] font-bold">admin123</code>). Segera ganti demi mencegah peretasan dan akses tidak sah.
+              <h4 className="text-xs sm:text-sm font-bold text-amber-950 dark:text-amber-200">
+                Pemberitahuan Keamanan: Akun Masih Menggunakan Password Bawaan
+              </h4>
+              <p className="text-xs sm:text-sm text-amber-900/90 dark:text-amber-200/80 font-medium mt-1 leading-relaxed">
+                Akun petugas ini masih menggunakan password bawaan standar (<code className="px-1.5 py-0.5 rounded-md bg-amber-200/70 dark:bg-amber-900/70 font-mono text-[11px] font-bold">admin123</code>). Segera perbarui demi menjaga keamanan data perpustakaan.
               </p>
             </div>
           </div>

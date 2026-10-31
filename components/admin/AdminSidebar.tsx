@@ -25,7 +25,6 @@ import {
   KeyRound,
   ShieldCheck,
   X,
-  Sparkles,
   PanelLeftClose,
   PanelLeftOpen,
 } from "lucide-react";
@@ -70,15 +69,11 @@ export const ADMIN_NAV_GROUPS: NavGroup[] = [
         label: "Scan Sirkulasi Cepat",
         href: "/admin/sirkulasi",
         icon: ScanLine,
-        badge: "Barcode",
-        badgeColor: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
       },
       {
         label: "Layar Kios Presensi",
         href: "/kiosk",
         icon: QrCode,
-        badge: "Monitor",
-        badgeColor: "bg-sky-500/15 text-sky-700 dark:text-sky-400 border-sky-500/30",
         target: "_blank",
       },
     ],
@@ -227,12 +222,9 @@ export function AdminSidebar({
                   />
                 </div>
                 <div className="min-w-0 text-left">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate tracking-tight">
-                      Perpustakaan
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Sistem Aktif" />
-                  </div>
+                  <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate tracking-tight block">
+                    Perpustakaan
+                  </span>
                   <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
                     SMKN 1 Beringin
                   </p>
@@ -293,7 +285,7 @@ export function AdminSidebar({
                       href={item.href}
                       target={item.target}
                       onClick={onCloseMobile}
-                      title={`${item.label}${item.badge ? ` (${item.badge})` : ""}`}
+                      title={item.label}
                       className={`relative group flex items-center justify-center w-10 h-10 mx-auto rounded-xl text-xs font-semibold transition-all ${
                         active
                           ? "bg-sky-600 text-white shadow-xs font-bold"
@@ -301,9 +293,6 @@ export function AdminSidebar({
                       }`}
                     >
                       <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-                      {item.badge && (
-                        <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900" />
-                      )}
                     </Link>
                   );
                 }
@@ -332,18 +321,6 @@ export function AdminSidebar({
                       </div>
                       <span className="truncate">{item.label}</span>
                     </div>
-
-                    {item.badge && (
-                      <span
-                        className={`text-[9px] font-bold px-1.5 py-0.5 rounded border uppercase tracking-wider shrink-0 ${
-                          active
-                            ? "bg-white/20 text-white border-white/30"
-                            : item.badgeColor || "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
                   </Link>
                 );
               })}

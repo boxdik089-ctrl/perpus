@@ -24,7 +24,7 @@ import {
   UtensilsCrossed,
   Scissors,
   Building2,
-  Sparkles,
+  Palette,
   Compass,
   ArrowUpDown,
   Layers,
@@ -159,7 +159,7 @@ const JURUSAN_TABS: {
     key: "KECANTIKAN",
     label: "Kecantikan (KC)",
     shortLabel: "Kecantikan",
-    icon: Sparkles,
+    icon: Palette,
     activeColor: "bg-purple-600 text-white shadow-md shadow-purple-500/30",
   },
   {

@@ -42,14 +42,9 @@ export function AdminAnalyticsDashboard({ data }: { data: AnalyticsDashboardData
             <TrendingUp className="w-5 h-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-white tracking-tight">
-                Infografis &amp; Tren Perpustakaan
-              </h2>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> Real-time
-              </span>
-            </div>
+            <h2 className="text-base sm:text-lg font-bold text-stone-900 dark:text-white tracking-tight">
+              Infografis &amp; Tren Perpustakaan
+            </h2>
             <p className="text-xs text-stone-500 dark:text-slate-400">
               Analisis sirkulasi buku, kunjungan siswa, dan pemetaan minat baca
             </p>

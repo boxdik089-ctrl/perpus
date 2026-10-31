@@ -196,7 +196,7 @@ export function AdminMobileNav() {
     <>
       {/* Top micro progress bar when navigating */}
       {pendingPath && (
-        <div className="fixed top-0 inset-x-0 h-0.5 bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-600 z-[70] animate-pulse pointer-events-none" />
+        <div className="fixed top-0 inset-x-0 h-0.5 bg-[#00367E] dark:bg-sky-500 z-[70] pointer-events-none" />
       )}
 
       {/* Bottom Safe Spacing Provider (Prevents page content from being clipped) */}

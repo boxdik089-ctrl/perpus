@@ -35,12 +35,8 @@ export default async function SirkulasiPage() {
                   className="w-7 h-7 object-contain rounded-lg bg-white/60 dark:bg-white/10 border border-stone-200 dark:border-white/20 p-0.5 shrink-0 hidden xs:block"
                 />
                 <div className="min-w-0">
-                  <h1 className="text-xs sm:text-base font-bold text-stone-900 dark:text-white leading-tight flex items-center gap-1.5 truncate">
-                    <span>Sirkulasi Scanner</span>
-                    <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 shrink-0">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      MEJA LAYANAN
-                    </span>
+                  <h1 className="text-xs sm:text-base font-bold text-stone-900 dark:text-white leading-tight truncate">
+                    Sirkulasi Scanner
                   </h1>
                   <p className="text-[10px] sm:text-xs text-stone-500 dark:text-slate-400 hidden sm:block truncate">
                     Scan kartu anggota → scan buku → pinjam/kembali otomatis

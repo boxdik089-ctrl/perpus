@@ -116,9 +116,6 @@ export default async function AdminDashboard() {
     <div className="p-3 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 max-w-7xl mx-auto">
       {/* ─── EXECUTIVE DASHBOARD HERO HEADER ─── */}
       <header className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-slate-200/90 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 shadow-sm p-4 sm:p-6 lg:p-7 transition-all">
-        {/* Soft background accents */}
-        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-500/5 dark:bg-blue-400/5 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-sky-500/5 dark:bg-sky-400/5 blur-3xl pointer-events-none" />
         <div className="absolute right-6 bottom-2 opacity-[0.035] dark:opacity-[0.06] pointer-events-none select-none hidden md:block">
           <img
             src="/assets/logo.png"
@@ -181,16 +178,11 @@ export default async function AdminDashboard() {
             </p>
           </div>
 
-          {/* Quick Badges / Date & Stats Pills */}
-          <div className="flex flex-wrap items-center gap-2 self-start md:self-end shrink-0">
+          {/* Functional Date Indicator */}
+          <div className="flex items-center self-start md:self-end shrink-0">
             <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-2xs">
-              <Calendar className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
+              <Calendar className="w-3.5 h-3.5 text-[#00367E] dark:text-sky-400 shrink-0" />
               <span>{todayStr}</span>
-            </div>
-
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/40 border border-sky-200/60 dark:border-sky-800/40 text-sky-800 dark:text-sky-300 text-xs font-semibold shadow-2xs">
-              <BookOpen className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
-              <span>{totalBuku} Judul Koleksi</span>
             </div>
           </div>
         </div>

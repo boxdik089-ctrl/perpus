@@ -365,12 +365,8 @@ export default function KunjunganClient({
                   alt="Logo Kolaborasi Sumut Berkah"
                   className="h-5 sm:h-6 w-auto object-contain shrink-0"
                 />
-                <h1 className="text-sm sm:text-lg font-bold text-stone-900 dark:text-white tracking-tight truncate flex items-center gap-2">
-                  <span>Statistik Pengunjung</span>
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold" title="Update otomatis real-time tanpa refresh halaman">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    LIVE
-                  </span>
+                <h1 className="text-sm sm:text-lg font-bold text-stone-900 dark:text-white tracking-tight truncate">
+                  Statistik Pengunjung
                 </h1>
               </div>
             </div>
@@ -883,7 +879,7 @@ export default function KunjunganClient({
 
                         {/* Top count or Puncak badge */}
                         {isPeak ? (
-                          <span className="text-[9px] font-black px-1 rounded bg-rose-500 text-white animate-pulse shadow-md">
+                          <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-rose-600 text-white shadow-xs">
                             {jumlah}
                           </span>
                         ) : isPositive ? (

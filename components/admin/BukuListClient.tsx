@@ -931,7 +931,7 @@ export function BukuListClient({ initialBuku }: { initialBuku: BukuListItem[] })
       {selectedIds.size > 0 && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-slate-900/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl px-4 sm:px-6 py-3 flex items-center gap-3 sm:gap-4 text-white animate-in slide-in-from-bottom-5 duration-200 flex-wrap max-w-[95vw]">
           <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
+            <span className="w-2 h-2 rounded-full bg-rose-500" />
             <span>{selectedIds.size} buku terpilih</span>
           </div>
 

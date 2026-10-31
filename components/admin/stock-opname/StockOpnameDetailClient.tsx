@@ -509,7 +509,7 @@ export function StockOpnameDetailClient({
                     : "bg-stone-500/15 text-stone-600 dark:text-slate-400 border border-stone-300 dark:border-slate-700"
                 }`}
               >
-                {sesi.status === "BERJALAN" && <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />}
+                {sesi.status === "BERJALAN" && <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />}
                 {sesi.status === "BERJALAN" ? "Audit Sedang Berjalan" : sesi.status}
               </span>
 

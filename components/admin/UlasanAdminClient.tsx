@@ -13,7 +13,6 @@ import {
   Loader2,
   ExternalLink,
   MessageSquare,
-  Sparkles,
   User,
   ArrowUpDown,
 } from "lucide-react";

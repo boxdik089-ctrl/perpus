@@ -221,9 +221,8 @@ export function IsbnFetcher({ onFetch }: IsbnFetcherProps) {
             <span className="text-xs font-bold text-slate-900 dark:text-white block">
               Scan Kode Batang / ISBN (Mesin Scanner Laser)
             </span>
-            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium flex items-center gap-1">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Alat Scanner Siap: Tinggal tembak garis kode batang di belakang buku
+            <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+              Arahkan scanner ke kode batang atau ketik ISBN
             </span>
           </div>
         </div>

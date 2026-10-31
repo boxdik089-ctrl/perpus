@@ -141,7 +141,7 @@ export function StockOpnameListClient({
       case "BERJALAN":
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
             Sedang Audit
           </span>
         );

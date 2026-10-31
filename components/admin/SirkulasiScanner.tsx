@@ -374,8 +374,7 @@ export function SirkulasiScanner() {
       {/* KANAN: log aktivitas */}
       <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-stone-200 dark:border-slate-800 shadow-md flex flex-col max-h-[calc(100vh-8rem)] overflow-hidden">
         <div className="px-5 py-4 border-b border-stone-200 dark:border-slate-800 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-stone-900 dark:text-white flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <h2 className="text-sm font-bold text-stone-900 dark:text-white">
             Log Aktivitas
           </h2>
           {log.length > 0 && (
