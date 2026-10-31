@@ -444,155 +444,240 @@ export function CetakLabelBukuClient({
 
           // Draw Border if enabled
           if (showBorder) {
-            doc.setDrawColor(200, 200, 200);
+            doc.setDrawColor(203, 213, 225); // Slate-300
             doc.setLineWidth(0.2);
-            doc.roundedRect(x, y, w, h, 1.5, 1.5, "S");
+            doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
           }
 
           if (labelMode === "COMBI") {
-            // Sisi Kiri: Spine (35% width), Sisi Kanan: Barcode (65% width)
-            const spineW = w * 0.35;
-            const barcodeW = w - spineW;
+            const spineW = w * 0.35; // 22.4mm
+            const barcodeW = w - spineW; // 41.6mm
 
-            // Garis Pemisah Spine & Barcode
-            doc.setDrawColor(210, 215, 225);
+            // Vertical divider line
+            doc.setDrawColor(203, 213, 225);
             doc.setLineWidth(0.2);
             doc.line(x + spineW, y + 1.5, x + spineW, y + h - 1.5);
 
-            // Left Side: Spine Box
+            // --- Left Side: Spine ---
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(5);
-              doc.setTextColor(30, 41, 59);
-              doc.text("SMKN 1", x + spineW / 2, y + 3.2, { align: "center" });
-              doc.text("BERINGIN", x + spineW / 2, y + 5.5, { align: "center" });
-              doc.setDrawColor(210, 215, 225);
-              doc.setLineWidth(0.2);
-              doc.line(x + 1.5, y + 6.8, x + spineW - 1.5, y + 6.8);
+              doc.setFontSize(5.2);
+              doc.setTextColor(15, 23, 42);
+              doc.text("SMKN 1", x + spineW / 2, y + 3.0, { align: "center", baseline: "middle" });
+              doc.text("BERINGIN", x + spineW / 2, y + 5.2, { align: "center", baseline: "middle" });
+
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.18);
+              doc.line(x + 1.5, y + 6.6, x + spineW - 1.5, y + 6.6);
             }
 
-            const spineStartY = showHeaderInstansi ? 10.5 : 7;
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(8.5);
+            doc.setFontSize(9.0);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + spineW / 2, y + spineStartY, { align: "center" });
+            doc.text(item.klasifikasi || "000", x + spineW / 2, y + 11.5, { align: "center", baseline: "middle" });
+
+            doc.setFontSize(8.0);
+            doc.setTextColor(30, 41, 59);
+            doc.text(item.authorCode, x + spineW / 2, y + 15.6, { align: "center", baseline: "middle" });
 
             doc.setFontSize(7.5);
-            doc.text(item.authorCode, x + spineW / 2, y + spineStartY + 4, { align: "center" });
+            doc.setTextColor(51, 65, 85);
+            doc.text(item.titleCode, x + spineW / 2, y + 19.5, { align: "center", baseline: "middle" });
 
-            doc.setFontSize(7);
-            doc.setFont("helvetica", "normal");
-            doc.text(item.titleCode, x + spineW / 2, y + spineStartY + 7.5, { align: "center" });
+            // Left Pill
+            const lPillW = 14;
+            const lPillH = 3.6;
+            const lPillX = x + (spineW - lPillW) / 2;
+            const lPillY = y + h - 4.8;
 
-            doc.setFontSize(6);
+            doc.setFillColor(241, 245, 249);
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.15);
+            doc.roundedRect(lPillX, lPillY, lPillW, lPillH, 0.8, 0.8, "FD");
+
             doc.setFont("helvetica", "bold");
+            doc.setFontSize(5.6);
             doc.setTextColor(71, 85, 105);
-            doc.text(`c.${item.copyNumber}`, x + spineW / 2, y + h - 2, { align: "center" });
+            doc.text(`c.${item.copyNumber}`, lPillX + lPillW / 2, lPillY + lPillH / 2, { align: "center", baseline: "middle" });
 
-            // Right Side: Barcode Box
+            // --- Right Side: Barcode ---
             const bX = x + spineW + 1;
             const bW = barcodeW - 2;
 
             if (showHeaderInstansi) {
-              doc.setFontSize(5.8);
-              doc.setTextColor(30, 41, 59);
               doc.setFont("helvetica", "bold");
-              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3.8, { align: "center" });
-              doc.setDrawColor(210, 215, 225);
-              doc.setLineWidth(0.2);
-              doc.line(bX + 1, y + 5, bX + bW - 1, y + 5);
+              doc.setFontSize(5.8);
+              doc.setTextColor(15, 23, 42);
+              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3.8, { align: "center", baseline: "middle" });
+
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.18);
+              doc.line(bX + 1.5, y + 5.3, bX + bW - 1.5, y + 5.3);
             }
 
-            // Barcode Image
+            // Barcode image
             const bcImg = barcodeCache[item.kode];
-            const barcodeY = showHeaderInstansi ? y + 6.2 : y + 3.5;
+            const rBcW = Math.min(bW - 8, 28);
+            const rBcH = 6.5;
+            const rBcX = bX + (bW - rBcW) / 2;
+            const rBcY = y + 6.3;
+
             if (bcImg) {
-              doc.addImage(bcImg, "PNG", bX + 2, barcodeY, bW - 4, 8.5);
+              doc.addImage(bcImg, "PNG", rBcX, rBcY, rBcW, rBcH);
             }
 
-            // Barcode Number text
-            doc.setFontSize(7.5);
-            doc.setFont("courier", "bold");
-            doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, bX + bW / 2, barcodeY + 11.8, { align: "center" });
-
-            // Book Title (max 2 lines)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(5.8);
+            doc.setFontSize(7.0);
             doc.setTextColor(15, 23, 42);
-            const truncatedTitle = doc.splitTextToSize(item.judul, bW - 2);
-            doc.text(truncatedTitle.slice(0, 2), bX + bW / 2, barcodeY + 15, { align: "center" });
+            doc.text(item.kode, bX + bW / 2, rBcY + rBcH + 2.3, { align: "center", baseline: "middle" });
 
+            // Title
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(5.5);
+            doc.setTextColor(30, 41, 59);
+            const rawLines = doc.splitTextToSize(item.judul, bW - 4);
+            let titleLines = rawLines.slice(0, 2);
+            if (rawLines.length > 2) {
+              let last = titleLines[1];
+              if (last.length > 3) last = last.substring(0, last.length - 3) + "...";
+              titleLines[1] = last;
+            }
+
+            const rTitleStartY = rBcY + rBcH + 4.8;
+            if (titleLines.length === 1) {
+              doc.text(titleLines[0], bX + bW / 2, rTitleStartY + 1.0, { align: "center", baseline: "middle" });
+            } else {
+              doc.text(titleLines[0], bX + bW / 2, rTitleStartY, { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], bX + bW / 2, rTitleStartY + 2.4, { align: "center", baseline: "middle" });
+            }
+
+            // Right location pill
             if (showLocation) {
+              const rPillW = Math.min(bW - 8, 28);
+              const rPillH = 3.6;
+              const rPillX = bX + (bW - rPillW) / 2;
+              const rPillY = y + h - 4.8;
+
+              doc.setFillColor(241, 245, 249);
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.15);
+              doc.roundedRect(rPillX, rPillY, rPillW, rPillH, 0.8, 0.8, "FD");
+
+              doc.setFont("helvetica", "bold");
               doc.setFontSize(5.2);
-              doc.setFont("helvetica", "normal");
-              doc.setTextColor(100, 116, 139);
-              doc.text(`Lokasi: ${item.rakNama}`, bX + bW / 2, y + h - 1.5, { align: "center" });
+              doc.setTextColor(71, 85, 105);
+              doc.text(`Lokasi: ${item.rakNama}`, rPillX + rPillW / 2, rPillY + rPillH / 2, { align: "center", baseline: "middle" });
             }
           } else if (labelMode === "SPINE_ONLY") {
-            // Full Spine Label
+            // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
               doc.setFontSize(7.5);
-              doc.setTextColor(30, 41, 59);
-              doc.text("SMKN 1 BERINGIN", x + w / 2, y + 4.5, { align: "center" });
-              doc.setDrawColor(210, 215, 225);
-              doc.setLineWidth(0.2);
-              doc.line(x + 3, y + 6.2, x + w - 3, y + 6.2);
+              doc.setTextColor(15, 23, 42);
+              doc.text("SMKN 1 BERINGIN", x + w / 2, y + 4.2, { align: "center", baseline: "middle" });
+
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.18);
+              doc.line(x + 3, y + 6.0, x + w - 3, y + 6.0);
             }
 
-            const startY = showHeaderInstansi ? 11.5 : 7.5;
-
+            // 2. Call Number Stack (DDC + Author + Title)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(11);
+            doc.setFontSize(12);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + w / 2, y + startY, { align: "center" });
+            doc.text(item.klasifikasi || "000", x + w / 2, y + 11.2, { align: "center", baseline: "middle" });
+
+            doc.setFontSize(10);
+            doc.setTextColor(30, 41, 59);
+            doc.text(item.authorCode, x + w / 2, y + 16.0, { align: "center", baseline: "middle" });
 
             doc.setFontSize(9.5);
-            doc.text(item.authorCode, x + w / 2, y + startY + 5, { align: "center" });
+            doc.setTextColor(51, 65, 85);
+            doc.text(item.titleCode, x + w / 2, y + 20.4, { align: "center", baseline: "middle" });
 
-            doc.setFontSize(9);
-            doc.setFont("helvetica", "normal");
-            doc.text(item.titleCode, x + w / 2, y + startY + 9.5, { align: "center" });
+            // 3. Bottom Pill Badge
+            const pillText = `c.${item.copyNumber} · ${item.isReferensi ? "[R]" : "Koleksi"}`;
+            const pillW = 32;
+            const pillH = 4.2;
+            const pillX = x + (w - pillW) / 2;
+            const pillY = y + h - 5.5;
 
-            doc.setFontSize(7);
+            doc.setFillColor(241, 245, 249);
+            doc.setDrawColor(226, 232, 240);
+            doc.setLineWidth(0.15);
+            doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
+
             doc.setFont("helvetica", "bold");
+            doc.setFontSize(6);
             doc.setTextColor(71, 85, 105);
-            doc.text(`c.${item.copyNumber} · ${item.isReferensi ? "[R]" : "Koleksi"}`, x + w / 2, y + h - 2.5, { align: "center" });
+            doc.text(pillText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
           } else {
-            // BARCODE ONLY
+            // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(7);
-              doc.setTextColor(30, 41, 59);
-              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + 4.2, { align: "center" });
-              doc.setDrawColor(210, 215, 225);
-              doc.setLineWidth(0.2);
-              doc.line(x + 3, y + 5.8, x + w - 3, y + 5.8);
+              doc.setFontSize(6.8);
+              doc.setTextColor(15, 23, 42);
+              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + 3.8, { align: "center", baseline: "middle" });
+
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.18);
+              doc.line(x + 3, y + 5.3, x + w - 3, y + 5.3);
             }
 
-            const barcodeY = showHeaderInstansi ? y + 7.5 : y + 4;
+            // 2. Barcode Image
             const bcImg = barcodeCache[item.kode];
+            const bcW = Math.min(w * 0.65, 38);
+            const bcH = 6.8;
+            const bcX = x + (w - bcW) / 2;
+            const bcY = y + 6.3;
+
             if (bcImg) {
-              doc.addImage(bcImg, "PNG", x + 5, barcodeY, w - 10, 9);
+              doc.addImage(bcImg, "PNG", bcX, bcY, bcW, bcH);
             }
 
-            doc.setFontSize(8);
-            doc.setFont("courier", "bold");
-            doc.setTextColor(15, 23, 42);
-            doc.text(`* ${item.kode} *`, x + w / 2, barcodeY + 12.5, { align: "center" });
-
+            // 3. Barcode Code Text
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6.5);
+            doc.setFontSize(7.5);
             doc.setTextColor(15, 23, 42);
-            const titleLines = doc.splitTextToSize(item.judul, w - 6);
-            doc.text(titleLines.slice(0, 2), x + w / 2, barcodeY + 16, { align: "center" });
+            doc.text(item.kode, x + w / 2, bcY + bcH + 2.4, { align: "center", baseline: "middle" });
 
+            // 4. Book Title (Max 2 lines)
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(6.2);
+            doc.setTextColor(30, 41, 59);
+            const rawLines = doc.splitTextToSize(item.judul, w - 8);
+            let titleLines = rawLines.slice(0, 2);
+            if (rawLines.length > 2) {
+              let last = titleLines[1];
+              if (last.length > 3) last = last.substring(0, last.length - 3) + "...";
+              titleLines[1] = last;
+            }
+
+            const titleStartY = bcY + bcH + 5.0;
+            if (titleLines.length === 1) {
+              doc.text(titleLines[0], x + w / 2, titleStartY + 1.2, { align: "center", baseline: "middle" });
+            } else {
+              doc.text(titleLines[0], x + w / 2, titleStartY, { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], x + w / 2, titleStartY + 2.7, { align: "center", baseline: "middle" });
+            }
+
+            // 5. Bottom Location Pill Badge
             if (showLocation) {
-              doc.setFontSize(5.5);
-              doc.setFont("helvetica", "normal");
-              doc.setTextColor(100, 116, 139);
-              doc.text(`Lokasi: ${item.rakNama}`, x + w / 2, y + h - 2, { align: "center" });
+              const badgeText = `${item.rakNama}  ·  c.${item.copyNumber}`;
+              const pillW = Math.min(w - 14, 38);
+              const pillH = 3.8;
+              const pillX = x + (w - pillW) / 2;
+              const pillY = y + h - 5.0;
+
+              doc.setFillColor(241, 245, 249);
+              doc.setDrawColor(226, 232, 240);
+              doc.setLineWidth(0.15);
+              doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
+
+              doc.setFont("helvetica", "bold");
+              doc.setFontSize(5.4);
+              doc.setTextColor(71, 85, 105);
+              doc.text(badgeText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
             }
           }
         }
