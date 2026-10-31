@@ -28,14 +28,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Pesan tidak boleh kosong" }, { status: 400 });
     }
 
-    // Batasi panjang pesan maksimal 500 karakter & bersihkan null-byte
-    const raw = sanitizeInput(message, 500);
+    // Batasi panjang pesan maksimal 600 karakter & bersihkan null-byte
+    const raw = sanitizeInput(message, 600);
     if (!raw) {
       return NextResponse.json({ error: "Pesan tidak boleh kosong" }, { status: 400 });
     }
     const cleanMsg = raw.toLowerCase().trim();
 
-    // 1. Ekstrak kata kunci untuk pencarian di database buku
+    // 2. Ekstrak kata kunci untuk pencarian di database buku
     const stopWords = new Set([
       "buku", "tentang", "yang", "mau", "ada", "rekomendasi", "cari", "kak", "tolong", 
       "dong", "buat", "baca", "apa", "aja", "saya", "aku", "rekomendasikan", "pengen", 
@@ -45,9 +45,9 @@ export async function POST(req: Request) {
       .replace(/[^\w\s]/g, " ")
       .split(/\s+/)
       .filter((w) => w.length > 2 && !stopWords.has(w))
-      .slice(0, 5); // Batasi maksimal 5 kata kunci untuk mencegah Query DoS & ReDoS
+      .slice(0, 5);
 
-    // Cari buku relevan di database
+    // Cari buku relevan di database perpustakaan
     let relevantBooks: any[] = [];
     if (searchTerms.length > 0) {
       relevantBooks = await prisma.buku.findMany({
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
               { judul: { contains: term, mode: "insensitive" } },
               { penulis: { contains: term, mode: "insensitive" } },
               { kategori: { contains: term, mode: "insensitive" } },
+              { klasifikasi: { contains: term, mode: "insensitive" } },
             ],
           })),
         },
@@ -102,63 +103,118 @@ export async function POST(req: Request) {
 
     const catalogToUse = (relevantBooks.length > 0 ? relevantBooks : fallbackCatalog).slice(0, 5);
 
-    // 2. OPSIONAL: JIKA ADA GOOGLE GEMINI API KEY AKTIF
+    // 3. UTAMA: GOOGLE GEMINI AI ENGINE DENGAN MULTI-TURN CONVERSATION MEMORY
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey && geminiKey.trim() !== "") {
       try {
         const catalogSummary = catalogToUse
           .map((b) => {
-            const rak = b.eksemplar?.[0]?.rak?.nama ? ` (Rak: ${b.eksemplar[0].rak.nama})` : "";
-            const ebook = b.is_ebook || b.file_url ? " [E-Book]" : "";
-            return `- "${b.judul}" oleh ${b.penulis} [Stok: ${b.stok_tersedia}]${rak}${ebook}`;
+            const rak = b.eksemplar?.[0]?.rak?.nama ? ` (Rak Fisik: ${b.eksemplar[0].rak.nama})` : "";
+            const ebook = b.is_ebook || b.file_url ? " [Tersedia E-Book Online]" : "";
+            return `- "${b.judul}" karya ${b.penulis} [Stok: ${b.stok_tersedia}]${rak}${ebook}`;
           })
           .join("\n");
 
-        const prompt = `Kamu adalah "Tanya Pustaka", pustakawan digital resmi Perpustakaan SMK Negeri 1 Beringin.
-Karakter:
-- Bersikap layaknya pustakawan sekolah profesional: ramah, sopan, membantu, dan edukatif.
-- Hindari bahasa robot atau istilah teknis AI yang berlebihan. Gunakan bahasa Indonesia yang santun dan mudah dipahami siswa serta guru.
-- Format jawaban rapi dengan poin bullet dan penekanan teks penting.
-- DILARANG menggunakan emoji. Jangan gunakan emoji dalam bentuk apa pun pada seluruh respon.
-- Jam operasional perpustakaan: Senin - Jumat pukul 07.30 s/d 16.00 WIB (Katalog & E-Book dapat diakses online 24 jam).
-- Jurusan SMKN 1 Beringin: PPLG, TJKT, Tata Busana, Kuliner, Perhotelan, Usaha Layanan Wisata (ULW), Tata Kecantikan.
-- Masa peminjaman buku cetak: 7 hari kalender, dapat dilakukan mandiri di Kiosk perpustakaan.
+        const systemPrompt = `Kamu adalah "Tanya Pustaka", pustakawan virtual cerdas, berilmu luas, dan asisten belajar resmi di Perpustakaan SMK Negeri 1 Beringin.
 
-Katalog Buku Relevan:
+Karakter & Nilai Utama:
+- Berpendidikan tinggi, ramah, edukatif, santun, dan sangat menguasai materi kejuruan maupun akademik sekolah.
+- Mampu menjawab beragam topik: materi pelajaran, tugas sekolah, konsep teori, penjelasan coding, rumus sains, bimbingan kejuruan, hingga rekomendasi dan ringkasan buku.
+- Menjawab dengan bahasa Indonesia yang jelas, runut, memakai poin-poin terstruktur jika diperlukan, dan memberikan contoh konkret.
+- DILARANG menggunakan kata-kata klise AI slop: "delve", "tapestry", "landscape", "pivotal", "robust", "seamlessly", "di era digital yang serba cepat ini".
+- Hindari penggunaan emoji yang berlebihan. Respon harus tetap rapi, profesional, dan nyaman dibaca.
+
+Informasi Resmi SMKN 1 Beringin:
+- Motto Sekolah: "Berilmu, Berkarakter, Berdaya Saing".
+- 7 Konsentrasi Keahlian / Jurusan:
+  1. PPLG (Pengembangan Perangkat Lunak dan Gim)
+  2. TJKT (Teknik Jaringan Komputer dan Telekomunikasi)
+  3. Desain & Produksi Busana (Tata Busana)
+  4. Kuliner (Tata Boga)
+  5. Perhotelan (Hospitality)
+  6. Usaha Layanan Wisata (ULW)
+  7. Tata Kecantikan & Spa
+- Jam Layanan Fisik Perpustakaan: Senin - Jumat pukul 07.30 s/d 16.00 WIB (Portal Katalog & E-Book dapat diakses 24 jam).
+- Peminjaman Buku Cetak: Durasi 7 hari kalender, peminjaman mandiri melalui Kiosk digital dengan scan NISN/kartu siswa dan barcode buku. Pengingat batas waktu dikirim otomatis via WhatsApp.
+
+Data Buku Relevan di Perpustakaan Saat Ini:
 ${catalogSummary || "- Katalog umum perpustakaan tersedia"}
 
-Pesan Siswa: "${raw}"`;
+Jika siswa bertanya tentang buku atau rekomendasi bacaan, sebutkan judul buku yang relevan dari data di atas beserta informasi rak dan stoknya secara jelas. Jika siswa bertanya tentang konsep pelajaran/teori/kejuruan, jelaskan dengan cerdas, akurat, dan mudah dipahami.`;
 
-        const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey.trim()}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              contents: [{ parts: [{ text: prompt }] }],
-            }),
-            signal: AbortSignal.timeout(5000), // Timeout 5 detik agar tidak menggantung
-          }
-        );
+        // Susun riwayat obrolan (Multi-turn conversation memory)
+        const contents: Array<{ role: "user" | "model"; parts: Array<{ text: string }> }> = [];
 
-        if (geminiRes.ok) {
-          const aiData = await geminiRes.json();
-          const replyText = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (replyText) {
-            const matchedBooks = extractRecommendedBooks(replyText, cleanMsg, catalogToUse);
-            return NextResponse.json({
-              reply: replyText,
-              recommendations: matchedBooks,
-              provider: "pustaka-ai",
-            });
+        if (Array.isArray(history) && history.length > 0) {
+          // Ambil maksimal 8 percakapan terakhir agar konteks utuh tapi hemat token
+          for (const item of history.slice(-8)) {
+            if (item && typeof item.text === "string" && item.text.trim()) {
+              contents.push({
+                role: item.sender === "user" ? "user" : "model",
+                parts: [{ text: item.text.slice(0, 800) }],
+              });
+            }
           }
         }
+
+        // Tambahkan pesan user saat ini
+        contents.push({
+          role: "user",
+          parts: [{ text: raw }],
+        });
+
+        // Request ke Gemini 2.0 Flash (dengan fallback otomatis ke Gemini 1.5 Flash)
+        const candidateModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
+        let aiReplyText: string | null = null;
+
+        for (const modelName of candidateModels) {
+          try {
+            const geminiRes = await fetch(
+              `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${geminiKey.trim()}`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  system_instruction: {
+                    parts: [{ text: systemPrompt }],
+                  },
+                  contents: contents,
+                  generationConfig: {
+                    temperature: 0.7,
+                    maxOutputTokens: 1200,
+                  },
+                }),
+                signal: AbortSignal.timeout(12000), // Timeout 12 detik
+              }
+            );
+
+            if (geminiRes.ok) {
+              const aiData = await geminiRes.json();
+              const text = aiData?.candidates?.[0]?.content?.parts?.[0]?.text;
+              if (text && text.trim()) {
+                aiReplyText = text.trim();
+                break;
+              }
+            }
+          } catch (modelErr) {
+            console.warn(`[Gemini API] Percobaan model ${modelName} gagal:`, modelErr);
+          }
+        }
+
+        if (aiReplyText) {
+          const matchedBooks = extractRecommendedBooks(aiReplyText, cleanMsg, catalogToUse);
+          return NextResponse.json({
+            reply: aiReplyText,
+            recommendations: matchedBooks,
+            provider: "gemini-ai",
+          });
+        }
       } catch (err: any) {
-        console.warn("[Gemini Fallback] Mengalihkan ke Smart Conversational Engine:", err?.message);
+        console.warn("[Gemini API Fallback] Gagal memanggil Gemini, menggunakan mesin lokal:", err?.message);
       }
     }
 
-    // 3. SMART CONVERSATIONAL ENGINE (Bawaan cepat, tanpa ketergantungan API pihak ketiga yang down)
+    // 4. MESIN PENGETAHUAN CERDAS BAWAAN (OFFLINE ENHANCED ENGINE)
     const smartFallback = generateSmartResponse(raw, cleanMsg, relevantBooks, fallbackCatalog);
     return NextResponse.json(smartFallback);
   } catch (error: any) {
@@ -192,9 +248,8 @@ function extractRecommendedBooks(replyText: string, cleanMsg: string, books: any
   }));
 }
 
-// Mesin Cerdas Berbasis Pengetahuan Sekolah & Database Lokal
+// Mesin Cerdas Berbasis Pengetahuan Sekolah & Database Lokal (Offline Fallback Engine)
 function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any[], fallbackCatalog: any[]) {
-  // Format helper buku
   const mapBooks = (list: any[]) =>
     list.slice(0, 3).map((b) => ({
       id: b.id,
@@ -211,7 +266,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: `Wajar sekali jika ada hari-hari di mana kita merasa lelah, sedih, atau terbebani. Perasaan yang sedang kamu alami saat ini sangat manusiawi dan valid.\n\nJangan memaksakan diri terlalu keras. Ambil jeda sejenak, tarik napas perlahan, dan istirahat sejenak. Jika kamu butuh pengalihan pikiran yang menenangkan, membaca cerita santai atau novel fiksi di perpustakaan bisa jadi teman yang baik.\n\nTetap semangat, setiap tantangan akan membantumu tumbuh lebih kuat.`,
       recommendations: mapBooks(fallbackCatalog),
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
@@ -220,7 +275,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: `Senang mendengarnya. Tetap jaga semangat belajar dan energi positifmu. Semoga harimu di SMK Negeri 1 Beringin selalu produktif dan menyenangkan.`,
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
@@ -234,7 +289,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: greetings[Math.floor(Math.random() * greetings.length)],
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
@@ -243,16 +298,16 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: `Kabar baik dan sistem perpustakaan beroperasi normal. Terima kasih sudah menyapa. Bagaimana dengan kegiatan belajarmu hari ini?`,
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
   // E. Identitas
   if (/siapa kamu|kamu siapa|tentang kamu|nama kamu|siapa namamu/i.test(cleanMsg)) {
     return {
-      reply: `Saya **Tanya Pustaka**, layanan bantuan virtual resmi di **Perpustakaan SMK Negeri 1 Beringin**.\n\nSaya siap membantu siswa dan guru dalam:\n- Menemukan buku cetak di rak fisik dan koleksi e-book digital.\n- Informasi materi pelajaran umum dan 7 konsentrasi keahlian SMK.\n- Informasi jam operasional dan tata tertib peminjaman di Kiosk.\n- Rekomendasi bacaan untuk mendukung kegiatan literasi sekolah.`,
+      reply: `Saya **Tanya Pustaka**, pustakawan virtual dan asisten literasi resmi di **Perpustakaan SMK Negeri 1 Beringin**.\n\nSaya siap membantu siswa dan guru dalam:\n- Menemukan buku cetak di rak fisik dan koleksi e-book digital.\n- Menjelaskan materi pelajaran umum dan 7 konsentrasi keahlian SMK.\n- Informasi jam operasional dan tata tertib peminjaman di Kiosk.\n- Rekomendasi bacaan untuk mendukung kegiatan literasi sekolah.`,
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
@@ -260,7 +315,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: `Layanan Tanya Pustaka dikembangkan oleh tim Perpustakaan SMK Negeri 1 Beringin untuk memudahkan seluruh warga sekolah mengakses informasi pustaka dan buku secara mandiri.`,
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
@@ -269,7 +324,7 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: `**Jam Operasional Perpustakaan SMKN 1 Beringin:**\n\n- **Hari:** Senin s/d Jumat\n- **Waktu Layanan Fisik:** 07.30 – 16.00 WIB\n- **Sabtu & Minggu:** Libur / Tutup\n\n*Catatan:* Portal perpustakaan web dan koleksi **E-Book** dapat dibaca online **24 jam** nonstop dari HP atau laptop.`,
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
@@ -278,80 +333,89 @@ function generateSmartResponse(raw: string, cleanMsg: string, relevantBooks: any
     return {
       reply: `**Panduan Peminjaman Buku di SMKN 1 Beringin:**\n\n1. Cari buku di katalog web ini atau langsung di rak fisik perpustakaan.\n2. Datangi mesin **Kiosk Mandiri** di perpustakaan.\n3. Masukkan NISN atau scan barcode kartu perpustakaan kamu.\n4. Scan barcode buku yang ingin dipinjam.\n5. Durasi peminjaman adalah **7 hari** (dapat diperpanjang).\n6. Pengingat otomatis akan dikirimkan via WhatsApp sebelum masa pinjam berakhir agar terhindar dari denda.`,
       recommendations: [],
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
-  // H. Jurusan di SMKN 1 Beringin
-  if (/jurusan|pplg|tjkt|busana|kuliner|perhotelan|ulw|kecantikan|sekolah/i.test(cleanMsg)) {
+  // H. Pengetahuan 7 Konsentrasi Keahlian SMKN 1 Beringin
+  if (/pplg|coding|pemrograman|web|software|aplikasi|frontend|backend|database|sql|python|javascript|php/i.test(cleanMsg)) {
     return {
-      reply: `**7 Kompetensi Keahlian di SMK Negeri 1 Beringin:**\n\n1. **PPLG** (Pengembangan Perangkat Lunak dan Gim) — Rekayasa perangkat lunak, pemrograman web, mobile, dan basis data.\n2. **TJKT** (Teknik Jaringan Komputer & Telekomunikasi) — Jaringan komputer, administrasi server, fiber optic, dan keamanan jaringan.\n3. **Busana** (Tata Busana) — Desain busana, pembuatan pola, dan produksi busana.\n4. **Kuliner** (Tata Boga) — Pengolahan makanan nusantara/internasional, tata hidang, dan pastry.\n5. **Perhotelan** — Layanan front office, tata graha (housekeeping), dan operasional hotel.\n6. **ULW** (Usaha Layanan Wisata) — Pemanduan wisata, perencanaan perjalanan, dan tiket reservasi.\n7. **Kecantikan & Spa** — Perawatan kulit, tata rias, dan perawatan rambut.\n\nPerpustakaan menyediakan modul pelajaran dan buku referensi untuk seluruh jurusan ini.`,
-      recommendations: [],
-      provider: "pustaka-ai",
+      reply: `**Materi Kejuruan PPLG (Pengembangan Perangkat Lunak & Gim):**\n\nJurusan PPLG di SMKN 1 Beringin mempelajari pembuatan perangkat lunak, aplikasi web, mobile, dan game. Kunci sukses di jurusan ini:\n1. **Logika Dasar:** Struktur algoritma, variabel, percabangan (if/else), perulangan (loop), dan fungsi.\n2. **Web Development:** HTML5, CSS3/Tailwind, JavaScript modern, dan framework seperti React/Next.js.\n3. **Backend & Basis Data:** PHP/Node.js/Python serta perancangan database relasional SQL (MySQL/PostgreSQL).\n4. **Manajemen Versi:** Menguasai Git & GitHub untuk kolaborasi proyek.\n\nPerpustakaan menyediakan buku-buku pemrograman dan modul kejuruan di Rak Komputer & Informatika.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
     };
   }
 
-  // I. Coding & Pemrograman
-  if (/coding|pemrograman|javascript|python|php|html|css|database|sql|koding/i.test(cleanMsg)) {
-    const itBooks = (relevantBooks.length > 0 ? relevantBooks : fallbackCatalog).filter((b) =>
-      /komputer|program|coding|jaringan|it|informatika|web|data/i.test(b.judul + (b.kategori || ""))
-    );
-
+  if (/tjkt|jaringan|network|mikrotik|cisco|router|switch|lan|wan|ip address|subnetting|fiber|server/i.test(cleanMsg)) {
     return {
-      reply: `**Panduan Belajar Pemrograman:**\n\nKunci utama menguasai pemrograman adalah pemahaman konsep dasar dan latihan konsisten:\n1. Kuasai dasar logika pemrograman dan algoritma.\n2. Untuk Web: pelajari HTML, CSS, dan JavaScript secara bertahap.\n3. Untuk Backend & Data: pelajari bahasa pemrograman seperti PHP, Python, atau Node.js serta dasar SQL.\n4. Manfaatkan buku dan modul di perpustakaan sebagai referensi terstruktur.`,
-      recommendations: mapBooks(itBooks.length > 0 ? itBooks : fallbackCatalog),
-      provider: "pustaka-ai",
+      reply: `**Materi Kejuruan TJKT (Teknik Jaringan Komputer & Telekomunikasi):**\n\nJurusan TJKT di SMKN 1 Beringin fokus pada instalasi, konfigurasi, dan pengamanan infrastruktur jaringan:\n1. **Dasar Jaringan:** Model OSI Layer, TCP/IP, pengalamatan IPv4 & IPv6, serta teknik Subnetting (VLSM/CIDR).\n2. **Routing & Switching:** Konfigurasi perangkat router/switch (Mikrotik, Cisco), VLAN, DHCP, NAT, dan firewall.\n3. **Telekomunikasi:** Penyambungan kabel Fiber Optic (splicing), OTB, ODP, dan teknologi transmisi nirkabel.\n4. **Administrasi Server:** Instalasi Linux Server (Debian/Ubuntu Server), web server, DNS, dan cloud computing.\n\nModul praktikum dan buku referensi jaringan tersedia di Rak Jaringan & Sistem Komputer.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
     };
   }
 
-  // J. Pantun, Motivasi
-  if (/pantun/i.test(cleanMsg)) {
-    const pantunList = [
-      "Pergi ke pasar membeli durian,\nDurian manis harum baunya.\nJangan malas membaca kawan,\nIlmu berguna sepanjang usia.",
-      "Pagi hari embun menetes,\nBurung berkicau riang gembira.\nBelajar giat raihlah sukses,\nBanggakan sekolah dan orang tua.",
-      "Pohon beringin rindang daunnya,\nTempat berteduh kala panas terik.\nBuku jendela ilmu dunia,\nMembaca rutin masa depan terbaik.",
-    ];
+  if (/busana|fashion|pola baju|menjahit|kain|tekstil|draping/i.test(cleanMsg)) {
     return {
-      reply: pantunList[Math.floor(Math.random() * pantunList.length)],
-      recommendations: [],
-      provider: "pustaka-ai",
+      reply: `**Materi Kejuruan Desain & Produksi Busana:**\n\nJurusan Tata Busana membekali siswa keahlian merancang hingga memproduksi pakaian siap pakai (ready-to-wear) maupun adibusana:\n1. **Desain Busana:** Ilustrasi mode, proporsi anatomi tubuh, pemilihan warna, dan analisis tren busana.\n2. **Konstruksi Pola:** Pembuatan pola dasar wanita/pria/anak, pecah pola, grading, dan teknik draping.\n3. **Teknologi Menjahit:** Pengoperasian mesin jahit industri, mesin obras, teknik penyelesaian tepi, dan pemasangan furing.\n4. **Pengetahuan Tekstil:** Karakteristik serat alami (katun, sutra, wol) dan sintetis (poliester, nilon).\n\nBuku desain mode dan panduan pembuatan pola tersedia di Rak Tata Busana & Desain.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
     };
   }
 
-  if (/lelucon|jokes|lucu|humor|tebak-tebakan|tebakan/i.test(cleanMsg)) {
-    const jokes = [
-      "Kenapa keyboard komputer suka galau? Karena selalu ada 'Space' di antara tombol-tombolnya.",
-      "Kenapa buku matematika selalu kelihatan rumit? Karena dari dulu soal dan masalahnya belum selesai-selesai.",
-      "Pintu apa yang didorong sepuluh orang kuat tetap tidak terbuka? Jawabannya: Pintu yang tulisannya 'TARIK'.",
-    ];
+  if (/kuliner|tata boga|masak|resep|pastry|bakery|boga|food/i.test(cleanMsg)) {
     return {
-      reply: jokes[Math.floor(Math.random() * jokes.length)],
-      recommendations: [],
-      provider: "pustaka-ai",
+      reply: `**Materi Kejuruan Kuliner (Tata Boga):**\n\nJurusan Kuliner di SMKN 1 Beringin melatih keterampilan memasak profesional berstandar industri perhotelan dan restoran:\n1. **Sanitasi & K3:** Penerapan HACCP, personal hygiene, penanganan bahan makanan aman, dan keselamatan kerja dapur.\n2. **Pengolahan Nusantara & Kontinental:** Teknik dasar pengolahan (boiling, sautéing, roasting, braising), pembuatan stok, saus dasar (mother sauces), dan hidangan utama.\n3. **Pastry & Bakery:** Pembuatan roti (yeast dough), kue (sponge cake, butter cake), pastry (puff/choux), dan dekorasi kue.\n4. **Food Costing & Tata Hidang:** Perhitungan harga pokok produksi (HPP), penataan meja (table set-up), dan layanan restoran.\n\nBuku resep dan standar kuliner tersedia di Rak Kuliner & Tata Boga.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
     };
   }
 
-  if (/malas|semangat|motivasi|tips belajar/i.test(cleanMsg)) {
+  if (/perhotelan|hotel|front office|housekeeping|tamu|kamar/i.test(cleanMsg)) {
     return {
-      reply: `**Motivasi Belajar:**\n\n*\"Lelahnya belajar hari ini jauh lebih baik daripada perihnya penyesalan di masa depan.\"*\n\nJika merasa lelah, beristirahatlah sejenak untuk memulihkan energi, lalu lanjutkan kembali. Setiap hal yang kamu pelajari hari ini adalah bekal berharga untuk masa depanmu.`,
-      recommendations: mapBooks(fallbackCatalog),
-      provider: "pustaka-ai",
+      reply: `**Materi Kejuruan Perhotelan:**\n\nJurusan Perhotelan membina keahlian operasional akomodasi dan keramahan (hospitality service):\n1. **Front Office (Kantor Depan):** Prosedur reservasi, check-in, check-out, penanganan telepon (telephone courtesy), dan informasi tamu.\n2. **Housekeeping (Tata Graha):** Pembersihan dan penataan kamar tamu (making bed), pemeliharaan area publik, dan penanganan linen/laundry.\n3. **Hospitality Attitude:** Standar grooming, etika komunikasi profesional, dan penanganan keluhan tamu (guest complaints).\n\nBuku operasional hotel dan pelayanan tamu tersedia di Rak Pariwisata & Perhotelan.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
     };
   }
 
-  // K. Pencarian Buku Relevan di Database
+  if (/ulw|wisata|tour|travel|itinerary|pemandu/i.test(cleanMsg)) {
+    return {
+      reply: `**Materi Kejuruan Usaha Layanan Wisata (ULW):**\n\nJurusan ULW menyiapkan tenaga profesional di industri perjalanan dan pariwisata:\n1. **Perencanaan Perjalanan Wisata:** Penyusunan paket tour (itinerary planning), perhitungan harga paket wisata, dan reservasi tiket/akomodasi.\n2. **Pemanduan Wisata (Tour Guiding):** Teknik komunikasi pemandu wisata, penguasaan objek wisata lokal/nasional, dan etika mendampingi wisatawan.\n3. **MICE & Event:** Pengelolaan pertemuan, insentif, konvensi, dan pameran (MICE).\n\nModul pariwisata dan geografi wisata tersedia di Rak Layanan Wisata.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
+    };
+  }
+
+  if (/kecantikan|spa|makeup|tata rias|kulit|rambut/i.test(cleanMsg)) {
+    return {
+      reply: `**Materi Kejuruan Tata Kecantikan & Spa:**\n\nJurusan Kecantikan mengajarkan perawatan kecantikan estetika kulit, rambut, dan tata rias:\n1. **Perawatan Kulit Wajah:** Analisis jenis kulit, pembersihan mendalam (facial), masker, dan penggunaan alat kecantikan modern.\n2. **Tata Rias (Makeup Artistry):** Rias wajah sehari-hari, rias panggung, rias pengantin adat/modern, dan koreksi bentuk wajah.\n3. **Perawatan Rambut & Tubuh:** Pangkas rambut dasar, pewarnaan, penataan sanggul, perawatan tangan & kaki (manicure-pedicure), serta body massage/spa.\n\nBuku anatomi kecantikan dan modul tata rias tersedia di Rak Tata Kecantikan.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
+    };
+  }
+
+  // I. Mata Pelajaran Umum (Matematika, IPA, Bahasa)
+  if (/matematika|rumus|aljabar|trigonometri|kalkulus|integral|turunan|persamaan|hitung/i.test(cleanMsg)) {
+    return {
+      reply: `**Pembahasan Materi Matematika:**\n\nMatematika mengasah kemampuan bernalar logis dan pemecahan masalah secara terstruktur:\n- **Aljabar:** Persamaan linear, kuadrat, sistem persamaan (SPLDV/SPLTV), dan matriks.\n- **Geometri & Trigonometri:** Perhitungan sudut, teorema Pythagoras, aturan sinus/cosinus, dan bangun ruang.\n- **Statistika & Peluang:** Mean, median, modus, kuartil, dan permutasi/kombinasi.\n\nTips belajar: Jangan hanya menghafal rumus, pahami pola konsep dan latih soal-soal bertingkat dari mudah ke menantang. Buku pelajaran Matematika Kurikulum Merdeka tersedia lengkap di perpustakaan.`,
+      recommendations: mapBooks(relevantBooks.length > 0 ? relevantBooks : fallbackCatalog),
+      provider: "pustaka-local",
+    };
+  }
+
+  // J. Pencarian Buku Relevan di Database
   if (relevantBooks.length > 0) {
     return {
       reply: `Berikut beberapa buku di katalog Perpustakaan SMKN 1 Beringin yang sesuai dengan pencarian "${raw}":\n\nKamu dapat langsung membaca secara daring (jika bertanda E-Book) atau meminjam buku fisik di rak perpustakaan.`,
       recommendations: mapBooks(relevantBooks),
-      provider: "pustaka-ai",
+      provider: "pustaka-local",
     };
   }
 
-  // L. Respon Terbuka / General Conversation
+  // K. Respon Bantuan Terbuka (Ketika belum terkoneksi ke Gemini AI)
   return {
-    reply: `Terkait pertanyaan "${raw}", saya siap membantu memberikan referensi bahan ajar, informasi operasional perpustakaan, maupun katalog buku yang tersedia di SMKN 1 Beringin.\n\nBerikut beberapa rekomendasi buku pilihan yang dapat kamu baca:`,
+    reply: `Halo! Saya **Tanya Pustaka**, siap membantumu mencari referensi buku, materi 7 jurusan kejuruan SMKN 1 Beringin, atau layanan perpustakaan.\n\n*Tips Pintar:* Untuk mengaktifkan kecerdasan percakapan tanpa batas (mampu menjawab semua tugas, merangkum buku apapun, dan menguraikan soal sains/coding secara bebas), silakan hubungkan **Google Gemini API Key** di pengaturan sistem perpustakaan.\n\nSementara itu, berikut beberapa rekomendasi buku pilihan yang dapat kamu pelajari:`,
     recommendations: mapBooks(fallbackCatalog),
-    provider: "pustaka-ai",
+    provider: "pustaka-local",
   };
 }
