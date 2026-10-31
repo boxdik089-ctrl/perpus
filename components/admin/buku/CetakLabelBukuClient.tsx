@@ -59,19 +59,19 @@ interface PaperTemplateConfig {
 export const PAPER_TEMPLATES: Record<PaperTemplateId, PaperTemplateConfig> = {
   A4_4x4: {
     id: "A4_4x4",
-    name: "Kertas A4 Grid 4×4 (16 Label Standar Sekolah)",
-    description: "4 kolom × 4 baris = 16 label (68 × 45 mm) pas cetak A4",
+    name: "Kertas A4 Grid 4×4 (16 Label Pas A4)",
+    description: "4 kolom × 4 baris = 16 label (62 × 40 mm) pas printer Epson/Canon",
     cols: 4,
     rows: 4,
     perPage: 16,
     sheetWidthMm: 297,
     sheetHeightMm: 210,
-    labelWidthMm: 68,
-    labelHeightMm: 45,
-    marginHorizMm: 8,
-    marginVertMm: 8,
-    gapHorizMm: 3,
-    gapVertMm: 3,
+    labelWidthMm: 62,
+    labelHeightMm: 40,
+    marginHorizMm: 18.5,
+    marginVertMm: 19,
+    gapHorizMm: 4,
+    gapVertMm: 4,
   },
   TJ103: {
     id: "TJ103",
@@ -466,48 +466,48 @@ export function CetakLabelBukuClient({
             doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
           }
 
-          const isLarge = h >= 40;
+          const isLarge = h >= 38;
 
           if (labelMode === "COMBI") {
-            const spineW = w * 0.35; // ~23.8mm on A4 4x4
-            const barcodeW = w - spineW; // ~44.2mm on A4 4x4
+            const spineW = w * 0.35; // ~21.7mm on 62mm
+            const barcodeW = w - spineW; // ~40.3mm on 62mm
 
             // Vertical divider line
             doc.setDrawColor(203, 213, 225);
             doc.setLineWidth(0.2);
-            doc.line(x + spineW, y + (isLarge ? 2 : 1.5), x + spineW, y + h - (isLarge ? 2 : 1.5));
+            doc.line(x + spineW, y + 1.5, x + spineW, y + h - 1.5);
 
             // --- Left Side: Spine ---
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 6.5 : 5.2);
+              doc.setFontSize(isLarge ? 5.5 : 5.0);
               doc.setTextColor(15, 23, 42);
-              doc.text("SMKN 1", x + spineW / 2, y + (isLarge ? 4.5 : 3.0), { align: "center", baseline: "middle" });
-              doc.text("BERINGIN", x + spineW / 2, y + (isLarge ? 7.5 : 5.2), { align: "center", baseline: "middle" });
+              doc.text("SMKN 1", x + spineW / 2, y + (isLarge ? 3.2 : 2.8), { align: "center", baseline: "middle" });
+              doc.text("BERINGIN", x + spineW / 2, y + (isLarge ? 5.6 : 5.0), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 1.5, y + (isLarge ? 9.5 : 6.6), x + spineW - 1.5, y + (isLarge ? 9.5 : 6.6));
+              doc.line(x + 1.5, y + (isLarge ? 7.4 : 6.4), x + spineW - 1.5, y + (isLarge ? 7.4 : 6.4));
             }
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 11 : 9.0);
+            doc.setFontSize(isLarge ? 10.0 : 8.5);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + spineW / 2, y + (isLarge ? 16 : 11.5), { align: "center", baseline: "middle" });
+            doc.text(item.klasifikasi || "000", x + spineW / 2, y + (isLarge ? 13.5 : 11.0), { align: "center", baseline: "middle" });
 
-            doc.setFontSize(isLarge ? 9.5 : 8.0);
+            doc.setFontSize(isLarge ? 8.8 : 7.5);
             doc.setTextColor(30, 41, 59);
-            doc.text(item.authorCode, x + spineW / 2, y + (isLarge ? 22 : 15.6), { align: "center", baseline: "middle" });
+            doc.text(item.authorCode, x + spineW / 2, y + (isLarge ? 18.5 : 15.0), { align: "center", baseline: "middle" });
 
-            doc.setFontSize(isLarge ? 9.0 : 7.5);
+            doc.setFontSize(isLarge ? 8.2 : 7.0);
             doc.setTextColor(51, 65, 85);
-            doc.text(item.titleCode, x + spineW / 2, y + (isLarge ? 27.5 : 19.5), { align: "center", baseline: "middle" });
+            doc.text(item.titleCode, x + spineW / 2, y + (isLarge ? 23.5 : 19.0), { align: "center", baseline: "middle" });
 
             // Left Pill
-            const lPillW = isLarge ? 16 : 14;
-            const lPillH = isLarge ? 4.5 : 3.6;
+            const lPillW = isLarge ? 14 : 13;
+            const lPillH = isLarge ? 4.0 : 3.5;
             const lPillX = x + (spineW - lPillW) / 2;
-            const lPillY = y + h - (isLarge ? 6.5 : 4.8);
+            const lPillY = y + h - (isLarge ? 5.5 : 4.8);
 
             doc.setFillColor(241, 245, 249);
             doc.setDrawColor(226, 232, 240);
@@ -515,7 +515,7 @@ export function CetakLabelBukuClient({
             doc.roundedRect(lPillX, lPillY, lPillW, lPillH, 0.8, 0.8, "FD");
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 6.5 : 5.6);
+            doc.setFontSize(isLarge ? 6.2 : 5.5);
             doc.setTextColor(71, 85, 105);
             doc.text(`c.${item.copyNumber}`, lPillX + lPillW / 2, lPillY + lPillH / 2, { align: "center", baseline: "middle" });
 
@@ -525,34 +525,34 @@ export function CetakLabelBukuClient({
 
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 6.8 : 5.8);
+              doc.setFontSize(isLarge ? 6.0 : 5.6);
               doc.setTextColor(15, 23, 42);
-              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + (isLarge ? 4.8 : 3.8), { align: "center", baseline: "middle" });
+              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3.8, { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(bX + 1.5, y + (isLarge ? 7.5 : 5.3), bX + bW - 1.5, y + (isLarge ? 7.5 : 5.3));
+              doc.line(bX + 1.5, y + 5.6, bX + bW - 1.5, y + 5.6);
             }
 
             // Barcode image
             const bcImg = barcodeCache[item.kode];
-            const rBcW = isLarge ? Math.min(bW - 8, 34) : Math.min(bW - 8, 28);
-            const rBcH = isLarge ? 8.5 : 6.5;
+            const rBcW = isLarge ? 28 : Math.min(bW - 8, 26);
+            const rBcH = isLarge ? 7.0 : 6.2;
             const rBcX = bX + (bW - rBcW) / 2;
-            const rBcY = y + (isLarge ? 9.5 : 6.3);
+            const rBcY = y + 7.2;
 
             if (bcImg) {
               doc.addImage(bcImg, "PNG", rBcX, rBcY, rBcW, rBcH);
             }
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 8.0 : 7.0);
+            doc.setFontSize(isLarge ? 7.5 : 6.8);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, bX + bW / 2, rBcY + rBcH + (isLarge ? 3.0 : 2.3), { align: "center", baseline: "middle" });
+            doc.text(item.kode, bX + bW / 2, rBcY + rBcH + (isLarge ? 2.5 : 2.2), { align: "center", baseline: "middle" });
 
             // Title
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 6.5 : 5.5);
+            doc.setFontSize(isLarge ? 5.8 : 5.2);
             doc.setTextColor(30, 41, 59);
             const rawLines = doc.splitTextToSize(item.judul, bW - 4);
             let titleLines = rawLines.slice(0, 2);
@@ -562,20 +562,20 @@ export function CetakLabelBukuClient({
               titleLines[1] = last;
             }
 
-            const rTitleStartY = rBcY + rBcH + (isLarge ? 6.5 : 4.8);
+            const rTitleStartY = rBcY + rBcH + (isLarge ? 5.6 : 4.6);
             if (titleLines.length === 1) {
               doc.text(titleLines[0], bX + bW / 2, rTitleStartY + 1.0, { align: "center", baseline: "middle" });
             } else {
               doc.text(titleLines[0], bX + bW / 2, rTitleStartY, { align: "center", baseline: "middle" });
-              doc.text(titleLines[1], bX + bW / 2, rTitleStartY + (isLarge ? 3.0 : 2.4), { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], bX + bW / 2, rTitleStartY + (isLarge ? 2.6 : 2.2), { align: "center", baseline: "middle" });
             }
 
             // Right location pill
             if (showLocation) {
-              const rPillW = isLarge ? Math.min(bW - 8, 34) : Math.min(bW - 8, 28);
-              const rPillH = isLarge ? 4.5 : 3.6;
+              const rPillW = Math.min(bW - 8, isLarge ? 30 : 26);
+              const rPillH = isLarge ? 4.0 : 3.5;
               const rPillX = bX + (bW - rPillW) / 2;
-              const rPillY = y + h - (isLarge ? 6.5 : 4.8);
+              const rPillY = y + h - (isLarge ? 5.5 : 4.8);
 
               doc.setFillColor(241, 245, 249);
               doc.setDrawColor(226, 232, 240);
@@ -583,7 +583,7 @@ export function CetakLabelBukuClient({
               doc.roundedRect(rPillX, rPillY, rPillW, rPillH, 0.8, 0.8, "FD");
 
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 6.0 : 5.2);
+              doc.setFontSize(isLarge ? 5.5 : 5.0);
               doc.setTextColor(71, 85, 105);
               doc.text(`Lokasi: ${item.rakNama}`, rPillX + rPillW / 2, rPillY + rPillH / 2, { align: "center", baseline: "middle" });
             }
@@ -591,35 +591,35 @@ export function CetakLabelBukuClient({
             // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 8.5 : 7.5);
+              doc.setFontSize(isLarge ? 7.8 : 7.2);
               doc.setTextColor(15, 23, 42);
-              doc.text("SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 5.2 : 4.2), { align: "center", baseline: "middle" });
+              doc.text("SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 4.5 : 4.0), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 3, y + (isLarge ? 8.2 : 6.0), x + w - 3, y + (isLarge ? 8.2 : 6.0));
+              doc.line(x + 3, y + (isLarge ? 6.8 : 5.8), x + w - 3, y + (isLarge ? 6.8 : 5.8));
             }
 
             // 2. Call Number Stack (DDC + Author + Title)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 14 : 12);
+            doc.setFontSize(isLarge ? 13 : 11.5);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + w / 2, y + (isLarge ? 16.5 : 11.2), { align: "center", baseline: "middle" });
-
-            doc.setFontSize(isLarge ? 11.5 : 10);
-            doc.setTextColor(30, 41, 59);
-            doc.text(item.authorCode, x + w / 2, y + (isLarge ? 23.5 : 16.0), { align: "center", baseline: "middle" });
+            doc.text(item.klasifikasi || "000", x + w / 2, y + (isLarge ? 14.5 : 11.2), { align: "center", baseline: "middle" });
 
             doc.setFontSize(isLarge ? 10.5 : 9.5);
+            doc.setTextColor(30, 41, 59);
+            doc.text(item.authorCode, x + w / 2, y + (isLarge ? 20.5 : 16.0), { align: "center", baseline: "middle" });
+
+            doc.setFontSize(isLarge ? 9.5 : 8.8);
             doc.setTextColor(51, 65, 85);
-            doc.text(item.titleCode, x + w / 2, y + (isLarge ? 29.5 : 20.4), { align: "center", baseline: "middle" });
+            doc.text(item.titleCode, x + w / 2, y + (isLarge ? 26.0 : 20.4), { align: "center", baseline: "middle" });
 
             // 3. Bottom Pill Badge
             const pillText = `c.${item.copyNumber} · ${item.isReferensi ? "[R]" : "Koleksi"}`;
-            const pillW = isLarge ? 38 : 32;
-            const pillH = isLarge ? 5.0 : 4.2;
+            const pillW = isLarge ? 34 : 30;
+            const pillH = isLarge ? 4.2 : 3.8;
             const pillX = x + (w - pillW) / 2;
-            const pillY = y + h - (isLarge ? 7.0 : 5.5);
+            const pillY = y + h - (isLarge ? 5.8 : 5.0);
 
             doc.setFillColor(241, 245, 249);
             doc.setDrawColor(226, 232, 240);
@@ -627,28 +627,28 @@ export function CetakLabelBukuClient({
             doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 7.0 : 6.0);
+            doc.setFontSize(isLarge ? 6.2 : 5.6);
             doc.setTextColor(71, 85, 105);
             doc.text(pillText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
           } else {
             // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 7.5 : 6.8);
+              doc.setFontSize(isLarge ? 7.2 : 6.6);
               doc.setTextColor(15, 23, 42);
-              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 4.8 : 3.8), { align: "center", baseline: "middle" });
+              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 4.0 : 3.6), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 3, y + (isLarge ? 7.5 : 5.3), x + w - 3, y + (isLarge ? 7.5 : 5.3));
+              doc.line(x + 3, y + (isLarge ? 6.0 : 5.2), x + w - 3, y + (isLarge ? 6.0 : 5.2));
             }
 
             // 2. Barcode Image
             const bcImg = barcodeCache[item.kode];
-            const bcW = isLarge ? Math.min(w * 0.65, 44) : Math.min(w * 0.65, 38);
-            const bcH = isLarge ? 9.5 : 6.8;
+            const bcW = isLarge ? 36 : Math.min(w * 0.65, 36);
+            const bcH = isLarge ? 7.5 : 6.5;
             const bcX = x + (w - bcW) / 2;
-            const bcY = y + (isLarge ? 9.5 : 6.3);
+            const bcY = y + (isLarge ? 7.6 : 6.2);
 
             if (bcImg) {
               doc.addImage(bcImg, "PNG", bcX, bcY, bcW, bcH);
@@ -656,13 +656,13 @@ export function CetakLabelBukuClient({
 
             // 3. Barcode Code Text
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 8.5 : 7.5);
+            doc.setFontSize(isLarge ? 8.0 : 7.2);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, x + w / 2, bcY + bcH + (isLarge ? 3.2 : 2.4), { align: "center", baseline: "middle" });
+            doc.text(item.kode, x + w / 2, bcY + bcH + (isLarge ? 2.8 : 2.3), { align: "center", baseline: "middle" });
 
             // 4. Book Title (Max 2 lines)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 7.0 : 6.2);
+            doc.setFontSize(isLarge ? 6.2 : 5.8);
             doc.setTextColor(30, 41, 59);
             const rawLines = doc.splitTextToSize(item.judul, w - 8);
             let titleLines = rawLines.slice(0, 2);
@@ -672,21 +672,21 @@ export function CetakLabelBukuClient({
               titleLines[1] = last;
             }
 
-            const titleStartY = bcY + bcH + (isLarge ? 7.0 : 5.0);
+            const titleStartY = bcY + bcH + (isLarge ? 6.0 : 4.8);
             if (titleLines.length === 1) {
-              doc.text(titleLines[0], x + w / 2, titleStartY + 1.2, { align: "center", baseline: "middle" });
+              doc.text(titleLines[0], x + w / 2, titleStartY + 1.0, { align: "center", baseline: "middle" });
             } else {
               doc.text(titleLines[0], x + w / 2, titleStartY, { align: "center", baseline: "middle" });
-              doc.text(titleLines[1], x + w / 2, titleStartY + (isLarge ? 3.2 : 2.7), { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], x + w / 2, titleStartY + (isLarge ? 2.8 : 2.4), { align: "center", baseline: "middle" });
             }
 
             // 5. Bottom Location Pill Badge
             if (showLocation) {
               const badgeText = `${item.rakNama}  ·  c.${item.copyNumber}`;
-              const pillW = isLarge ? Math.min(w - 16, 44) : Math.min(w - 14, 38);
-              const pillH = isLarge ? 4.5 : 3.8;
+              const pillW = Math.min(w - 14, isLarge ? 38 : 34);
+              const pillH = isLarge ? 4.0 : 3.6;
               const pillX = x + (w - pillW) / 2;
-              const pillY = y + h - (isLarge ? 6.5 : 5.0);
+              const pillY = y + h - (isLarge ? 5.5 : 4.8);
 
               doc.setFillColor(241, 245, 249);
               doc.setDrawColor(226, 232, 240);
@@ -694,7 +694,7 @@ export function CetakLabelBukuClient({
               doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
 
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 6.2 : 5.4);
+              doc.setFontSize(isLarge ? 5.6 : 5.2);
               doc.setTextColor(71, 85, 105);
               doc.text(badgeText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
             }
