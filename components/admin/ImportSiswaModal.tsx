@@ -523,7 +523,7 @@ export function ImportSiswaModal() {
       >
         <FileSpreadsheet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
         <span className="hidden sm:inline">Import</span>
-        <span className="hidden xl:inline"> Excel</span>
+        <span className="hidden 2xl:inline"> Excel</span>
       </button>
 
       {/* Modal Dialog */}
