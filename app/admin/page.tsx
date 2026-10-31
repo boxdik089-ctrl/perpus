@@ -24,6 +24,7 @@ import { AdminProfileDropdown } from "@/components/admin/AdminProfileDropdown";
 import { AdminAnalyticsDashboard } from "@/components/admin/AdminAnalyticsDashboard";
 import { getDashboardAnalytics } from "@/lib/analytics";
 import { SecurityAlertBanner } from "@/components/admin/SecurityAlertBanner";
+import { getRemainingDays } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 
 export const dynamic = "force-dynamic";
@@ -164,7 +165,7 @@ export default async function AdminDashboard() {
         {/* Bottom Hero Content: Greeting & Live Information Chips */}
         <div className="pt-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block mb-1">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#00367E] dark:text-sky-300 block mb-1">
               {greetingTime}
             </span>
             <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-snug">
@@ -173,14 +174,14 @@ export default async function AdminDashboard() {
                 {adminName}
               </span>
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-medium mt-1 max-w-xl leading-relaxed">
               Pantau sirkulasi peminjaman buku, data keanggotaan siswa, dan statistik operasional perpustakaan secara real-time.
             </p>
           </div>
 
           {/* Functional Date Indicator */}
           <div className="flex items-center self-start md:self-end shrink-0">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 text-xs font-medium shadow-2xs">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/70 text-slate-700 dark:text-slate-300 text-xs font-semibold shadow-2xs">
               <Calendar className="w-3.5 h-3.5 text-[#00367E] dark:text-sky-400 shrink-0" />
               <span>{todayStr}</span>
             </div>
@@ -199,7 +200,7 @@ export default async function AdminDashboard() {
           className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Total Koleksi
             </span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-slate-700 dark:group-hover:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
@@ -209,7 +210,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
             {totalBuku}
           </p>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1">
             Judul buku terdaftar →
           </p>
         </Link>
@@ -220,7 +221,7 @@ export default async function AdminDashboard() {
           className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Total Eksemplar
             </span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-slate-700 dark:group-hover:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
@@ -230,7 +231,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
             {totalEksemplar}
           </p>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1">
             Fisik buku ber-barcode →
           </p>
         </Link>
@@ -241,17 +242,17 @@ export default async function AdminDashboard() {
           className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Sedang Dipinjam
             </span>
             <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 flex items-center justify-center shrink-0">
               <ArrowLeftRight className="w-4 h-4" />
             </div>
           </div>
-          <p className="text-2xl sm:text-3xl font-bold text-sky-600 dark:text-sky-400 tracking-tight tabular-nums">
+          <p className="text-2xl sm:text-3xl font-bold text-sky-700 dark:text-sky-400 tracking-tight tabular-nums">
             {bukuDipinjam}
           </p>
-          <p className="text-[10px] sm:text-[11px] text-sky-600/90 dark:text-sky-400/80 font-medium mt-1">
+          <p className="text-xs text-sky-800 dark:text-sky-300 font-semibold mt-1">
             Sirkulasi aktif →
           </p>
         </Link>
@@ -262,7 +263,7 @@ export default async function AdminDashboard() {
           className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-sky-500/50 dark:hover:border-sky-500/50 hover:shadow-sm transition-all group block"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Total Anggota
             </span>
             <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-50 group-hover:text-sky-600 dark:group-hover:bg-slate-700 dark:group-hover:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
@@ -272,7 +273,7 @@ export default async function AdminDashboard() {
           <p className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight tabular-nums">
             {totalAnggota}
           </p>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate">
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1 truncate">
             {totalAnggotaSiswa} Siswa • {totalAnggotaGuruStaf} Guru →
           </p>
         </Link>
@@ -283,7 +284,7 @@ export default async function AdminDashboard() {
           className="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-2xs hover:border-rose-500/50 dark:hover:border-rose-500/50 hover:shadow-sm transition-all col-span-2 sm:col-span-1 group block"
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Denda Belum Bayar
             </span>
             <div
@@ -306,7 +307,7 @@ export default async function AdminDashboard() {
             <span className="text-sm sm:text-base font-semibold opacity-70 mr-1">Rp</span>
             <span>{totalDenda.toLocaleString("id-ID")}</span>
           </p>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-600 dark:text-slate-300 font-medium mt-1">
             {totalDenda > 0 ? "Tertunggak sistem →" : "Semua denda lunas"}
           </p>
         </Link>
@@ -350,12 +351,12 @@ export default async function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 uppercase text-[10px] tracking-wider font-semibold">
-                  <th className="py-2.5 px-3">Peminjam</th>
-                  <th className="py-2.5 px-3">Buku &amp; Barcode</th>
-                  <th className="py-2.5 px-3">Tgl Pinjam</th>
-                  <th className="py-2.5 px-3">Batas Kembali</th>
-                  <th className="py-2.5 px-3 text-right">Status Waktu</th>
+                <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 uppercase text-[11px] tracking-wider font-bold">
+                  <th className="py-3 px-3">Peminjam</th>
+                  <th className="py-3 px-3">Buku &amp; Barcode</th>
+                  <th className="py-3 px-3">Tgl Pinjam</th>
+                  <th className="py-3 px-3">Batas Kembali</th>
+                  <th className="py-3 px-3 text-right">Status Waktu</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
@@ -375,10 +376,9 @@ export default async function AdminDashboard() {
                     trx.eksemplar?.kode || trx.buku?.kode_buku || "-";
 
                   const returnDate = new Date(trx.batas_kembali);
-                  const isOverdue = returnDate.getTime() < now.getTime();
-                  const diffDays = Math.ceil(
-                    (returnDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)
-                  );
+                  const remainingDays = getRemainingDays(trx.batas_kembali);
+                  const isLate = remainingDays < 0;
+                  const isToday = remainingDays === 0;
 
                   return (
                     <tr
@@ -386,28 +386,33 @@ export default async function AdminDashboard() {
                       className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors"
                     >
                       <td className="py-3 px-3">
-                        <p className="font-semibold text-slate-900 dark:text-white truncate max-w-[200px]">
+                        <p className="font-bold text-slate-900 dark:text-white truncate max-w-[200px]">
                           {peminjamName}
                         </p>
-                        <p className="text-[10px] text-slate-400 truncate">
+                        <p className="text-xs text-slate-600 dark:text-slate-300 font-medium truncate mt-0.5">
                           {peminjamKelas}
                         </p>
                       </td>
                       <td className="py-3 px-3">
-                        <p className="font-medium text-slate-800 dark:text-slate-200 truncate max-w-[280px]">
-                          {bukuJudul}
-                        </p>
-                        <span className="inline-block font-mono text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                          {barcodeKode}
-                        </span>
+                        <div className="space-y-1">
+                          <p className="font-bold text-slate-900 dark:text-slate-100 truncate max-w-[280px]">
+                            {bukuJudul}
+                          </p>
+                          <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-300/80 dark:border-slate-700 font-mono text-[11px] text-slate-800 dark:text-slate-200 select-all shadow-2xs">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                              BARCODE:
+                            </span>
+                            <span className="font-bold tracking-wider">{barcodeKode}</span>
+                          </div>
+                        </div>
                       </td>
-                      <td className="py-3 px-3 text-slate-600 dark:text-slate-400 whitespace-nowrap">
+                      <td className="py-3 px-3 text-slate-700 dark:text-slate-300 font-medium whitespace-nowrap">
                         {new Date(trx.tgl_pinjam).toLocaleDateString("id-ID", {
                           day: "numeric",
                           month: "short",
                         })}
                       </td>
-                      <td className="py-3 px-3 font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
+                      <td className="py-3 px-3 font-bold text-slate-900 dark:text-white whitespace-nowrap">
                         {returnDate.toLocaleDateString("id-ID", {
                           day: "numeric",
                           month: "short",
@@ -415,18 +420,20 @@ export default async function AdminDashboard() {
                         })}
                       </td>
                       <td className="py-3 px-3 text-right whitespace-nowrap">
-                        {isOverdue ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                            <AlertTriangle className="w-3 h-3" />
-                            Terlambat {Math.abs(diffDays)} hari
+                        {isLate ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:text-rose-200 border border-rose-300 dark:border-rose-800 shadow-2xs">
+                            <AlertTriangle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400 shrink-0" />
+                            <span>Terlambat {Math.abs(remainingDays)} hari</span>
                           </span>
-                        ) : diffDays === 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">
-                            Jatuh tempo hari ini
+                        ) : isToday ? (
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-900 dark:bg-amber-950/60 dark:text-amber-200 border border-amber-300 dark:border-amber-700 shadow-2xs">
+                            <Clock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+                            <span>Jatuh tempo hari ini</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                            Sisa {diffDays} hari
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-200 border border-emerald-300 dark:border-emerald-800 shadow-2xs">
+                            <Clock className="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" />
+                            <span>Sisa {remainingDays} hari</span>
                           </span>
                         )}
                       </td>

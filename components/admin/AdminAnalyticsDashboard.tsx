@@ -217,18 +217,18 @@ export function AdminAnalyticsDashboard({ data }: { data: AnalyticsDashboardData
 
         {/* Kolom Kanan: Top 5 Buku Terlaris & Minat Jurusan (5 Kolom) */}
         <div className="lg:col-span-5 space-y-4">
-          {/* Top 5 Buku Populer */}
+          {/* Top 5 Koleksi Terpopuler */}
           <div className="bg-stone-50/80 dark:bg-slate-950/60 border border-stone-200/80 dark:border-slate-800 rounded-2xl p-4 sm:p-5">
             <div className="flex items-center justify-between mb-3.5">
               <div className="flex items-center gap-2">
                 <Trophy className="w-4 h-4 text-amber-500" />
                 <h3 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-white">
-                  Top 5 Buku Terlaris
+                  Top 5 Buku Terpopuler
                 </h3>
               </div>
               <Link
                 href="/admin/buku"
-                className="text-[11px] font-semibold text-sky-600 hover:text-sky-700 dark:text-sky-400 flex items-center gap-1"
+                className="text-[11px] font-semibold text-sky-700 hover:text-sky-800 dark:text-sky-300 flex items-center gap-1"
               >
                 <span>Lihat Semua</span>
                 <ArrowUpRight className="w-3 h-3" />

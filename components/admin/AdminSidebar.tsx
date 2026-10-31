@@ -199,14 +199,20 @@ export function AdminSidebar({
           collapsed ? "px-2 justify-center" : "px-4 sm:px-5 justify-between"
         }`}>
           {collapsed ? (
-            <button
-              type="button"
-              onClick={onToggleCollapse}
-              className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center transition-all group shadow-2xs"
-              title="Perbesar Menu (Expand Sidebar)"
-            >
-              <PanelLeftOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            </button>
+            <div className="relative group flex items-center justify-center">
+              <button
+                type="button"
+                onClick={onToggleCollapse}
+                className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/40 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-700/80 flex items-center justify-center transition-all shadow-2xs cursor-pointer"
+                aria-label="Perbesar Menu Sidebar"
+              >
+                <PanelLeftOpen className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </button>
+              {/* High-Contrast Floating Tooltip on Hover */}
+              <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-950 text-xs font-bold rounded-lg shadow-xl whitespace-nowrap pointer-events-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 border border-slate-700 dark:border-slate-300">
+                Perbesar Menu Sidebar
+              </div>
+            </div>
           ) : (
             <>
               <Link
@@ -225,7 +231,7 @@ export function AdminSidebar({
                   <span className="font-extrabold text-sm text-slate-900 dark:text-white truncate tracking-tight block">
                     Perpustakaan
                   </span>
-                  <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate">
+                  <p className="text-[10px] text-slate-600 dark:text-slate-300 font-semibold truncate">
                     SMKN 1 Beringin
                   </p>
                 </div>
@@ -236,8 +242,8 @@ export function AdminSidebar({
                 <button
                   type="button"
                   onClick={onToggleCollapse}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                  title="Kecilkan Menu (Minimize Sidebar)"
+                  className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Kecilkan Menu (Sidebar Ringkas)"
                 >
                   <PanelLeftClose className="w-4 h-4" />
                 </button>
@@ -269,7 +275,7 @@ export function AdminSidebar({
                   <div className="my-2.5 mx-1 border-t border-slate-200/70 dark:border-slate-800" />
                 )
               ) : (
-                <div className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+                <div className="px-3 pb-1 text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
                   {group.groupLabel}
                 </div>
               )}
@@ -280,20 +286,24 @@ export function AdminSidebar({
 
                 if (collapsed) {
                   return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      target={item.target}
-                      onClick={onCloseMobile}
-                      title={item.label}
-                      className={`relative group flex items-center justify-center w-10 h-10 mx-auto rounded-xl text-xs font-semibold transition-all ${
-                        active
-                          ? "bg-sky-600 text-white shadow-xs font-bold"
-                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
-                      }`}
-                    >
-                      <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
-                    </Link>
+                    <div key={item.href} className="relative group flex items-center justify-center">
+                      <Link
+                        href={item.href}
+                        target={item.target}
+                        onClick={onCloseMobile}
+                        className={`flex items-center justify-center w-10 h-10 mx-auto rounded-xl text-xs font-semibold transition-all ${
+                          active
+                            ? "bg-[#00367E] text-white shadow-xs font-bold"
+                            : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                        }`}
+                      >
+                        <Icon className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110" />
+                      </Link>
+                      {/* High-Contrast Floating Tooltip on Hover */}
+                      <div className="absolute left-full ml-3 px-3 py-1.5 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-950 text-xs font-bold rounded-lg shadow-xl whitespace-nowrap pointer-events-none opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 z-50 border border-slate-700 dark:border-slate-300">
+                        {item.label}
+                      </div>
+                    </div>
                   );
                 }
 
@@ -305,8 +315,8 @@ export function AdminSidebar({
                     onClick={onCloseMobile}
                     className={`group flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
                       active
-                        ? "bg-sky-600 text-white shadow-xs font-bold"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
+                        ? "bg-[#00367E] text-white shadow-xs font-bold"
+                        : "text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white"
                     }`}
                   >
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -314,7 +324,7 @@ export function AdminSidebar({
                         className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
                           active
                             ? "bg-white/20 text-white"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 group-hover:bg-sky-100 dark:group-hover:bg-slate-700 group-hover:text-sky-600 dark:group-hover:text-sky-400"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 group-hover:bg-sky-100 dark:group-hover:bg-slate-700 group-hover:text-[#00367E] dark:group-hover:text-sky-400"
                         }`}
                       >
                         <Icon className="w-3.5 h-3.5" />
