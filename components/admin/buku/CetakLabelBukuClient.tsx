@@ -27,6 +27,7 @@ import jsPDF from "jspdf";
 import * as XLSX from "xlsx";
 
 export type PaperTemplateId =
+  | "A4_4x4"
   | "TJ103"
   | "TJ121"
   | "A4_3x8"
@@ -56,6 +57,22 @@ interface PaperTemplateConfig {
 }
 
 export const PAPER_TEMPLATES: Record<PaperTemplateId, PaperTemplateConfig> = {
+  A4_4x4: {
+    id: "A4_4x4",
+    name: "Kertas A4 Grid 4×4 (16 Label Standar Sekolah)",
+    description: "4 kolom × 4 baris = 16 label (68 × 45 mm) pas cetak A4",
+    cols: 4,
+    rows: 4,
+    perPage: 16,
+    sheetWidthMm: 297,
+    sheetHeightMm: 210,
+    labelWidthMm: 68,
+    labelHeightMm: 45,
+    marginHorizMm: 8,
+    marginVertMm: 8,
+    gapHorizMm: 3,
+    gapVertMm: 3,
+  },
   TJ103: {
     id: "TJ103",
     name: "Tom & Jerry No. 103",
@@ -188,14 +205,14 @@ export function CetakLabelBukuClient({
   const [selectedKategori, setSelectedKategori] = useState("ALL");
   const [selectedRak, setSelectedRak] = useState("ALL");
   
-  // Selection
+  // Selection (default 16 items for 4x4 A4 grid)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    new Set(initialItems.slice(0, 12).map((i) => i.id))
+    new Set(initialItems.slice(0, 16).map((i) => i.id))
   );
 
   // Settings
   const [labelMode, setLabelMode] = useState<LabelMode>("COMBI");
-  const [templateId, setTemplateId] = useState<PaperTemplateId>("TJ103");
+  const [templateId, setTemplateId] = useState<PaperTemplateId>("A4_4x4");
   const [startOffset, setStartOffset] = useState<number>(0); // 0-indexed (skip slots)
   const [showBorder, setShowBorder] = useState(true);
   const [showHeaderInstansi, setShowHeaderInstansi] = useState(true);
@@ -299,7 +316,7 @@ export function CetakLabelBukuClient({
 
     style.textContent = `
       @page {
-        size: ${template.sheetWidthMm}mm ${template.sheetHeightMm}mm;
+        size: ${template.sheetWidthMm}mm ${template.sheetHeightMm}mm ${template.sheetWidthMm > template.sheetHeightMm ? "landscape" : "portrait"};
         margin: 0 !important;
       }
       @media print {
@@ -449,46 +466,48 @@ export function CetakLabelBukuClient({
             doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
           }
 
+          const isLarge = h >= 40;
+
           if (labelMode === "COMBI") {
-            const spineW = w * 0.35; // 22.4mm
-            const barcodeW = w - spineW; // 41.6mm
+            const spineW = w * 0.35; // ~23.8mm on A4 4x4
+            const barcodeW = w - spineW; // ~44.2mm on A4 4x4
 
             // Vertical divider line
             doc.setDrawColor(203, 213, 225);
             doc.setLineWidth(0.2);
-            doc.line(x + spineW, y + 1.5, x + spineW, y + h - 1.5);
+            doc.line(x + spineW, y + (isLarge ? 2 : 1.5), x + spineW, y + h - (isLarge ? 2 : 1.5));
 
             // --- Left Side: Spine ---
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(5.2);
+              doc.setFontSize(isLarge ? 6.5 : 5.2);
               doc.setTextColor(15, 23, 42);
-              doc.text("SMKN 1", x + spineW / 2, y + 3.0, { align: "center", baseline: "middle" });
-              doc.text("BERINGIN", x + spineW / 2, y + 5.2, { align: "center", baseline: "middle" });
+              doc.text("SMKN 1", x + spineW / 2, y + (isLarge ? 4.5 : 3.0), { align: "center", baseline: "middle" });
+              doc.text("BERINGIN", x + spineW / 2, y + (isLarge ? 7.5 : 5.2), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 1.5, y + 6.6, x + spineW - 1.5, y + 6.6);
+              doc.line(x + 1.5, y + (isLarge ? 9.5 : 6.6), x + spineW - 1.5, y + (isLarge ? 9.5 : 6.6));
             }
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(9.0);
+            doc.setFontSize(isLarge ? 11 : 9.0);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + spineW / 2, y + 11.5, { align: "center", baseline: "middle" });
+            doc.text(item.klasifikasi || "000", x + spineW / 2, y + (isLarge ? 16 : 11.5), { align: "center", baseline: "middle" });
 
-            doc.setFontSize(8.0);
+            doc.setFontSize(isLarge ? 9.5 : 8.0);
             doc.setTextColor(30, 41, 59);
-            doc.text(item.authorCode, x + spineW / 2, y + 15.6, { align: "center", baseline: "middle" });
+            doc.text(item.authorCode, x + spineW / 2, y + (isLarge ? 22 : 15.6), { align: "center", baseline: "middle" });
 
-            doc.setFontSize(7.5);
+            doc.setFontSize(isLarge ? 9.0 : 7.5);
             doc.setTextColor(51, 65, 85);
-            doc.text(item.titleCode, x + spineW / 2, y + 19.5, { align: "center", baseline: "middle" });
+            doc.text(item.titleCode, x + spineW / 2, y + (isLarge ? 27.5 : 19.5), { align: "center", baseline: "middle" });
 
             // Left Pill
-            const lPillW = 14;
-            const lPillH = 3.6;
+            const lPillW = isLarge ? 16 : 14;
+            const lPillH = isLarge ? 4.5 : 3.6;
             const lPillX = x + (spineW - lPillW) / 2;
-            const lPillY = y + h - 4.8;
+            const lPillY = y + h - (isLarge ? 6.5 : 4.8);
 
             doc.setFillColor(241, 245, 249);
             doc.setDrawColor(226, 232, 240);
@@ -496,7 +515,7 @@ export function CetakLabelBukuClient({
             doc.roundedRect(lPillX, lPillY, lPillW, lPillH, 0.8, 0.8, "FD");
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(5.6);
+            doc.setFontSize(isLarge ? 6.5 : 5.6);
             doc.setTextColor(71, 85, 105);
             doc.text(`c.${item.copyNumber}`, lPillX + lPillW / 2, lPillY + lPillH / 2, { align: "center", baseline: "middle" });
 
@@ -506,34 +525,34 @@ export function CetakLabelBukuClient({
 
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(5.8);
+              doc.setFontSize(isLarge ? 6.8 : 5.8);
               doc.setTextColor(15, 23, 42);
-              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3.8, { align: "center", baseline: "middle" });
+              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + (isLarge ? 4.8 : 3.8), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(bX + 1.5, y + 5.3, bX + bW - 1.5, y + 5.3);
+              doc.line(bX + 1.5, y + (isLarge ? 7.5 : 5.3), bX + bW - 1.5, y + (isLarge ? 7.5 : 5.3));
             }
 
             // Barcode image
             const bcImg = barcodeCache[item.kode];
-            const rBcW = Math.min(bW - 8, 28);
-            const rBcH = 6.5;
+            const rBcW = isLarge ? Math.min(bW - 8, 34) : Math.min(bW - 8, 28);
+            const rBcH = isLarge ? 8.5 : 6.5;
             const rBcX = bX + (bW - rBcW) / 2;
-            const rBcY = y + 6.3;
+            const rBcY = y + (isLarge ? 9.5 : 6.3);
 
             if (bcImg) {
               doc.addImage(bcImg, "PNG", rBcX, rBcY, rBcW, rBcH);
             }
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(7.0);
+            doc.setFontSize(isLarge ? 8.0 : 7.0);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, bX + bW / 2, rBcY + rBcH + 2.3, { align: "center", baseline: "middle" });
+            doc.text(item.kode, bX + bW / 2, rBcY + rBcH + (isLarge ? 3.0 : 2.3), { align: "center", baseline: "middle" });
 
             // Title
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(5.5);
+            doc.setFontSize(isLarge ? 6.5 : 5.5);
             doc.setTextColor(30, 41, 59);
             const rawLines = doc.splitTextToSize(item.judul, bW - 4);
             let titleLines = rawLines.slice(0, 2);
@@ -543,20 +562,20 @@ export function CetakLabelBukuClient({
               titleLines[1] = last;
             }
 
-            const rTitleStartY = rBcY + rBcH + 4.8;
+            const rTitleStartY = rBcY + rBcH + (isLarge ? 6.5 : 4.8);
             if (titleLines.length === 1) {
               doc.text(titleLines[0], bX + bW / 2, rTitleStartY + 1.0, { align: "center", baseline: "middle" });
             } else {
               doc.text(titleLines[0], bX + bW / 2, rTitleStartY, { align: "center", baseline: "middle" });
-              doc.text(titleLines[1], bX + bW / 2, rTitleStartY + 2.4, { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], bX + bW / 2, rTitleStartY + (isLarge ? 3.0 : 2.4), { align: "center", baseline: "middle" });
             }
 
             // Right location pill
             if (showLocation) {
-              const rPillW = Math.min(bW - 8, 28);
-              const rPillH = 3.6;
+              const rPillW = isLarge ? Math.min(bW - 8, 34) : Math.min(bW - 8, 28);
+              const rPillH = isLarge ? 4.5 : 3.6;
               const rPillX = bX + (bW - rPillW) / 2;
-              const rPillY = y + h - 4.8;
+              const rPillY = y + h - (isLarge ? 6.5 : 4.8);
 
               doc.setFillColor(241, 245, 249);
               doc.setDrawColor(226, 232, 240);
@@ -564,7 +583,7 @@ export function CetakLabelBukuClient({
               doc.roundedRect(rPillX, rPillY, rPillW, rPillH, 0.8, 0.8, "FD");
 
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(5.2);
+              doc.setFontSize(isLarge ? 6.0 : 5.2);
               doc.setTextColor(71, 85, 105);
               doc.text(`Lokasi: ${item.rakNama}`, rPillX + rPillW / 2, rPillY + rPillH / 2, { align: "center", baseline: "middle" });
             }
@@ -572,35 +591,35 @@ export function CetakLabelBukuClient({
             // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(7.5);
+              doc.setFontSize(isLarge ? 8.5 : 7.5);
               doc.setTextColor(15, 23, 42);
-              doc.text("SMKN 1 BERINGIN", x + w / 2, y + 4.2, { align: "center", baseline: "middle" });
+              doc.text("SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 5.2 : 4.2), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 3, y + 6.0, x + w - 3, y + 6.0);
+              doc.line(x + 3, y + (isLarge ? 8.2 : 6.0), x + w - 3, y + (isLarge ? 8.2 : 6.0));
             }
 
             // 2. Call Number Stack (DDC + Author + Title)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(12);
+            doc.setFontSize(isLarge ? 14 : 12);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + w / 2, y + 11.2, { align: "center", baseline: "middle" });
+            doc.text(item.klasifikasi || "000", x + w / 2, y + (isLarge ? 16.5 : 11.2), { align: "center", baseline: "middle" });
 
-            doc.setFontSize(10);
+            doc.setFontSize(isLarge ? 11.5 : 10);
             doc.setTextColor(30, 41, 59);
-            doc.text(item.authorCode, x + w / 2, y + 16.0, { align: "center", baseline: "middle" });
+            doc.text(item.authorCode, x + w / 2, y + (isLarge ? 23.5 : 16.0), { align: "center", baseline: "middle" });
 
-            doc.setFontSize(9.5);
+            doc.setFontSize(isLarge ? 10.5 : 9.5);
             doc.setTextColor(51, 65, 85);
-            doc.text(item.titleCode, x + w / 2, y + 20.4, { align: "center", baseline: "middle" });
+            doc.text(item.titleCode, x + w / 2, y + (isLarge ? 29.5 : 20.4), { align: "center", baseline: "middle" });
 
             // 3. Bottom Pill Badge
             const pillText = `c.${item.copyNumber} · ${item.isReferensi ? "[R]" : "Koleksi"}`;
-            const pillW = 32;
-            const pillH = 4.2;
+            const pillW = isLarge ? 38 : 32;
+            const pillH = isLarge ? 5.0 : 4.2;
             const pillX = x + (w - pillW) / 2;
-            const pillY = y + h - 5.5;
+            const pillY = y + h - (isLarge ? 7.0 : 5.5);
 
             doc.setFillColor(241, 245, 249);
             doc.setDrawColor(226, 232, 240);
@@ -608,28 +627,28 @@ export function CetakLabelBukuClient({
             doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6);
+            doc.setFontSize(isLarge ? 7.0 : 6.0);
             doc.setTextColor(71, 85, 105);
             doc.text(pillText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
           } else {
             // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(6.8);
+              doc.setFontSize(isLarge ? 7.5 : 6.8);
               doc.setTextColor(15, 23, 42);
-              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + 3.8, { align: "center", baseline: "middle" });
+              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 4.8 : 3.8), { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 3, y + 5.3, x + w - 3, y + 5.3);
+              doc.line(x + 3, y + (isLarge ? 7.5 : 5.3), x + w - 3, y + (isLarge ? 7.5 : 5.3));
             }
 
             // 2. Barcode Image
             const bcImg = barcodeCache[item.kode];
-            const bcW = Math.min(w * 0.65, 38);
-            const bcH = 6.8;
+            const bcW = isLarge ? Math.min(w * 0.65, 44) : Math.min(w * 0.65, 38);
+            const bcH = isLarge ? 9.5 : 6.8;
             const bcX = x + (w - bcW) / 2;
-            const bcY = y + 6.3;
+            const bcY = y + (isLarge ? 9.5 : 6.3);
 
             if (bcImg) {
               doc.addImage(bcImg, "PNG", bcX, bcY, bcW, bcH);
@@ -637,13 +656,13 @@ export function CetakLabelBukuClient({
 
             // 3. Barcode Code Text
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(7.5);
+            doc.setFontSize(isLarge ? 8.5 : 7.5);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, x + w / 2, bcY + bcH + 2.4, { align: "center", baseline: "middle" });
+            doc.text(item.kode, x + w / 2, bcY + bcH + (isLarge ? 3.2 : 2.4), { align: "center", baseline: "middle" });
 
             // 4. Book Title (Max 2 lines)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6.2);
+            doc.setFontSize(isLarge ? 7.0 : 6.2);
             doc.setTextColor(30, 41, 59);
             const rawLines = doc.splitTextToSize(item.judul, w - 8);
             let titleLines = rawLines.slice(0, 2);
@@ -653,21 +672,21 @@ export function CetakLabelBukuClient({
               titleLines[1] = last;
             }
 
-            const titleStartY = bcY + bcH + 5.0;
+            const titleStartY = bcY + bcH + (isLarge ? 7.0 : 5.0);
             if (titleLines.length === 1) {
               doc.text(titleLines[0], x + w / 2, titleStartY + 1.2, { align: "center", baseline: "middle" });
             } else {
               doc.text(titleLines[0], x + w / 2, titleStartY, { align: "center", baseline: "middle" });
-              doc.text(titleLines[1], x + w / 2, titleStartY + 2.7, { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], x + w / 2, titleStartY + (isLarge ? 3.2 : 2.7), { align: "center", baseline: "middle" });
             }
 
             // 5. Bottom Location Pill Badge
             if (showLocation) {
               const badgeText = `${item.rakNama}  ·  c.${item.copyNumber}`;
-              const pillW = Math.min(w - 14, 38);
-              const pillH = 3.8;
+              const pillW = isLarge ? Math.min(w - 16, 44) : Math.min(w - 14, 38);
+              const pillH = isLarge ? 4.5 : 3.8;
               const pillX = x + (w - pillW) / 2;
-              const pillY = y + h - 5.0;
+              const pillY = y + h - (isLarge ? 6.5 : 5.0);
 
               doc.setFillColor(241, 245, 249);
               doc.setDrawColor(226, 232, 240);
@@ -675,7 +694,7 @@ export function CetakLabelBukuClient({
               doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
 
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(5.4);
+              doc.setFontSize(isLarge ? 6.2 : 5.4);
               doc.setTextColor(71, 85, 105);
               doc.text(badgeText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
             }
@@ -695,6 +714,7 @@ export function CetakLabelBukuClient({
   // Render Label Preview Item
   const renderLabelContent = (item: ItemLabelBuku) => {
     const bcUrl = barcodeCache[item.kode];
+    const isLarge = template.labelHeightMm >= 40;
 
     if (labelMode === "COMBI") {
       return (
@@ -703,52 +723,52 @@ export function CetakLabelBukuClient({
           <div className="w-[35%] border-r border-slate-300 flex flex-col items-center justify-between pr-1 py-0.5 text-center shrink-0">
             {showHeaderInstansi && (
               <div className="w-full border-b border-slate-200 pb-0.5 text-center leading-none shrink-0">
-                <div className="text-[6px] font-black uppercase tracking-tight text-slate-900 leading-tight">
+                <div className={`${isLarge ? "text-[7.5px]" : "text-[6px]"} font-black uppercase tracking-tight text-slate-900 leading-tight`}>
                   SMKN 1
                 </div>
-                <div className="text-[6px] font-black uppercase tracking-tight text-slate-900 leading-tight">
+                <div className={`${isLarge ? "text-[7.5px]" : "text-[6px]"} font-black uppercase tracking-tight text-slate-900 leading-tight`}>
                   BERINGIN
                 </div>
               </div>
             )}
             <div className="flex-1 flex flex-col items-center justify-center space-y-0.5 py-0.5 min-h-0">
-              <div className="font-mono font-black text-[11px] leading-tight text-slate-950">
+              <div className={`font-mono font-black ${isLarge ? "text-[13px]" : "text-[11px]"} leading-tight text-slate-950`}>
                 {item.klasifikasi || "000"}
               </div>
-              <div className="font-mono font-extrabold text-[9.5px] leading-tight text-slate-800 uppercase">
+              <div className={`font-mono font-extrabold ${isLarge ? "text-[11px]" : "text-[9.5px]"} leading-tight text-slate-800 uppercase`}>
                 {item.authorCode}
               </div>
-              <div className="font-mono font-bold text-[9px] leading-tight text-slate-700">
+              <div className={`font-mono font-bold ${isLarge ? "text-[10px]" : "text-[9px]"} leading-tight text-slate-700`}>
                 {item.titleCode}
               </div>
             </div>
-            <div className="shrink-0 text-[7px] font-bold text-slate-600 bg-slate-100 rounded px-1.5 py-0.5 leading-none border border-slate-200">
+            <div className={`shrink-0 ${isLarge ? "text-[8.5px] px-2 py-0.5" : "text-[7px] px-1.5 py-0.5"} font-bold text-slate-600 bg-slate-100 rounded leading-none border border-slate-200`}>
               c.{item.copyNumber}
             </div>
           </div>
 
           {/* Sisi Kanan: Barcode (65%) */}
           <div className="w-[65%] pl-1.5 py-0.5 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-            <div className="text-[6.5px] font-extrabold uppercase text-slate-900 tracking-tight border-b border-slate-200 pb-0.5 w-full truncate leading-normal shrink-0">
+            <div className={`${isLarge ? "text-[7.5px]" : "text-[6.5px]"} font-extrabold uppercase text-slate-900 tracking-tight border-b border-slate-200 pb-0.5 w-full truncate leading-normal shrink-0`}>
               PERPUS SMKN 1 BERINGIN
             </div>
-            <div className="w-full flex-1 flex items-center justify-center my-0.5 max-h-[26px] min-h-0">
+            <div className={`w-full flex-1 flex items-center justify-center my-0.5 ${isLarge ? "max-h-[38px]" : "max-h-[26px]"} min-h-0`}>
               {bcUrl ? (
-                <img src={bcUrl} alt={item.kode} className="h-full max-h-[24px] w-full object-contain" />
+                <img src={bcUrl} alt={item.kode} className={`h-full ${isLarge ? "max-h-[34px]" : "max-h-[24px]"} w-full object-contain`} />
               ) : (
-                <div className="h-5 w-full bg-slate-100 flex items-center justify-center font-mono text-[8px]">
+                <div className={`h-5 w-full bg-slate-100 flex items-center justify-center font-mono ${isLarge ? "text-[9px]" : "text-[8px]"}`}>
                   {item.kode}
                 </div>
               )}
             </div>
-            <div className="font-mono font-black text-[9px] tracking-wider leading-none text-slate-950 shrink-0">
+            <div className={`font-mono font-black ${isLarge ? "text-[10.5px]" : "text-[9px]"} tracking-wider leading-none text-slate-950 shrink-0`}>
               {item.kode}
             </div>
-            <div className="text-[7px] font-bold line-clamp-1 text-slate-900 leading-[1.15] w-full px-0.5 my-0.5 shrink-0">
+            <div className={`${isLarge ? "text-[8px]" : "text-[7px]"} font-bold line-clamp-2 text-slate-900 leading-[1.15] w-full px-0.5 my-0.5 shrink-0`}>
               {item.judul}
             </div>
             {showLocation && (
-              <div className="shrink-0 text-[6.5px] font-bold text-slate-600 truncate w-full leading-none">
+              <div className={`shrink-0 ${isLarge ? "text-[7.5px]" : "text-[6.5px]"} font-bold text-slate-600 truncate w-full leading-none`}>
                 <span className="bg-slate-100 px-1 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
                   {item.rakNama}
                 </span>
@@ -764,23 +784,23 @@ export function CetakLabelBukuClient({
         <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] px-2 pt-2 pb-1.5 text-center select-none box-border shadow-2xs overflow-hidden">
           {showHeaderInstansi && (
             <div className="w-full border-b border-slate-200 pb-1 text-center shrink-0">
-              <div className="text-[7.5px] font-black uppercase tracking-wider text-slate-900 leading-normal">
+              <div className={`${isLarge ? "text-[9px]" : "text-[7.5px]"} font-black uppercase tracking-wider text-slate-900 leading-normal`}>
                 SMKN 1 BERINGIN
               </div>
             </div>
           )}
           <div className="flex-1 flex flex-col items-center justify-center py-0.5 space-y-0.5 min-h-0">
-            <div className="font-mono font-black text-[12px] leading-tight text-slate-950">
+            <div className={`font-mono font-black ${isLarge ? "text-[15px]" : "text-[12px]"} leading-tight text-slate-950`}>
               {item.klasifikasi || "000"}
             </div>
-            <div className="font-mono font-extrabold text-[10px] leading-tight text-slate-800 uppercase">
+            <div className={`font-mono font-extrabold ${isLarge ? "text-[12px]" : "text-[10px]"} leading-tight text-slate-800 uppercase`}>
               {item.authorCode}
             </div>
-            <div className="font-mono font-bold text-[9.5px] leading-tight text-slate-700">
+            <div className={`font-mono font-bold ${isLarge ? "text-[11px]" : "text-[9.5px]"} leading-tight text-slate-700`}>
               {item.titleCode}
             </div>
           </div>
-          <div className="shrink-0 text-[7px] font-bold text-slate-600 bg-slate-100 rounded px-2.5 py-0.5 border border-slate-200 leading-none">
+          <div className={`shrink-0 ${isLarge ? "text-[8.5px] px-3 py-0.5" : "text-[7px] px-2.5 py-0.5"} font-bold text-slate-600 bg-slate-100 rounded border border-slate-200 leading-none`}>
             c.{item.copyNumber} · {item.isReferensi ? "[R]" : "Koleksi"}
           </div>
         </div>
@@ -792,28 +812,28 @@ export function CetakLabelBukuClient({
       <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] px-2 pt-2 pb-1.5 text-center select-none box-border shadow-2xs overflow-hidden">
         {showHeaderInstansi && (
           <div className="w-full border-b border-slate-200 pb-0.5 text-center shrink-0">
-            <div className="text-[7px] font-black uppercase text-slate-900 tracking-wider leading-normal">
+            <div className={`${isLarge ? "text-[8.5px]" : "text-[7px]"} font-black uppercase text-slate-900 tracking-wider leading-normal`}>
               PERPUSTAKAAN SMKN 1 BERINGIN
             </div>
           </div>
         )}
-        <div className="w-full flex-1 flex items-center justify-center my-0.5 max-h-[26px] min-h-0">
+        <div className={`w-full flex-1 flex items-center justify-center my-0.5 ${isLarge ? "max-h-[38px]" : "max-h-[26px]"} min-h-0`}>
           {bcUrl ? (
-            <img src={bcUrl} alt={item.kode} className="h-full max-h-[24px] w-full object-contain" />
+            <img src={bcUrl} alt={item.kode} className={`h-full ${isLarge ? "max-h-[34px]" : "max-h-[24px]"} w-full object-contain`} />
           ) : (
-            <div className="h-5 w-full bg-slate-100 flex items-center justify-center font-mono text-[8.5px]">
+            <div className={`h-5 w-full bg-slate-100 flex items-center justify-center font-mono ${isLarge ? "text-[9.5px]" : "text-[8.5px]"}`}>
               {item.kode}
             </div>
           )}
         </div>
-        <div className="font-mono font-black text-[9px] tracking-widest leading-none text-slate-950 shrink-0">
+        <div className={`font-mono font-black ${isLarge ? "text-[11px]" : "text-[9px]"} tracking-widest leading-none text-slate-950 shrink-0`}>
           * {item.kode} *
         </div>
-        <div className="text-[7px] font-bold line-clamp-1 text-slate-900 leading-tight w-full px-1 my-0.5 shrink-0">
+        <div className={`${isLarge ? "text-[8.5px]" : "text-[7px]"} font-bold line-clamp-1 text-slate-900 leading-tight w-full px-1 my-0.5 shrink-0`}>
           {item.judul}
         </div>
         {showLocation && (
-          <div className="shrink-0 text-[6.5px] font-semibold text-slate-600 truncate w-full leading-none">
+          <div className={`shrink-0 ${isLarge ? "text-[8px]" : "text-[6.5px]"} font-semibold text-slate-600 truncate w-full leading-none`}>
             <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
               {item.rakNama}
             </span>
