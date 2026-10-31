@@ -21,6 +21,8 @@ import {
   AlertCircle,
   FileSpreadsheet,
   Grid,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import bwipjs from "bwip-js";
 import jsPDF from "jspdf";
@@ -60,17 +62,17 @@ export const PAPER_TEMPLATES: Record<PaperTemplateId, PaperTemplateConfig> = {
   A4_4x4: {
     id: "A4_4x4",
     name: "Kertas A4 Grid 4×4 (16 Label Pas A4)",
-    description: "4 kolom × 4 baris = 16 label (62 × 40 mm) pas printer Epson/Canon",
+    description: "4 kolom × 4 baris = 16 label (60 × 39 mm) pas & simetris printer",
     cols: 4,
     rows: 4,
     perPage: 16,
     sheetWidthMm: 297,
     sheetHeightMm: 210,
-    labelWidthMm: 62,
-    labelHeightMm: 40,
-    marginHorizMm: 18.5,
-    marginVertMm: 19,
-    gapHorizMm: 4,
+    labelWidthMm: 60,
+    labelHeightMm: 39,
+    marginHorizMm: 21,
+    marginVertMm: 21,
+    gapHorizMm: 5,
     gapVertMm: 4,
   },
   TJ103: {
@@ -219,6 +221,11 @@ export function CetakLabelBukuClient({
   const [showLocation, setShowLocation] = useState(true);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
+  // Page Scope Selection & Pagination Controls
+  const [pageScope, setPageScope] = useState<"ALL" | "ODD" | "EVEN" | "CUSTOM">("ALL");
+  const [customPagesInput, setCustomPagesInput] = useState<string>("1");
+  const [previewPageIdx, setPreviewPageIdx] = useState<number>(0);
+
   // Barcode Cache (Data URLs)
   const [barcodeCache, setBarcodeCache] = useState<Record<string, string>>({});
 
@@ -244,6 +251,40 @@ export function CetakLabelBukuClient({
   }, [items, selectedIds]);
 
   const template = PAPER_TEMPLATES[templateId];
+
+  const totalSlots = startOffset + selectedItems.length;
+  const totalPages = Math.max(1, Math.ceil(totalSlots / template.perPage));
+
+  // Determine target pages based on scope
+  const targetPages = useMemo(() => {
+    const all = Array.from({ length: totalPages }, (_, i) => i + 1);
+    if (pageScope === "ALL") return all;
+    if (pageScope === "ODD") return all.filter((p) => p % 2 === 1);
+    if (pageScope === "EVEN") {
+      const even = all.filter((p) => p % 2 === 0);
+      return even.length > 0 ? even : [1];
+    }
+    // CUSTOM
+    const set = new Set<number>();
+    const parts = customPagesInput.split(",").map((s) => s.trim()).filter(Boolean);
+    for (const part of parts) {
+      if (part.includes("-")) {
+        const [a, b] = part.split("-").map((n) => parseInt(n.trim(), 10));
+        if (!isNaN(a) && !isNaN(b)) {
+          for (let i = Math.max(1, a); i <= Math.min(totalPages, b); i++) {
+            set.add(i);
+          }
+        }
+      } else {
+        const p = parseInt(part, 10);
+        if (!isNaN(p) && p >= 1 && p <= totalPages) {
+          set.add(p);
+        }
+      }
+    }
+    const res = Array.from(set).sort((a, b) => a - b);
+    return res.length > 0 ? res : [1];
+  }, [totalPages, pageScope, customPagesInput]);
 
   // Pre-generate barcodes using bwipjs
   useEffect(() => {
@@ -333,6 +374,10 @@ export function CetakLabelBukuClient({
           width: 100% !important;
         }
         .printable-sheet {
+          break-inside: avoid;
+          page-break-inside: avoid;
+        }
+        .printable-sheet:not(:last-child) {
           page-break-after: always;
           break-after: page;
         }
@@ -435,21 +480,23 @@ export function CetakLabelBukuClient({
         format: [template.sheetWidthMm, template.sheetHeightMm],
       });
 
-      const totalSlots = startOffset + selectedItems.length;
-      const totalPages = Math.ceil(totalSlots / template.perPage);
+      const pagesToPrint = targetPages;
+      let docPageCount = 0;
 
-      let itemIndex = 0;
-
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) doc.addPage([template.sheetWidthMm, template.sheetHeightMm], orientation);
+      for (const pageNum of pagesToPrint) {
+        const pageIdx = pageNum - 1;
+        if (docPageCount > 0) {
+          doc.addPage([template.sheetWidthMm, template.sheetHeightMm], orientation);
+        }
+        docPageCount++;
 
         for (let slot = 0; slot < template.perPage; slot++) {
-          const globalSlotIndex = page * template.perPage + slot;
+          const globalSlotIndex = pageIdx * template.perPage + slot;
           if (globalSlotIndex < startOffset) continue; // Skip unused offset
+          const itemIndex = globalSlotIndex - startOffset;
           if (itemIndex >= selectedItems.length) break;
 
           const item = selectedItems[itemIndex];
-          itemIndex++;
 
           const col = slot % template.cols;
           const row = Math.floor(slot / template.cols);
@@ -466,11 +513,9 @@ export function CetakLabelBukuClient({
             doc.roundedRect(x, y, w, h, 1.2, 1.2, "S");
           }
 
-          const isLarge = h >= 38;
-
           if (labelMode === "COMBI") {
-            const spineW = w * 0.35; // ~21.7mm on 62mm
-            const barcodeW = w - spineW; // ~40.3mm on 62mm
+            const spineW = w * 0.35; // 21mm on 60mm
+            const barcodeW = w - spineW; // 39mm on 60mm
 
             // Vertical divider line
             doc.setDrawColor(203, 213, 225);
@@ -480,34 +525,38 @@ export function CetakLabelBukuClient({
             // --- Left Side: Spine ---
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 5.5 : 5.0);
+              doc.setFontSize(5.5);
               doc.setTextColor(15, 23, 42);
-              doc.text("SMKN 1", x + spineW / 2, y + (isLarge ? 3.2 : 2.8), { align: "center", baseline: "middle" });
-              doc.text("BERINGIN", x + spineW / 2, y + (isLarge ? 5.6 : 5.0), { align: "center", baseline: "middle" });
+              doc.text("SMKN 1", x + spineW / 2, y + 3.2, { align: "center", baseline: "middle" });
+              doc.text("BERINGIN", x + spineW / 2, y + 5.6, { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 1.5, y + (isLarge ? 7.4 : 6.4), x + spineW - 1.5, y + (isLarge ? 7.4 : 6.4));
+              doc.line(x + 1.5, y + 7.2, x + spineW - 1.5, y + 7.2);
             }
 
+            // DDC Klasifikasi
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 10.0 : 8.5);
+            const ddcLen = (item.klasifikasi || "").length;
+            doc.setFontSize(ddcLen > 5 ? 8.2 : 9.5);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + spineW / 2, y + (isLarge ? 13.5 : 11.0), { align: "center", baseline: "middle" });
+            doc.text(item.klasifikasi || "000", x + spineW / 2, y + 13.2, { align: "center", baseline: "middle" });
 
-            doc.setFontSize(isLarge ? 8.8 : 7.5);
+            // Author Code
+            doc.setFontSize(8.0);
             doc.setTextColor(30, 41, 59);
-            doc.text(item.authorCode, x + spineW / 2, y + (isLarge ? 18.5 : 15.0), { align: "center", baseline: "middle" });
+            doc.text(item.authorCode, x + spineW / 2, y + 18.2, { align: "center", baseline: "middle" });
 
-            doc.setFontSize(isLarge ? 8.2 : 7.0);
+            // Title Code
+            doc.setFontSize(7.6);
             doc.setTextColor(51, 65, 85);
-            doc.text(item.titleCode, x + spineW / 2, y + (isLarge ? 23.5 : 19.0), { align: "center", baseline: "middle" });
+            doc.text(item.titleCode, x + spineW / 2, y + 23.2, { align: "center", baseline: "middle" });
 
             // Left Pill
-            const lPillW = isLarge ? 14 : 13;
-            const lPillH = isLarge ? 4.0 : 3.5;
+            const lPillW = 13.5;
+            const lPillH = 3.6;
             const lPillX = x + (spineW - lPillW) / 2;
-            const lPillY = y + h - (isLarge ? 5.5 : 4.8);
+            const lPillY = y + h - 5.2;
 
             doc.setFillColor(241, 245, 249);
             doc.setDrawColor(226, 232, 240);
@@ -515,46 +564,47 @@ export function CetakLabelBukuClient({
             doc.roundedRect(lPillX, lPillY, lPillW, lPillH, 0.8, 0.8, "FD");
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 6.2 : 5.5);
+            doc.setFontSize(5.6);
             doc.setTextColor(71, 85, 105);
             doc.text(`c.${item.copyNumber}`, lPillX + lPillW / 2, lPillY + lPillH / 2, { align: "center", baseline: "middle" });
 
             // --- Right Side: Barcode ---
-            const bX = x + spineW + 1;
-            const bW = barcodeW - 2;
+            const bX = x + spineW + 1.0;
+            const bW = barcodeW - 2.0;
 
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 6.0 : 5.6);
+              doc.setFontSize(5.6);
               doc.setTextColor(15, 23, 42);
-              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3.8, { align: "center", baseline: "middle" });
+              doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3.4, { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(bX + 1.5, y + 5.6, bX + bW - 1.5, y + 5.6);
+              doc.line(bX + 1.5, y + 5.2, bX + bW - 1.5, y + 5.2);
             }
 
             // Barcode image
             const bcImg = barcodeCache[item.kode];
-            const rBcW = isLarge ? 28 : Math.min(bW - 8, 26);
-            const rBcH = isLarge ? 7.0 : 6.2;
+            const rBcW = 27;
+            const rBcH = 5.8;
             const rBcX = bX + (bW - rBcW) / 2;
-            const rBcY = y + 7.2;
+            const rBcY = y + 6.6;
 
             if (bcImg) {
               doc.addImage(bcImg, "PNG", rBcX, rBcY, rBcW, rBcH);
             }
 
+            // Code
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 7.5 : 6.8);
+            doc.setFontSize(7.0);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, bX + bW / 2, rBcY + rBcH + (isLarge ? 2.5 : 2.2), { align: "center", baseline: "middle" });
+            doc.text(item.kode, bX + bW / 2, y + 14.5, { align: "center", baseline: "middle" });
 
             // Title
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 5.8 : 5.2);
+            doc.setFontSize(5.8);
             doc.setTextColor(30, 41, 59);
-            const rawLines = doc.splitTextToSize(item.judul, bW - 4);
+            const rawLines = doc.splitTextToSize(item.judul, bW - 3);
             let titleLines = rawLines.slice(0, 2);
             if (rawLines.length > 2) {
               let last = titleLines[1];
@@ -562,20 +612,19 @@ export function CetakLabelBukuClient({
               titleLines[1] = last;
             }
 
-            const rTitleStartY = rBcY + rBcH + (isLarge ? 5.6 : 4.6);
             if (titleLines.length === 1) {
-              doc.text(titleLines[0], bX + bW / 2, rTitleStartY + 1.0, { align: "center", baseline: "middle" });
+              doc.text(titleLines[0], bX + bW / 2, y + 18.2, { align: "center", baseline: "middle" });
             } else {
-              doc.text(titleLines[0], bX + bW / 2, rTitleStartY, { align: "center", baseline: "middle" });
-              doc.text(titleLines[1], bX + bW / 2, rTitleStartY + (isLarge ? 2.6 : 2.2), { align: "center", baseline: "middle" });
+              doc.text(titleLines[0], bX + bW / 2, y + 17.5, { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], bX + bW / 2, y + 20.3, { align: "center", baseline: "middle" });
             }
 
             // Right location pill
             if (showLocation) {
-              const rPillW = Math.min(bW - 8, isLarge ? 30 : 26);
-              const rPillH = isLarge ? 4.0 : 3.5;
+              const rPillW = Math.min(bW - 4, Math.max(20, doc.getTextWidth(item.rakNama) + 5));
+              const rPillH = 3.6;
               const rPillX = bX + (bW - rPillW) / 2;
-              const rPillY = y + h - (isLarge ? 5.5 : 4.8);
+              const rPillY = y + h - 5.2;
 
               doc.setFillColor(241, 245, 249);
               doc.setDrawColor(226, 232, 240);
@@ -583,43 +632,44 @@ export function CetakLabelBukuClient({
               doc.roundedRect(rPillX, rPillY, rPillW, rPillH, 0.8, 0.8, "FD");
 
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 5.5 : 5.0);
+              doc.setFontSize(5.4);
               doc.setTextColor(71, 85, 105);
-              doc.text(`Lokasi: ${item.rakNama}`, rPillX + rPillW / 2, rPillY + rPillH / 2, { align: "center", baseline: "middle" });
+              doc.text(item.rakNama, rPillX + rPillW / 2, rPillY + rPillH / 2, { align: "center", baseline: "middle" });
             }
           } else if (labelMode === "SPINE_ONLY") {
             // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 7.8 : 7.2);
+              doc.setFontSize(7.5);
               doc.setTextColor(15, 23, 42);
-              doc.text("SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 4.5 : 4.0), { align: "center", baseline: "middle" });
+              doc.text("SMKN 1 BERINGIN", x + w / 2, y + 4.2, { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 3, y + (isLarge ? 6.8 : 5.8), x + w - 3, y + (isLarge ? 6.8 : 5.8));
+              doc.line(x + 3, y + 6.2, x + w - 3, y + 6.2);
             }
 
             // 2. Call Number Stack (DDC + Author + Title)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 13 : 11.5);
+            const ddcLen = (item.klasifikasi || "").length;
+            doc.setFontSize(ddcLen > 5 ? 11.5 : 13.0);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.klasifikasi || "000", x + w / 2, y + (isLarge ? 14.5 : 11.2), { align: "center", baseline: "middle" });
+            doc.text(item.klasifikasi || "000", x + w / 2, y + 13.8, { align: "center", baseline: "middle" });
 
-            doc.setFontSize(isLarge ? 10.5 : 9.5);
+            doc.setFontSize(10.0);
             doc.setTextColor(30, 41, 59);
-            doc.text(item.authorCode, x + w / 2, y + (isLarge ? 20.5 : 16.0), { align: "center", baseline: "middle" });
+            doc.text(item.authorCode, x + w / 2, y + 19.5, { align: "center", baseline: "middle" });
 
-            doc.setFontSize(isLarge ? 9.5 : 8.8);
+            doc.setFontSize(9.0);
             doc.setTextColor(51, 65, 85);
-            doc.text(item.titleCode, x + w / 2, y + (isLarge ? 26.0 : 20.4), { align: "center", baseline: "middle" });
+            doc.text(item.titleCode, x + w / 2, y + 25.0, { align: "center", baseline: "middle" });
 
             // 3. Bottom Pill Badge
             const pillText = `c.${item.copyNumber} · ${item.isReferensi ? "[R]" : "Koleksi"}`;
-            const pillW = isLarge ? 34 : 30;
-            const pillH = isLarge ? 4.2 : 3.8;
+            const pillW = Math.min(w - 12, 34);
+            const pillH = 3.8;
             const pillX = x + (w - pillW) / 2;
-            const pillY = y + h - (isLarge ? 5.8 : 5.0);
+            const pillY = y + h - 5.2;
 
             doc.setFillColor(241, 245, 249);
             doc.setDrawColor(226, 232, 240);
@@ -627,28 +677,29 @@ export function CetakLabelBukuClient({
             doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
 
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 6.2 : 5.6);
+            doc.setFontSize(5.8);
             doc.setTextColor(71, 85, 105);
             doc.text(pillText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
           } else {
+            // BARCODE ONLY
             // 1. Header Instansi
             if (showHeaderInstansi) {
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 7.2 : 6.6);
+              doc.setFontSize(7.0);
               doc.setTextColor(15, 23, 42);
-              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + (isLarge ? 4.0 : 3.6), { align: "center", baseline: "middle" });
+              doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", x + w / 2, y + 3.8, { align: "center", baseline: "middle" });
 
               doc.setDrawColor(226, 232, 240);
               doc.setLineWidth(0.18);
-              doc.line(x + 3, y + (isLarge ? 6.0 : 5.2), x + w - 3, y + (isLarge ? 6.0 : 5.2));
+              doc.line(x + 3, y + 5.6, x + w - 3, y + 5.6);
             }
 
             // 2. Barcode Image
             const bcImg = barcodeCache[item.kode];
-            const bcW = isLarge ? 36 : Math.min(w * 0.65, 36);
-            const bcH = isLarge ? 7.5 : 6.5;
+            const bcW = 34;
+            const bcH = 7.0;
             const bcX = x + (w - bcW) / 2;
-            const bcY = y + (isLarge ? 7.6 : 6.2);
+            const bcY = y + 7.0;
 
             if (bcImg) {
               doc.addImage(bcImg, "PNG", bcX, bcY, bcW, bcH);
@@ -656,13 +707,13 @@ export function CetakLabelBukuClient({
 
             // 3. Barcode Code Text
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 8.0 : 7.2);
+            doc.setFontSize(7.8);
             doc.setTextColor(15, 23, 42);
-            doc.text(item.kode, x + w / 2, bcY + bcH + (isLarge ? 2.8 : 2.3), { align: "center", baseline: "middle" });
+            doc.text(item.kode, x + w / 2, bcY + bcH + 2.5, { align: "center", baseline: "middle" });
 
             // 4. Book Title (Max 2 lines)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(isLarge ? 6.2 : 5.8);
+            doc.setFontSize(6.0);
             doc.setTextColor(30, 41, 59);
             const rawLines = doc.splitTextToSize(item.judul, w - 8);
             let titleLines = rawLines.slice(0, 2);
@@ -672,21 +723,21 @@ export function CetakLabelBukuClient({
               titleLines[1] = last;
             }
 
-            const titleStartY = bcY + bcH + (isLarge ? 6.0 : 4.8);
+            const titleStartY = bcY + bcH + 5.5;
             if (titleLines.length === 1) {
               doc.text(titleLines[0], x + w / 2, titleStartY + 1.0, { align: "center", baseline: "middle" });
             } else {
               doc.text(titleLines[0], x + w / 2, titleStartY, { align: "center", baseline: "middle" });
-              doc.text(titleLines[1], x + w / 2, titleStartY + (isLarge ? 2.8 : 2.4), { align: "center", baseline: "middle" });
+              doc.text(titleLines[1], x + w / 2, titleStartY + 2.5, { align: "center", baseline: "middle" });
             }
 
             // 5. Bottom Location Pill Badge
             if (showLocation) {
               const badgeText = `${item.rakNama}  ·  c.${item.copyNumber}`;
-              const pillW = Math.min(w - 14, isLarge ? 38 : 34);
-              const pillH = isLarge ? 4.0 : 3.6;
+              const pillW = Math.min(w - 12, 34);
+              const pillH = 3.6;
               const pillX = x + (w - pillW) / 2;
-              const pillY = y + h - (isLarge ? 5.5 : 4.8);
+              const pillY = y + h - 5.2;
 
               doc.setFillColor(241, 245, 249);
               doc.setDrawColor(226, 232, 240);
@@ -694,7 +745,7 @@ export function CetakLabelBukuClient({
               doc.roundedRect(pillX, pillY, pillW, pillH, 0.9, 0.9, "FD");
 
               doc.setFont("helvetica", "bold");
-              doc.setFontSize(isLarge ? 5.6 : 5.2);
+              doc.setFontSize(5.4);
               doc.setTextColor(71, 85, 105);
               doc.text(badgeText, pillX + pillW / 2, pillY + pillH / 2, { align: "center", baseline: "middle" });
             }
@@ -714,62 +765,64 @@ export function CetakLabelBukuClient({
   // Render Label Preview Item
   const renderLabelContent = (item: ItemLabelBuku) => {
     const bcUrl = barcodeCache[item.kode];
-    const isLarge = template.labelHeightMm >= 40;
 
     if (labelMode === "COMBI") {
+      const ddcLen = (item.klasifikasi || "").length;
       return (
         <div className="w-full h-full flex bg-white text-slate-900 border border-slate-300 rounded-[3px] overflow-hidden select-none p-1 box-border shadow-2xs">
           {/* Sisi Kiri: Spine (35%) */}
           <div className="w-[35%] border-r border-slate-300 flex flex-col items-center justify-between pr-1 py-0.5 text-center shrink-0">
             {showHeaderInstansi && (
               <div className="w-full border-b border-slate-200 pb-0.5 text-center leading-none shrink-0">
-                <div className={`${isLarge ? "text-[7.5px]" : "text-[6px]"} font-black uppercase tracking-tight text-slate-900 leading-tight`}>
+                <div className="text-[6.5px] font-black uppercase tracking-tight text-slate-900 leading-tight">
                   SMKN 1
                 </div>
-                <div className={`${isLarge ? "text-[7.5px]" : "text-[6px]"} font-black uppercase tracking-tight text-slate-900 leading-tight`}>
+                <div className="text-[6.5px] font-black uppercase tracking-tight text-slate-900 leading-tight">
                   BERINGIN
                 </div>
               </div>
             )}
             <div className="flex-1 flex flex-col items-center justify-center space-y-0.5 py-0.5 min-h-0">
-              <div className={`font-mono font-black ${isLarge ? "text-[13px]" : "text-[11px]"} leading-tight text-slate-950`}>
+              <div className={`font-mono font-black ${ddcLen > 5 ? "text-[10px]" : "text-[12px]"} leading-tight text-slate-950`}>
                 {item.klasifikasi || "000"}
               </div>
-              <div className={`font-mono font-extrabold ${isLarge ? "text-[11px]" : "text-[9.5px]"} leading-tight text-slate-800 uppercase`}>
+              <div className="font-mono font-extrabold text-[9px] leading-tight text-slate-800 uppercase">
                 {item.authorCode}
               </div>
-              <div className={`font-mono font-bold ${isLarge ? "text-[10px]" : "text-[9px]"} leading-tight text-slate-700`}>
+              <div className="font-mono font-bold text-[8.5px] leading-tight text-slate-700">
                 {item.titleCode}
               </div>
             </div>
-            <div className={`shrink-0 ${isLarge ? "text-[8.5px] px-2 py-0.5" : "text-[7px] px-1.5 py-0.5"} font-bold text-slate-600 bg-slate-100 rounded leading-none border border-slate-200`}>
+            <div className="shrink-0 text-[7px] px-1.5 py-0.5 font-bold text-slate-600 bg-slate-100 rounded leading-none border border-slate-200">
               c.{item.copyNumber}
             </div>
           </div>
 
           {/* Sisi Kanan: Barcode (65%) */}
           <div className="w-[65%] pl-1.5 py-0.5 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
-            <div className={`${isLarge ? "text-[7.5px]" : "text-[6.5px]"} font-extrabold uppercase text-slate-900 tracking-tight border-b border-slate-200 pb-0.5 w-full truncate leading-normal shrink-0`}>
-              PERPUS SMKN 1 BERINGIN
-            </div>
-            <div className={`w-full flex-1 flex items-center justify-center my-0.5 ${isLarge ? "max-h-[38px]" : "max-h-[26px]"} min-h-0`}>
+            {showHeaderInstansi && (
+              <div className="text-[6.8px] font-extrabold uppercase text-slate-900 tracking-tight border-b border-slate-200 pb-0.5 w-full truncate leading-normal shrink-0">
+                PERPUS SMKN 1 BERINGIN
+              </div>
+            )}
+            <div className="w-full flex-1 flex items-center justify-center my-0.5 max-h-[26px] min-h-0">
               {bcUrl ? (
-                <img src={bcUrl} alt={item.kode} className={`h-full ${isLarge ? "max-h-[34px]" : "max-h-[24px]"} w-full object-contain`} />
+                <img src={bcUrl} alt={item.kode} className="h-full max-h-[24px] w-full object-contain" />
               ) : (
-                <div className={`h-5 w-full bg-slate-100 flex items-center justify-center font-mono ${isLarge ? "text-[9px]" : "text-[8px]"}`}>
+                <div className="h-5 w-full bg-slate-100 flex items-center justify-center font-mono text-[8px]">
                   {item.kode}
                 </div>
               )}
             </div>
-            <div className={`font-mono font-black ${isLarge ? "text-[10.5px]" : "text-[9px]"} tracking-wider leading-none text-slate-950 shrink-0`}>
+            <div className="font-mono font-black text-[9px] tracking-wider leading-none text-slate-950 shrink-0">
               {item.kode}
             </div>
-            <div className={`${isLarge ? "text-[8px]" : "text-[7px]"} font-bold line-clamp-2 text-slate-900 leading-[1.15] w-full px-0.5 my-0.5 shrink-0`}>
+            <div className="text-[7.5px] font-bold line-clamp-2 text-slate-900 leading-[1.15] w-full px-0.5 my-0.5 shrink-0">
               {item.judul}
             </div>
             {showLocation && (
-              <div className={`shrink-0 ${isLarge ? "text-[7.5px]" : "text-[6.5px]"} font-bold text-slate-600 truncate w-full leading-none`}>
-                <span className="bg-slate-100 px-1 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
+              <div className="shrink-0 text-[7px] font-bold text-slate-600 truncate w-full leading-none">
+                <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
                   {item.rakNama}
                 </span>
               </div>
@@ -780,27 +833,28 @@ export function CetakLabelBukuClient({
     }
 
     if (labelMode === "SPINE_ONLY") {
+      const ddcLen = (item.klasifikasi || "").length;
       return (
-        <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] px-2 pt-2 pb-1.5 text-center select-none box-border shadow-2xs overflow-hidden">
+        <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] px-2 pt-1.5 pb-1 text-center select-none box-border shadow-2xs overflow-hidden">
           {showHeaderInstansi && (
             <div className="w-full border-b border-slate-200 pb-1 text-center shrink-0">
-              <div className={`${isLarge ? "text-[9px]" : "text-[7.5px]"} font-black uppercase tracking-wider text-slate-900 leading-normal`}>
+              <div className="text-[8px] font-black uppercase tracking-wider text-slate-900 leading-normal">
                 SMKN 1 BERINGIN
               </div>
             </div>
           )}
           <div className="flex-1 flex flex-col items-center justify-center py-0.5 space-y-0.5 min-h-0">
-            <div className={`font-mono font-black ${isLarge ? "text-[15px]" : "text-[12px]"} leading-tight text-slate-950`}>
+            <div className={`font-mono font-black ${ddcLen > 5 ? "text-[12px]" : "text-[14px]"} leading-tight text-slate-950`}>
               {item.klasifikasi || "000"}
             </div>
-            <div className={`font-mono font-extrabold ${isLarge ? "text-[12px]" : "text-[10px]"} leading-tight text-slate-800 uppercase`}>
+            <div className="font-mono font-extrabold text-[11px] leading-tight text-slate-800 uppercase">
               {item.authorCode}
             </div>
-            <div className={`font-mono font-bold ${isLarge ? "text-[11px]" : "text-[9.5px]"} leading-tight text-slate-700`}>
+            <div className="font-mono font-bold text-[10px] leading-tight text-slate-700">
               {item.titleCode}
             </div>
           </div>
-          <div className={`shrink-0 ${isLarge ? "text-[8.5px] px-3 py-0.5" : "text-[7px] px-2.5 py-0.5"} font-bold text-slate-600 bg-slate-100 rounded border border-slate-200 leading-none`}>
+          <div className="shrink-0 text-[7.5px] px-3 py-0.5 font-bold text-slate-600 bg-slate-100 rounded border border-slate-200 leading-none">
             c.{item.copyNumber} · {item.isReferensi ? "[R]" : "Koleksi"}
           </div>
         </div>
@@ -809,32 +863,32 @@ export function CetakLabelBukuClient({
 
     // BARCODE ONLY
     return (
-      <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] px-2 pt-2 pb-1.5 text-center select-none box-border shadow-2xs overflow-hidden">
+      <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] px-2 pt-1.5 pb-1 text-center select-none box-border shadow-2xs overflow-hidden">
         {showHeaderInstansi && (
           <div className="w-full border-b border-slate-200 pb-0.5 text-center shrink-0">
-            <div className={`${isLarge ? "text-[8.5px]" : "text-[7px]"} font-black uppercase text-slate-900 tracking-wider leading-normal`}>
+            <div className="text-[7.5px] font-black uppercase text-slate-900 tracking-wider leading-normal">
               PERPUSTAKAAN SMKN 1 BERINGIN
             </div>
           </div>
         )}
-        <div className={`w-full flex-1 flex items-center justify-center my-0.5 ${isLarge ? "max-h-[38px]" : "max-h-[26px]"} min-h-0`}>
+        <div className="w-full flex-1 flex items-center justify-center my-0.5 max-h-[30px] min-h-0">
           {bcUrl ? (
-            <img src={bcUrl} alt={item.kode} className={`h-full ${isLarge ? "max-h-[34px]" : "max-h-[24px]"} w-full object-contain`} />
+            <img src={bcUrl} alt={item.kode} className="h-full max-h-[28px] w-full object-contain" />
           ) : (
-            <div className={`h-5 w-full bg-slate-100 flex items-center justify-center font-mono ${isLarge ? "text-[9.5px]" : "text-[8.5px]"}`}>
+            <div className="h-5 w-full bg-slate-100 flex items-center justify-center font-mono text-[8.5px]">
               {item.kode}
             </div>
           )}
         </div>
-        <div className={`font-mono font-black ${isLarge ? "text-[11px]" : "text-[9px]"} tracking-widest leading-none text-slate-950 shrink-0`}>
+        <div className="font-mono font-black text-[9.5px] tracking-widest leading-none text-slate-950 shrink-0">
           * {item.kode} *
         </div>
-        <div className={`${isLarge ? "text-[8.5px]" : "text-[7px]"} font-bold line-clamp-1 text-slate-900 leading-tight w-full px-1 my-0.5 shrink-0`}>
+        <div className="text-[7.5px] font-bold line-clamp-1 text-slate-900 leading-tight w-full px-1 my-0.5 shrink-0">
           {item.judul}
         </div>
         {showLocation && (
-          <div className={`shrink-0 ${isLarge ? "text-[8px]" : "text-[6.5px]"} font-semibold text-slate-600 truncate w-full leading-none`}>
-            <span className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
+          <div className="shrink-0 text-[7px] font-semibold text-slate-600 truncate w-full leading-none">
+            <span className="bg-slate-100 px-2 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
               {item.rakNama}
             </span>
           </div>
@@ -871,7 +925,7 @@ export function CetakLabelBukuClient({
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
           >
             <Printer className="w-4 h-4" />
-            <span>Cetak Langsung ({selectedItems.length})</span>
+            <span>Cetak Langsung ({targetPages.length} Lembar)</span>
           </button>
 
           <button
@@ -895,7 +949,7 @@ export function CetakLabelBukuClient({
             ) : (
               <Download className="w-4 h-4 text-emerald-500" />
             )}
-            <span>{isGeneratingPdf ? "Memproses..." : "Unduh PDF"}</span>
+            <span>{isGeneratingPdf ? "Memproses..." : `Unduh PDF (${targetPages.length} Lembar)`}</span>
           </button>
         </div>
       </div>
@@ -1164,6 +1218,79 @@ export function CetakLabelBukuClient({
                 </div>
               )}
             </div>
+
+            {/* Page Selection Controls */}
+            <div className="pt-3 border-t border-stone-200/80 dark:border-slate-800 space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-stone-700 dark:text-slate-300">
+                  Cakupan Halaman yang Dicetak
+                </label>
+                <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                  {targetPages.length} dari {totalPages} lembar
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => setPageScope("ALL")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    pageScope === "ALL"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 hover:bg-stone-200"
+                  }`}
+                >
+                  Semua ({totalPages} Lembar)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPageScope("ODD")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    pageScope === "ODD"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 hover:bg-stone-200"
+                  }`}
+                >
+                  Ganjil Saja (1, 3, 5...)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPageScope("EVEN")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    pageScope === "EVEN"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 hover:bg-stone-200"
+                  }`}
+                >
+                  Genap Saja (2, 4, 6...)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPageScope("CUSTOM")}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                    pageScope === "CUSTOM"
+                      ? "bg-emerald-600 text-white shadow-xs"
+                      : "bg-stone-100 dark:bg-slate-800 text-stone-700 dark:text-slate-300 hover:bg-stone-200"
+                  }`}
+                >
+                  Kustom
+                </button>
+
+                {pageScope === "CUSTOM" && (
+                  <div className="flex items-center gap-2 mt-1 sm:mt-0">
+                    <input
+                      type="text"
+                      value={customPagesInput}
+                      onChange={(e) => setCustomPagesInput(e.target.value)}
+                      placeholder="contoh: 1, 2-3"
+                      className="w-32 px-2.5 py-1 text-xs font-bold rounded-lg bg-stone-50 dark:bg-slate-950 border border-stone-300 dark:border-slate-700 text-stone-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    />
+                    <span className="text-[11px] text-stone-500 dark:text-slate-400">
+                      (dari {totalPages} lembar)
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Live Print Preview Sheet */}
@@ -1172,56 +1299,91 @@ export function CetakLabelBukuClient({
               <div className="flex items-center gap-2">
                 <Eye className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <h3 className="font-bold text-sm text-stone-900 dark:text-white">
-                  Pratinjau Lembar Kertas ({template.name})
+                  Pratinjau Lembar ({template.name})
                 </h3>
               </div>
-              <span className="text-xs text-stone-500 dark:text-slate-400">
-                {template.cols} kolom × {template.rows} baris
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-stone-500 dark:text-slate-400 hidden sm:inline">
+                  {template.cols} × {template.rows} (16 label / lembar)
+                </span>
+                {totalPages > 1 && (
+                  <div className="flex items-center gap-1 bg-stone-100 dark:bg-slate-800 p-0.5 rounded-lg border border-stone-200 dark:border-slate-700">
+                    <button
+                      type="button"
+                      disabled={previewPageIdx <= 0}
+                      onClick={() => setPreviewPageIdx((p) => Math.max(0, p - 1))}
+                      className="p-1 rounded hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
+                      title="Lembar Sebelumnya"
+                    >
+                      <ChevronLeft className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-[11px] font-bold px-1 text-stone-700 dark:text-slate-200">
+                      Lembar {previewPageIdx + 1} / {totalPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={previewPageIdx >= totalPages - 1}
+                      onClick={() => setPreviewPageIdx((p) => Math.min(totalPages - 1, p + 1))}
+                      className="p-1 rounded hover:bg-white dark:hover:bg-slate-700 disabled:opacity-30 cursor-pointer"
+                      title="Lembar Berikutnya"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Visual Sheet Area */}
             <div className="p-4 bg-stone-200/70 dark:bg-slate-950/70 rounded-2xl overflow-x-auto flex items-center justify-center">
               <div
                 style={{
-                  width: `${template.sheetWidthMm * 2.6}px`,
-                  minHeight: `${template.sheetHeightMm * 2.6}px`,
-                  padding: `${template.marginVertMm * 2.6}px ${template.marginHorizMm * 2.6}px`,
+                  width: `${template.sheetWidthMm * 2.5}px`,
+                  height: `${template.sheetHeightMm * 2.5}px`,
+                  padding: `${template.marginVertMm * 2.5}px ${template.marginHorizMm * 2.5}px`,
                 }}
-                className="bg-white shadow-2xl rounded-sm border border-stone-300 relative box-border"
+                className="bg-white shadow-xl rounded-sm border border-stone-300 relative box-border"
               >
                 <div
                   style={{
                     display: "grid",
                     gridTemplateColumns: `repeat(${template.cols}, 1fr)`,
-                    gap: `${template.gapVertMm * 2.6}px ${template.gapHorizMm * 2.6}px`,
+                    gridTemplateRows: `repeat(${template.rows}, 1fr)`,
+                    gap: `${template.gapVertMm * 2.5}px ${template.gapHorizMm * 2.5}px`,
+                    width: "100%",
+                    height: "100%",
                   }}
                 >
-                  {/* Empty Offset Slots */}
-                  {Array.from({ length: startOffset }).map((_, idx) => (
-                    <div
-                      key={`skip-${idx}`}
-                      style={{
-                        height: `${template.labelHeightMm * 2.6}px`,
-                      }}
-                      className="border border-dashed border-stone-300 bg-stone-50 flex items-center justify-center text-[10px] text-stone-400 font-mono rounded"
-                    >
-                      (Stiker Terpakai #{idx + 1})
-                    </div>
-                  ))}
-
-                  {/* Selected Label Items */}
-                  {selectedItems.map((item, idx) => (
-                    <div
-                      key={item.id}
-                      style={{
-                        height: `${template.labelHeightMm * 2.6}px`,
-                      }}
-                      className="relative rounded"
-                    >
-                      {renderLabelContent(item)}
-                    </div>
-                  ))}
+                  {Array.from({ length: template.perPage }).map((_, slotIdx) => {
+                    const globalSlot = previewPageIdx * template.perPage + slotIdx;
+                    if (globalSlot < startOffset) {
+                      return (
+                        <div
+                          key={`skip-${slotIdx}`}
+                          className="border border-dashed border-stone-300 bg-stone-50 flex items-center justify-center text-[9px] text-stone-400 font-mono rounded"
+                        >
+                          (Kosong #{slotIdx + 1})
+                        </div>
+                      );
+                    }
+                    const itemIndex = globalSlot - startOffset;
+                    if (itemIndex >= selectedItems.length) {
+                      return (
+                        <div
+                          key={`empty-end-${slotIdx}`}
+                          className="border border-dashed border-stone-200 bg-stone-50/50 rounded flex items-center justify-center text-[9px] text-stone-300"
+                        >
+                          (Slot Kosong)
+                        </div>
+                      );
+                    }
+                    const item = selectedItems[itemIndex];
+                    return (
+                      <div key={item.id} className="relative rounded w-full h-full">
+                        {renderLabelContent(item)}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -1231,9 +1393,8 @@ export function CetakLabelBukuClient({
 
       {/* Hidden Container for Browser Window.print() */}
       <div className="printable-sheet-container hidden print:block">
-        {Array.from({
-          length: Math.ceil((startOffset + selectedItems.length) / template.perPage),
-        }).map((_, pageIdx) => {
+        {targetPages.map((pageNum) => {
+          const pageIdx = pageNum - 1;
           return (
             <div
               key={`page-${pageIdx}`}
@@ -1253,11 +1414,21 @@ export function CetakLabelBukuClient({
               {Array.from({ length: template.perPage }).map((_, slotIdx) => {
                 const globalSlot = pageIdx * template.perPage + slotIdx;
                 if (globalSlot < startOffset) {
-                  return <div key={`empty-${slotIdx}`} style={{ width: `${template.labelWidthMm}mm`, height: `${template.labelHeightMm}mm` }} />;
+                  return (
+                    <div
+                      key={`empty-${slotIdx}`}
+                      style={{ width: `${template.labelWidthMm}mm`, height: `${template.labelHeightMm}mm` }}
+                    />
+                  );
                 }
                 const itemIndex = globalSlot - startOffset;
                 if (itemIndex >= selectedItems.length) {
-                  return <div key={`empty-end-${slotIdx}`} style={{ width: `${template.labelWidthMm}mm`, height: `${template.labelHeightMm}mm` }} />;
+                  return (
+                    <div
+                      key={`empty-end-${slotIdx}`}
+                      style={{ width: `${template.labelWidthMm}mm`, height: `${template.labelHeightMm}mm` }}
+                    />
+                  );
                 }
                 const item = selectedItems[itemIndex];
                 return (
