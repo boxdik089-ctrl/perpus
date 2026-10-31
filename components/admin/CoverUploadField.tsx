@@ -334,7 +334,7 @@ export function CoverUploadField({ initialCoverUrl = "", name = "cover_url" }: P
 
             <div className="text-center">
               <span className="text-[10px] text-slate-500 dark:text-slate-400 font-mono truncate block max-w-full px-1">
-                {coverUrl.startsWith("/uploads/") ? "✓ File Tersimpan di Server" : (coverUrl || "Foto Lokal")}
+                {coverUrl.startsWith("/uploads/") ? "File Tersimpan di Server" : (coverUrl || "Foto Lokal")}
               </span>
             </div>
           </div>

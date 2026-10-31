@@ -118,17 +118,17 @@ export default function FormPeminjaman({ siswaList, bukuBiasaList, bukuMapelList
         if (res.type === "SISWA" && res.siswa) {
           if (activeTab === "BIASA") setSelectedSiswa(res.siswa.id);
           else setSelectedSiswaMapel(res.siswa.id);
-          setScanFeedback({ ok: true, message: `✓ Siswa "${res.siswa.nama}" (${res.siswa.kelas}) terpilih!` });
+          setScanFeedback({ ok: true, message: `Siswa "${res.siswa.nama}" (${res.siswa.kelas}) terpilih.` });
         } else if (res.type === "BUKU" && res.buku) {
           const buku = res.buku;
           if (buku.tipe_buku === "MAPEL") {
             setActiveTab("MAPEL");
             setSelectedBukuMapelIds((prev) => (prev.includes(buku.id) ? prev : [...prev, buku.id]));
-            setScanFeedback({ ok: true, message: `✓ Buku Mapel "${buku.judul}" ditambahkan ke pinjaman!` });
+            setScanFeedback({ ok: true, message: `Buku Mapel "${buku.judul}" ditambahkan ke pinjaman.` });
           } else {
             setActiveTab("BIASA");
             setSelectedBukuIds((prev) => (prev.includes(buku.id) ? prev : [...prev, buku.id]));
-            setScanFeedback({ ok: true, message: `✓ Buku "${buku.judul}" ditambahkan ke pinjaman!` });
+            setScanFeedback({ ok: true, message: `Buku "${buku.judul}" ditambahkan ke pinjaman.` });
           }
         }
       } else {

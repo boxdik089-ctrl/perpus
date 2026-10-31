@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
-import { Mic, MicOff, AudioLines, Loader2 } from "lucide-react";
+import { Mic, MicOff, AudioLines, Loader2, AlertCircle } from "lucide-react";
 
 type FieldMap = Record<string, string>;
 
@@ -290,8 +290,9 @@ export function VoiceNoteBuku() {
       )}
 
       {!supported && (
-        <p className="text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl p-2.5">
-          ⚠️ Browser ini belum mendukung Web Speech Recognition. Gunakan Google Chrome atau Microsoft Edge untuk fitur dikte suara.
+        <p className="text-[11px] text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900 rounded-xl p-2.5 flex items-start gap-1.5">
+          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+          <span>Browser ini belum mendukung Web Speech Recognition. Gunakan Google Chrome atau Microsoft Edge untuk fitur dikte suara.</span>
         </p>
       )}
     </div>

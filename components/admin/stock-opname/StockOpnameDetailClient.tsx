@@ -34,7 +34,10 @@ import {
   ChevronRight,
   ExternalLink,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  MapPin,
+  Tag,
+  Info
 } from "lucide-react";
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import {
@@ -668,8 +671,9 @@ export function StockOpnameDetailClient({
           {/* Scanner Settings (Target Rak & Kondisi Fisik) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4 p-3 bg-white/70 dark:bg-slate-800/60 rounded-xl border border-stone-200/70 dark:border-slate-700/60">
             <div>
-              <label className="block text-[11px] font-bold text-stone-600 dark:text-slate-400 mb-1">
-                📍 Posisi Rak Saat Ini:
+              <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-600 dark:text-slate-400 mb-1">
+                <MapPin className="w-3.5 h-3.5 text-stone-500 dark:text-slate-400" />
+                <span>Posisi Rak Saat Ini:</span>
               </label>
               <select
                 value={activeRakId}
@@ -686,38 +690,42 @@ export function StockOpnameDetailClient({
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-stone-600 dark:text-slate-400 mb-1">
-                🏷️ Kondisi Fisik yang Ditemukan:
+              <label className="flex items-center gap-1.5 text-[11px] font-bold text-stone-600 dark:text-slate-400 mb-1">
+                <Tag className="w-3.5 h-3.5 text-stone-500 dark:text-slate-400" />
+                <span>Kondisi Fisik yang Ditemukan:</span>
               </label>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setActiveKondisiFisik("BAIK")}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     activeKondisiFisik === "BAIK"
-                      ? "bg-emerald-500 text-white border-emerald-600 shadow-xs"
-                      : "bg-white dark:bg-slate-900 text-stone-600 dark:text-slate-300 border-stone-300 dark:border-slate-700"
+                      ? "bg-emerald-600 text-white border-emerald-700 shadow-xs"
+                      : "bg-white dark:bg-slate-900 text-stone-600 dark:text-slate-300 border-stone-300 dark:border-slate-700 hover:bg-stone-50"
                   }`}
                 >
-                  ✓ Kondisi Baik
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Kondisi Baik</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveKondisiFisik("RUSAK")}
-                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold border transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                     activeKondisiFisik === "RUSAK"
-                      ? "bg-rose-500 text-white border-rose-600 shadow-xs"
-                      : "bg-white dark:bg-slate-900 text-stone-600 dark:text-slate-300 border-stone-300 dark:border-slate-700"
+                      ? "bg-rose-600 text-white border-rose-700 shadow-xs"
+                      : "bg-white dark:bg-slate-900 text-stone-600 dark:text-slate-300 border-stone-300 dark:border-slate-700 hover:bg-stone-50"
                   }`}
                 >
-                  ⚠ Rusak / Cacat
+                  <AlertTriangle className="w-3.5 h-3.5" />
+                  <span>Rusak / Cacat</span>
                 </button>
               </div>
             </div>
 
             <div className="flex flex-col justify-end">
-              <p className="text-[11px] text-stone-500 dark:text-slate-400 leading-tight">
-                💡 <em>Tip: Kunci rak posisi Anda sekarang agar sistem langsung memvalidasi apakah buku yang discan salah tempat rak.</em>
+              <p className="flex items-start gap-1.5 text-[11px] text-stone-500 dark:text-slate-400 leading-tight">
+                <Info className="w-3.5 h-3.5 text-stone-400 shrink-0 mt-0.5" />
+                <span>Kunci posisi rak sekarang agar sistem memvalidasi jika buku salah tempat.</span>
               </p>
             </div>
           </div>

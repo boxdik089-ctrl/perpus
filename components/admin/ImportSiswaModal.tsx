@@ -647,12 +647,14 @@ export function ImportSiswaModal() {
                         <span>Pengaturan Kelas Siswa</span>
                       </div>
                       {hasKelasColumn ? (
-                        <p className="text-[11px] text-emerald-400">
-                          ✓ Kolom kelas ditemukan di Excel: <strong>&quot;{detectedKelasColName}&quot;</strong>. Kelas tiap siswa akan diambil dari file ini.
+                        <p className="text-[11px] text-emerald-400 flex items-start gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5 text-emerald-400" />
+                          <span>Kolom kelas ditemukan di Excel: <strong>&quot;{detectedKelasColName}&quot;</strong>. Kelas tiap siswa akan diambil dari file ini.</span>
                         </p>
                       ) : (
-                        <p className="text-[11px] text-amber-300">
-                          ⚠️ Kolom Kelas tidak ditemukan di dalam file. Anda dapat mengisi <strong>Kelas Default</strong> di bawah untuk semua siswa dalam file ini, atau biarkan kosong (<code>-</code>).
+                        <p className="text-[11px] text-amber-300 flex items-start gap-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
+                          <span>Kolom Kelas tidak ditemukan di dalam file. Anda dapat mengisi <strong>Kelas Default</strong> di bawah untuk semua siswa dalam file ini, atau biarkan kosong (<code>-</code>).</span>
                         </p>
                       )}
                     </div>

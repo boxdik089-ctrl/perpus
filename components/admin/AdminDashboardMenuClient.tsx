@@ -55,7 +55,7 @@ export function AdminDashboardMenuClient() {
       items: [
         {
           title: "Sirkulasi Scanner",
-          desc: "Scan kartu anggota ➔ scan buku: pinjam & kembali instan",
+          desc: "Scan kartu anggota lalu scan buku untuk pinjam & kembali instan",
           href: "/admin/sirkulasi",
           tag: "SCANNER CEPAT",
           tagColor: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400",
@@ -120,7 +120,7 @@ export function AdminDashboardMenuClient() {
         },
         {
           title: "Scan Cepat Masuk Buku",
-          desc: "Tembak barcode ISBN fisik ➔ auto input metadata & stok",
+          desc: "Scan barcode ISBN fisik untuk auto input metadata & stok",
           href: "/admin/buku/scan",
           tag: "AUTO-FETCH ISBN",
           tagColor: "bg-teal-500/10 text-teal-700 dark:text-teal-400",

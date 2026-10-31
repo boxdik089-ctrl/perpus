@@ -10,6 +10,7 @@ import {
   UserCheck,
   Clock,
   Users,
+  Check,
   CheckCircle2,
   AlertCircle,
   Maximize,
@@ -503,8 +504,9 @@ export default function KioskScannerClient({
                       <span className="truncate">{item.label}</span>
                     </div>
                     {isSelected && (
-                      <span className="text-[9px] uppercase tracking-wider font-bold text-white/90">
-                        ✓ Aktif
+                      <span className="text-[9px] uppercase tracking-wider font-bold text-white/90 inline-flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        <span>Aktif</span>
                       </span>
                     )}
                   </button>
