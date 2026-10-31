@@ -163,8 +163,13 @@ Jika siswa bertanya tentang buku atau rekomendasi bacaan, sebutkan judul buku ya
           parts: [{ text: raw }],
         });
 
-        // Request ke Gemini 2.0 Flash (dengan fallback otomatis ke Gemini 1.5 Flash)
-        const candidateModels = ["gemini-2.0-flash", "gemini-1.5-flash"];
+        // Request ke model Gemini Flash terbaru (dengan fallback bertingkat)
+        const candidateModels = [
+          "gemini-flash-lite-latest",
+          "gemini-3.5-flash-lite",
+          "gemini-flash-latest",
+          "gemini-2.5-flash"
+        ];
         let aiReplyText: string | null = null;
 
         for (const modelName of candidateModels) {
