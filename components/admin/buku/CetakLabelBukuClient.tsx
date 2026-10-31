@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { ItemLabelBuku } from "@/actions/label-buku";
 import {
   Search,
-  Printer,
   Download,
   CheckSquare,
   Square,
@@ -341,58 +340,6 @@ export function CetakLabelBukuClient({
 
   const handleDeselectAll = () => {
     setSelectedIds(new Set());
-  };
-
-  // Direct Print via Browser
-  const handlePrintBrowser = () => {
-    if (typeof document === "undefined") return;
-
-    const styleId = "print-label-sheet-style";
-    let style = document.getElementById(styleId) as HTMLStyleElement | null;
-    if (!style) {
-      style = document.createElement("style");
-      style.id = styleId;
-      document.head.appendChild(style);
-    }
-
-    style.textContent = `
-      @page {
-        size: ${template.sheetWidthMm}mm ${template.sheetHeightMm}mm ${template.sheetWidthMm > template.sheetHeightMm ? "landscape" : "portrait"};
-        margin: 0 !important;
-      }
-      @media print {
-        body {
-          margin: 0 !important;
-          padding: 0 !important;
-          background: #ffffff !important;
-        }
-        .print-hidden, nav, header, footer {
-          display: none !important;
-        }
-        .printable-sheet-container {
-          display: block !important;
-          width: 100% !important;
-        }
-        .printable-sheet {
-          break-inside: avoid;
-          page-break-inside: avoid;
-        }
-        .printable-sheet:not(:last-child) {
-          page-break-after: always;
-          break-after: page;
-        }
-      }
-    `;
-
-    const restore = () => {
-      style.textContent = "";
-      window.removeEventListener("afterprint", restore);
-    };
-    window.addEventListener("afterprint", restore);
-
-    setTimeout(() => {
-      window.print();
-    }, 100);
   };
 
   // Export Data to Excel (.xlsx)
@@ -756,7 +703,7 @@ export function CetakLabelBukuClient({
       doc.save(`Label-Buku-SMKN1Beringin-${new Date().toISOString().slice(0, 10)}.pdf`);
     } catch (err) {
       console.error("PDF generation failed:", err);
-      alert("Gagal mengunduh PDF. Silakan gunakan tombol Cetak Langsung.");
+      alert("Gagal mengunduh PDF. Silakan coba lagi beberapa saat.");
     } finally {
       setIsGeneratingPdf(false);
     }
@@ -920,16 +867,6 @@ export function CetakLabelBukuClient({
         <div className="flex items-center gap-2.5 w-full lg:w-auto flex-wrap">
           <button
             type="button"
-            onClick={handlePrintBrowser}
-            disabled={selectedItems.length === 0}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer"
-          >
-            <Printer className="w-4 h-4" />
-            <span>Cetak Langsung ({targetPages.length} Lembar)</span>
-          </button>
-
-          <button
-            type="button"
             onClick={handleExportExcel}
             disabled={selectedItems.length === 0}
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-stone-800 dark:text-white font-bold text-xs sm:text-sm border border-stone-300 dark:border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
@@ -942,12 +879,12 @@ export function CetakLabelBukuClient({
             type="button"
             onClick={handleDownloadPdf}
             disabled={selectedItems.length === 0 || isGeneratingPdf}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-stone-800 dark:text-white font-bold text-xs sm:text-sm border border-stone-300 dark:border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm shadow-sm disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer"
           >
             {isGeneratingPdf ? (
-              <RefreshCw className="w-4 h-4 animate-spin text-emerald-500" />
+              <RefreshCw className="w-4 h-4 animate-spin text-white" />
             ) : (
-              <Download className="w-4 h-4 text-emerald-500" />
+              <Download className="w-4 h-4 text-white" />
             )}
             <span>{isGeneratingPdf ? "Memproses..." : `Unduh PDF (${targetPages.length} Lembar)`}</span>
           </button>
@@ -1389,64 +1326,6 @@ export function CetakLabelBukuClient({
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Hidden Container for Browser Window.print() */}
-      <div className="printable-sheet-container hidden print:block">
-        {targetPages.map((pageNum) => {
-          const pageIdx = pageNum - 1;
-          return (
-            <div
-              key={`page-${pageIdx}`}
-              className="printable-sheet"
-              style={{
-                width: `${template.sheetWidthMm}mm`,
-                height: `${template.sheetHeightMm}mm`,
-                padding: `${template.marginVertMm}mm ${template.marginHorizMm}mm`,
-                boxSizing: "border-box",
-                background: "#ffffff",
-                display: "grid",
-                gridTemplateColumns: `repeat(${template.cols}, ${template.labelWidthMm}mm)`,
-                gridAutoRows: `${template.labelHeightMm}mm`,
-                gap: `${template.gapVertMm}mm ${template.gapHorizMm}mm`,
-              }}
-            >
-              {Array.from({ length: template.perPage }).map((_, slotIdx) => {
-                const globalSlot = pageIdx * template.perPage + slotIdx;
-                if (globalSlot < startOffset) {
-                  return (
-                    <div
-                      key={`empty-${slotIdx}`}
-                      style={{ width: `${template.labelWidthMm}mm`, height: `${template.labelHeightMm}mm` }}
-                    />
-                  );
-                }
-                const itemIndex = globalSlot - startOffset;
-                if (itemIndex >= selectedItems.length) {
-                  return (
-                    <div
-                      key={`empty-end-${slotIdx}`}
-                      style={{ width: `${template.labelWidthMm}mm`, height: `${template.labelHeightMm}mm` }}
-                    />
-                  );
-                }
-                const item = selectedItems[itemIndex];
-                return (
-                  <div
-                    key={item.id}
-                    style={{
-                      width: `${template.labelWidthMm}mm`,
-                      height: `${template.labelHeightMm}mm`,
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {renderLabelContent(item)}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
       </div>
     </div>
   );
