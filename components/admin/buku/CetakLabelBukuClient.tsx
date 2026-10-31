@@ -378,71 +378,71 @@ export function CetakLabelBukuClient({
 
           if (labelMode === "COMBI") {
             // Sisi Kiri: Spine (35% width), Sisi Kanan: Barcode (65% width)
-            const spineW = w * 0.36;
+            const spineW = w * 0.35;
             const barcodeW = w - spineW;
 
             // Garis Pemisah Spine & Barcode
-            doc.setDrawColor(220, 220, 220);
+            doc.setDrawColor(210, 215, 225);
             doc.setLineWidth(0.2);
             doc.line(x + spineW, y + 1, x + spineW, y + h - 1);
 
             // Left Side: Spine Box
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6);
+            doc.setFontSize(5.5);
             doc.setTextColor(30, 41, 59);
             if (showHeaderInstansi) {
-              doc.text("SMKN 1 BERINGIN", x + spineW / 2, y + 3.5, { align: "center" });
-              doc.line(x + 1, y + 4.5, x + spineW - 1, y + 4.5);
+              doc.text("SMKN 1 BERINGIN", x + spineW / 2, y + 3, { align: "center" });
+              doc.line(x + 1, y + 4.2, x + spineW - 1, y + 4.2);
             }
 
             // DDC & Codes
-            doc.setFontSize(8);
+            doc.setFontSize(8.5);
             doc.text(item.klasifikasi || "000", x + spineW / 2, y + (showHeaderInstansi ? 8.5 : 6), { align: "center" });
 
             doc.setFontSize(7.5);
-            doc.text(item.authorCode, x + spineW / 2, y + (showHeaderInstansi ? 13 : 10.5), { align: "center" });
+            doc.text(item.authorCode, x + spineW / 2, y + (showHeaderInstansi ? 12.5 : 10), { align: "center" });
 
-            doc.setFontSize(7.5);
+            doc.setFontSize(7);
             doc.setFont("helvetica", "normal");
-            doc.text(item.titleCode, x + spineW / 2, y + (showHeaderInstansi ? 17 : 14.5), { align: "center" });
+            doc.text(item.titleCode, x + spineW / 2, y + (showHeaderInstansi ? 16.5 : 14), { align: "center" });
 
             doc.setFontSize(6);
             doc.setFont("helvetica", "bold");
             doc.setTextColor(71, 85, 105);
-            doc.text(`c.${item.copyNumber}`, x + spineW / 2, y + h - 2.5, { align: "center" });
+            doc.text(`c.${item.copyNumber}`, x + spineW / 2, y + h - 2, { align: "center" });
 
             // Right Side: Barcode Box
             const bX = x + spineW + 1;
             const bW = barcodeW - 2;
 
-            doc.setFontSize(6);
+            doc.setFontSize(5.8);
             doc.setTextColor(30, 41, 59);
             doc.setFont("helvetica", "bold");
-            doc.text("PERPUSTAKAAN SMKN 1 BERINGIN", bX + bW / 2, y + 3.5, { align: "center" });
+            doc.text("PERPUS SMKN 1 BERINGIN", bX + bW / 2, y + 3, { align: "center" });
 
             // Barcode Image
             const bcImg = barcodeCache[item.kode];
             if (bcImg) {
-              doc.addImage(bcImg, "PNG", bX + 2, y + 4.5, bW - 4, 10);
+              doc.addImage(bcImg, "PNG", bX + 2, y + 4.2, bW - 4, 10);
             }
 
             // Barcode Number text
-            doc.setFontSize(7);
+            doc.setFontSize(7.5);
             doc.setFont("courier", "bold");
-            doc.text(`* ${item.kode} *`, bX + bW / 2, y + 17.5, { align: "center" });
+            doc.text(item.kode, bX + bW / 2, y + 17, { align: "center" });
 
-            // Book Title
+            // Book Title (max 2 lines)
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(6.5);
+            doc.setFontSize(6);
             doc.setTextColor(15, 23, 42);
             const truncatedTitle = doc.splitTextToSize(item.judul, bW - 2);
-            doc.text(truncatedTitle.slice(0, 2), bX + bW / 2, y + 21, { align: "center" });
+            doc.text(truncatedTitle.slice(0, 2), bX + bW / 2, y + 20.5, { align: "center" });
 
             if (showLocation) {
               doc.setFontSize(5.5);
               doc.setFont("helvetica", "normal");
               doc.setTextColor(100, 116, 139);
-              doc.text(`Lokasi: ${item.rakNama}`, bX + bW / 2, y + h - 2, { align: "center" });
+              doc.text(`Lokasi: ${item.rakNama}`, bX + bW / 2, y + h - 1.5, { align: "center" });
             }
           } else if (labelMode === "SPINE_ONLY") {
             // Full Spine Label
@@ -510,51 +510,55 @@ export function CetakLabelBukuClient({
 
     if (labelMode === "COMBI") {
       return (
-        <div className="w-full h-full flex bg-white text-slate-900 border border-slate-300 rounded-md overflow-hidden text-[10px] select-none p-1 box-border">
-          {/* Sisi Kiri: Spine */}
-          <div className="w-[36%] border-r border-slate-300 flex flex-col items-center justify-between pr-1 py-0.5 text-center">
+        <div className="w-full h-full flex bg-white text-slate-900 border border-slate-300 rounded-[3px] overflow-hidden select-none p-1 box-border shadow-2xs">
+          {/* Sisi Kiri: Spine (35%) */}
+          <div className="w-[35%] border-r border-slate-300 flex flex-col items-center justify-between pr-1 py-0.5 text-center shrink-0">
             {showHeaderInstansi && (
-              <div className="text-[7px] font-black uppercase tracking-tighter text-slate-800 border-b border-slate-200 pb-0.5 w-full truncate">
+              <div className="text-[6px] font-black uppercase tracking-tight text-slate-800 border-b border-slate-200 pb-0.5 w-full text-center leading-tight whitespace-nowrap">
                 SMKN 1 BERINGIN
               </div>
             )}
-            <div className="font-mono font-black text-[11px] leading-none text-slate-950">
-              {item.klasifikasi || "000"}
+            <div className="my-auto flex flex-col items-center justify-center space-y-0.5 py-0.5">
+              <div className="font-mono font-black text-[11px] leading-tight text-slate-950">
+                {item.klasifikasi || "000"}
+              </div>
+              <div className="font-mono font-extrabold text-[9.5px] leading-tight text-slate-800 uppercase">
+                {item.authorCode}
+              </div>
+              <div className="font-mono font-bold text-[9px] leading-tight text-slate-700">
+                {item.titleCode}
+              </div>
             </div>
-            <div className="font-mono font-extrabold text-[10px] leading-none text-slate-800">
-              {item.authorCode}
-            </div>
-            <div className="font-mono font-medium text-[10px] leading-none text-slate-700">
-              {item.titleCode}
-            </div>
-            <div className="text-[8px] font-bold text-slate-500">
+            <div className="text-[7.5px] font-bold text-slate-600 bg-slate-100 rounded px-1.5 py-0.2 leading-none border border-slate-200">
               c.{item.copyNumber}
             </div>
           </div>
 
-          {/* Sisi Kanan: Barcode */}
-          <div className="w-[64%] pl-1.5 py-0.5 flex flex-col items-center justify-between text-center overflow-hidden">
-            <div className="text-[7px] font-extrabold uppercase text-slate-800 tracking-tight truncate w-full">
+          {/* Sisi Kanan: Barcode (65%) */}
+          <div className="w-[65%] pl-1.5 py-0.5 flex flex-col items-center justify-between text-center overflow-hidden min-w-0">
+            <div className="text-[6.5px] font-extrabold uppercase text-slate-800 tracking-tight border-b border-slate-100 pb-0.5 w-full truncate leading-tight">
               PERPUS SMKN 1 BERINGIN
             </div>
-            <div className="w-full flex items-center justify-center my-0.5">
+            <div className="w-full flex-1 flex items-center justify-center my-0.5 max-h-[30px]">
               {bcUrl ? (
-                <img src={bcUrl} alt={item.kode} className="h-6 w-full object-contain" />
+                <img src={bcUrl} alt={item.kode} className="h-full max-h-[26px] w-full object-contain" />
               ) : (
                 <div className="h-6 w-full bg-slate-100 flex items-center justify-center font-mono text-[8px]">
                   {item.kode}
                 </div>
               )}
             </div>
-            <div className="font-mono font-black text-[9px] leading-none text-slate-950">
+            <div className="font-mono font-black text-[9.5px] tracking-wider leading-none text-slate-950">
               {item.kode}
             </div>
-            <div className="text-[8px] font-bold line-clamp-1 text-slate-900 leading-tight w-full">
+            <div className="text-[7.5px] font-bold line-clamp-2 text-slate-900 leading-[1.15] w-full px-0.5 my-0.5">
               {item.judul}
             </div>
             {showLocation && (
-              <div className="text-[7px] text-slate-500 font-medium truncate w-full">
-                {item.rakNama}
+              <div className="text-[6.5px] font-bold text-slate-600 truncate w-full leading-none">
+                <span className="bg-slate-100 px-1 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
+                  {item.rakNama}
+                </span>
               </div>
             )}
           </div>
@@ -564,22 +568,24 @@ export function CetakLabelBukuClient({
 
     if (labelMode === "SPINE_ONLY") {
       return (
-        <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-md p-1.5 text-center select-none box-border">
+        <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] p-1.5 text-center select-none box-border shadow-2xs">
           {showHeaderInstansi && (
-            <div className="text-[8px] font-black uppercase text-slate-800 border-b border-slate-200 pb-0.5 w-full truncate">
+            <div className="text-[7.5px] font-black uppercase tracking-tight text-slate-800 border-b border-slate-200 pb-0.5 w-full truncate">
               SMKN 1 BERINGIN
             </div>
           )}
-          <div className="font-mono font-black text-sm leading-none text-slate-950">
-            {item.klasifikasi || "000"}
+          <div className="my-auto flex flex-col items-center justify-center space-y-1">
+            <div className="font-mono font-black text-sm leading-none text-slate-950">
+              {item.klasifikasi || "000"}
+            </div>
+            <div className="font-mono font-extrabold text-xs leading-none text-slate-800 uppercase">
+              {item.authorCode}
+            </div>
+            <div className="font-mono font-semibold text-xs leading-none text-slate-700">
+              {item.titleCode}
+            </div>
           </div>
-          <div className="font-mono font-extrabold text-xs leading-none text-slate-800">
-            {item.authorCode}
-          </div>
-          <div className="font-mono font-semibold text-xs leading-none text-slate-700">
-            {item.titleCode}
-          </div>
-          <div className="text-[8px] font-bold text-slate-500">
+          <div className="text-[8px] font-bold text-slate-600 bg-slate-100 rounded px-2 py-0.5 border border-slate-200">
             c.{item.copyNumber} · {item.isReferensi ? "[R]" : "Koleksi"}
           </div>
         </div>
@@ -588,25 +594,32 @@ export function CetakLabelBukuClient({
 
     // BARCODE ONLY
     return (
-      <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-md p-1.5 text-center select-none box-border">
-        <div className="text-[8px] font-extrabold uppercase text-slate-800 tracking-tight truncate w-full">
+      <div className="w-full h-full flex flex-col items-center justify-between bg-white text-slate-900 border border-slate-300 rounded-[3px] p-1.5 text-center select-none box-border shadow-2xs">
+        <div className="text-[7.5px] font-extrabold uppercase text-slate-800 tracking-tight border-b border-slate-100 pb-0.5 w-full truncate">
           PERPUSTAKAAN SMKN 1 BERINGIN
         </div>
-        <div className="w-full flex items-center justify-center my-1">
+        <div className="w-full flex-1 flex items-center justify-center my-1 max-h-[36px]">
           {bcUrl ? (
-            <img src={bcUrl} alt={item.kode} className="h-7 w-full object-contain" />
+            <img src={bcUrl} alt={item.kode} className="h-full max-h-[32px] w-full object-contain" />
           ) : (
             <div className="h-7 w-full bg-slate-100 flex items-center justify-center font-mono text-[9px]">
               {item.kode}
             </div>
           )}
         </div>
-        <div className="font-mono font-black text-[10px] leading-none text-slate-950">
+        <div className="font-mono font-black text-[10px] tracking-wider leading-none text-slate-950">
           * {item.kode} *
         </div>
-        <div className="text-[8.5px] font-bold line-clamp-1 text-slate-900 leading-tight w-full">
+        <div className="text-[8px] font-bold line-clamp-2 text-slate-900 leading-tight w-full px-1">
           {item.judul}
         </div>
+        {showLocation && (
+          <div className="text-[7px] font-semibold text-slate-600 truncate w-full mt-0.5">
+            <span className="bg-slate-100 px-1 py-0.5 rounded border border-slate-200 inline-block max-w-full truncate">
+              {item.rakNama}
+            </span>
+          </div>
+        )}
       </div>
     );
   };
