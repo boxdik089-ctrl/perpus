@@ -209,7 +209,7 @@ export default function KatalogBukuClient({
 
   const handleShareWhatsApp = () => {
     if (!selectedBook) return;
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://perpustakaan.tiksmkn1beringin.sch.id";
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://perpustakaan.tiksmkn1beringin.my.id";
     const targetUrl = `${origin}?cari=${encodeURIComponent(selectedBook.judul)}`;
     const pesan = `*Rekomendasi Pustaka SMKN 1 Beringin*\n\n` +
       `*Judul:* ${selectedBook.judul}\n` +
@@ -224,7 +224,7 @@ export default function KatalogBukuClient({
 
   const handleCopyLink = () => {
     if (!selectedBook) return;
-    const origin = typeof window !== "undefined" ? window.location.origin : "https://perpustakaan.tiksmkn1beringin.sch.id";
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://perpustakaan.tiksmkn1beringin.my.id";
     const targetUrl = `${origin}?cari=${encodeURIComponent(selectedBook.judul)}`;
     navigator.clipboard.writeText(targetUrl);
     setCopiedLink(true);
