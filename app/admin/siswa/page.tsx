@@ -7,7 +7,6 @@ import { deleteSiswa } from "@/actions/siswa";
 import { Button } from "@/components/ui/Button";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { 
-  ArrowLeft, 
   Users, 
   UserPlus, 
   Edit3, 
@@ -44,23 +43,15 @@ export default async function SiswaPage() {
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-stone-200/80 dark:border-slate-800 sticky top-0 z-20 shadow-xs">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-16 gap-2 sm:gap-4">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              <Link 
-                href="/admin" 
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-700 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-800/80 dark:hover:bg-slate-700/80 px-2.5 sm:px-3 py-1.5 rounded-xl border border-stone-300/80 dark:border-slate-700/80 transition-colors shrink-0"
-              >
-                <ArrowLeft className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                <span className="hidden sm:inline">Dashboard</span>
-              </Link>
-              <span className="text-stone-300 dark:text-slate-700 hidden sm:inline">/</span>
-              <div className="flex items-center gap-2 min-w-0">
-                <img
-                  src="/assets/logo.png"
-                  alt="Logo SMK Negeri 1 Beringin"
-                  className="w-7 h-7 object-contain rounded-xl bg-white/60 dark:bg-white/10 border border-stone-200 dark:border-white/20 p-1 shrink-0 hidden xs:block"
-                />
-                <h1 className="text-xs sm:text-base font-bold text-stone-900 dark:text-white truncate">Data Siswa Roster</h1>
-              </div>
+            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+              <img
+                src="/assets/logo.png"
+                alt="Logo SMK Negeri 1 Beringin"
+                className="w-8 h-8 object-contain rounded-xl bg-white/60 dark:bg-white/10 border border-stone-200 dark:border-white/20 p-1 shrink-0"
+              />
+              <h1 className="text-sm sm:text-base font-bold text-stone-900 dark:text-white whitespace-nowrap">
+                Data Siswa Roster
+              </h1>
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
