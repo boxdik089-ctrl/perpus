@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Users, UserPlus, CreditCard } from "lucide-react";
+import { Users, UserPlus, CreditCard } from "lucide-react";
 import { AnggotaListClient, type AnggotaListItem } from "@/components/admin/AnggotaListClient";
 import { ImportSiswaModal } from "@/components/admin/ImportSiswaModal";
 import { KelolaKelulusanModal } from "@/components/admin/KelolaKelulusanModal";
@@ -40,34 +40,23 @@ export default async function AnggotaPage() {
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-950/70 border-b border-stone-200/80 dark:border-slate-800/80 mb-6 sm:mb-8">
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14 sm:h-18 gap-2 sm:gap-4">
-            {/* Left Section: Breadcrumb & Title */}
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink-0">
-              <Link
-                href="/admin"
-                className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-stone-700 hover:text-emerald-600 dark:text-slate-300 dark:hover:text-emerald-400 bg-stone-100 hover:bg-stone-200/80 dark:bg-slate-900/80 dark:hover:bg-slate-800 border border-stone-300/80 dark:border-slate-800 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl transition-all cursor-pointer shadow-xs shrink-0"
-                title="Kembali ke Dashboard"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span className="hidden xl:inline">Dashboard</span>
-              </Link>
-              <span className="text-stone-300 dark:text-slate-700 hidden sm:inline">/</span>
-              <div className="flex items-center gap-2 min-w-0">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 hidden xs:flex">
-                  <Users className="w-4 h-4" />
+            {/* Left Section: Icon & Title */}
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h1 className="text-base sm:text-lg font-black text-stone-900 dark:text-white whitespace-nowrap">
+                    Data Anggota
+                  </h1>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hidden lg:inline-block shrink-0">
+                    Siswa · Guru
+                  </span>
                 </div>
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h1 className="text-sm sm:text-base font-black text-stone-900 dark:text-white whitespace-nowrap">
-                      Data Anggota
-                    </h1>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 hidden 2xl:inline-block shrink-0">
-                      Siswa · Guru
-                    </span>
-                  </div>
-                  <p className="text-[10px] sm:text-[11px] text-stone-500 dark:text-slate-400 hidden xl:block truncate">
-                    SMK Negeri 1 Beringin · Registrasi &amp; Kartu
-                  </p>
-                </div>
+                <p className="text-[11px] text-stone-500 dark:text-slate-400 hidden sm:block truncate">
+                  SMK Negeri 1 Beringin · Registrasi &amp; Kartu
+                </p>
               </div>
             </div>
 
