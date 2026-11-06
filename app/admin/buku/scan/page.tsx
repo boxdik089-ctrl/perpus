@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Scan, BookOpen, Plus, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft, BookOpen, Plus, FileSpreadsheet } from "lucide-react";
 import { QuickScanBukuClient } from "@/components/admin/QuickScanBukuClient";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
@@ -30,8 +30,12 @@ export default async function ScanBukuPage() {
               </Link>
               <span className="text-stone-300 dark:text-slate-700 hidden sm:inline">/</span>
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/10">
-                  <Scan className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-white/60 dark:bg-white/10 ring-1 ring-stone-200 dark:ring-white/20 p-1 flex items-center justify-center shrink-0">
+                  <img
+                    src="/assets/logo.png"
+                    alt="Logo SMKN 1 Beringin"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">

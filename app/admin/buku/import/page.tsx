@@ -3,7 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ImportBukuClient } from "@/components/admin/ImportBukuClient";
-import { ArrowLeft, FileSpreadsheet } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 
 export const dynamic = "force-dynamic";
@@ -30,8 +30,12 @@ export default async function ImportBukuPage() {
               </Link>
               <span className="text-slate-300 dark:text-slate-700 hidden sm:inline">/</span>
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 dark:bg-blue-500/20 border border-blue-500/20 dark:border-blue-500/30 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-                  <FileSpreadsheet className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-xl bg-white/60 dark:bg-white/10 ring-1 ring-slate-200 dark:ring-white/20 p-1 flex items-center justify-center shrink-0">
+                  <img
+                    src="/assets/logo.png"
+                    alt="Logo SMKN 1 Beringin"
+                    className="w-full h-full object-contain"
+                  />
                 </div>
                 <div>
                   <h1 className="text-base sm:text-lg font-black text-slate-900 dark:text-white">

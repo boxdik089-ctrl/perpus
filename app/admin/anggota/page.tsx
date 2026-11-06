@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Users, UserPlus, CreditCard } from "lucide-react";
+import { UserPlus, CreditCard } from "lucide-react";
 import { AnggotaListClient, type AnggotaListItem } from "@/components/admin/AnggotaListClient";
 import { ImportSiswaModal } from "@/components/admin/ImportSiswaModal";
 import { KelolaKelulusanModal } from "@/components/admin/KelolaKelulusanModal";
@@ -42,8 +42,12 @@ export default async function AnggotaPage() {
           <div className="flex justify-between items-center h-14 sm:h-18 gap-3 sm:gap-6">
             {/* Left Section: Icon & Title */}
             <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/60 dark:bg-white/10 ring-1 ring-stone-200 dark:ring-white/20 p-1 flex items-center justify-center shrink-0">
+                <img
+                  src="/assets/logo.png"
+                  alt="Logo SMKN 1 Beringin"
+                  className="w-full h-full object-contain"
+                />
               </div>
               <div className="shrink-0">
                 <h1 className="text-base sm:text-lg font-black text-stone-900 dark:text-white whitespace-nowrap leading-tight">

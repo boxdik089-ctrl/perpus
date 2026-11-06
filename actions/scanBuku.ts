@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { findRakIdForKlasifikasi } from "@/lib/rak";
 import { requireAdminSession } from "@/lib/security";
+import { resolveDdcFromIsbn, inferDdcFromText, type DdcResult } from "@/lib/ddc";
 
 export type QuickScanBukuResult = {
   ok: boolean;
@@ -149,14 +150,69 @@ const INDONESIAN_TEXTBOOKS_DB: Record<string, { judul: string; penulis: string; 
   },
 };
 
+export async function autoDetectDdcAction(
+  rawIsbn: string,
+  titleHint?: string,
+  categoryHint?: string
+): Promise<DdcResult> {
+  await requireAdminSession();
+  const clean = rawIsbn.trim().replace(/[-\s]/g, "");
+
+  if (clean.length >= 8) {
+    const res = await resolveDdcFromIsbn(clean);
+    if (res.ok) {
+      return res;
+    }
+  }
+
+  // Jika online catalog tidak menemukan, coba inferensi dari judul / kategori yang sudah diinput
+  if (titleHint || categoryHint) {
+    const inferred = inferDdcFromText(`${titleHint || ""} ${categoryHint || ""}`, categoryHint);
+    if (inferred.ddc !== "000") {
+      return {
+        ok: true,
+        ddc: inferred.ddc,
+        label: inferred.label,
+        kategori: inferred.kategori,
+        source: "Inferensi Judul / Kategori",
+        confidence: "MEDIUM",
+      };
+    }
+  }
+
+  return {
+    ok: false,
+    ddc: "000",
+    label: "Kode DDC belum terdeteksi otomatis",
+    source: "Not Found",
+    confidence: "ESTIMATED",
+  };
+}
+
 export async function fetchIsbnMetadataAction(rawIsbn: string) {
   await requireAdminSession();
   const clean = rawIsbn.trim().replace(/[-\s]/g, "");
-  if (!clean || clean.length < 9) {
-    return { ok: false as const, pesan: "Nomor ISBN minimal 10 digit" };
+  if (!clean || clean.length < 8) {
+    return { ok: false as const, pesan: "Nomor ISBN minimal 8-10 digit" };
   }
 
-  // 1. Cek di Kamus Buku Pelajaran Indonesia / SMK
+  // 1. Cek resolusi cerdas DDC & metadata buku (DB internal, registry SMK, OpenLibrary, Google Books)
+  const ddcRes = await resolveDdcFromIsbn(clean);
+  if (ddcRes.ok && ddcRes.judul) {
+    return {
+      ok: true as const,
+      source: ddcRes.source,
+      data: {
+        judul: ddcRes.judul,
+        penulis: ddcRes.penulis || "Penulis Tidak Diketahui",
+        cover_url: ddcRes.cover_url || null,
+        kategori: ddcRes.kategori || "Lainnya",
+        klasifikasi: ddcRes.ddc,
+      },
+    };
+  }
+
+  // 2. Cek di Kamus Buku Pelajaran Indonesia / SMK
   if (INDONESIAN_TEXTBOOKS_DB[clean]) {
     const item = INDONESIAN_TEXTBOOKS_DB[clean];
     return {
@@ -290,6 +346,15 @@ export async function fetchIsbnMetadataAction(rawIsbn: string) {
       ok: false as const,
       pesan: `Metadata untuk ISBN ${clean} tidak ditemukan di katalog online. Silakan isi Judul & Penulis secara manual.`,
     };
+  }
+
+  // Jika klasifikasi DDC belum terisi (000), gunakan inferensi cerdas dari judul
+  if (!ddc || ddc === "000") {
+    const smart = inferDdcFromText(title, category);
+    ddc = smart.ddc;
+    if (category === "Lainnya" && smart.kategori) {
+      category = smart.kategori;
+    }
   }
 
   return {

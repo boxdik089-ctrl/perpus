@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import * as XLSX from "xlsx";
 import {
   FileSpreadsheet,
@@ -142,7 +143,12 @@ function cleanTeleponString(val: any): string {
 }
 
 export function ImportSiswaModal() {
+  const [mounted, setMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [fileName, setFileName] = useState<string | null>(null);
   const [rawRows, setRawRows] = useState<ImportRow[]>([]);
   const [defaultKelas, setDefaultKelas] = useState("");
@@ -527,9 +533,9 @@ export function ImportSiswaModal() {
       </button>
 
       {/* Modal Dialog */}
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-100 flex flex-col max-h-[90vh]">
+      {isOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden text-slate-100 flex flex-col max-h-[90vh] my-auto">
             {/* Modal Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/50">
               <div className="flex items-center gap-3">
@@ -866,7 +872,8 @@ export function ImportSiswaModal() {
               )}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

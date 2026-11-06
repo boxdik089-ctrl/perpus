@@ -1,13 +1,31 @@
 import { prisma } from "@/lib/prisma";
-import { updateBuku } from "@/actions/buku";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { ArrowLeft, BookOpen, User, Layers, Save, AlertCircle, Barcode } from "lucide-react";
-import { EbookUploadField } from "@/components/admin/EbookUploadField";
-import { CoverUploadField } from "@/components/admin/CoverUploadField";
+import { ArrowLeft, BookOpen, Barcode } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
+import { EditBukuFormClient } from "@/components/admin/EditBukuFormClient";
+
+const MATA_PELAJARAN = [
+  "IPA",
+  "IPS",
+  "Matematika",
+  "Bahasa Indonesia",
+  "Bahasa Inggris",
+  "Seni Budaya",
+  "Pendidikan Jasmani",
+  "Teknologi Informasi",
+  "Sejarah",
+  "Geografi",
+  "Biologi",
+  "Kimia",
+  "Fisika",
+  "Akuntansi",
+  "Ekonomi",
+  "Hukum Dagang",
+  "Lainnya",
+];
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -26,7 +44,6 @@ export default async function EditBukuPage({
 
   return (
     <div className="relative min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
-
       {/* Header Sticky Navigation */}
       <header className="sticky top-0 z-30 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 mb-8 shadow-xs">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -59,7 +76,7 @@ export default async function EditBukuPage({
               <div>
                 <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">Edit Data Buku</h1>
                 <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-                  Perbarui judul, penulis, cover, dan penyesuaian stok buku
+                  Perbarui judul, penulis, cover, nomor DDC, dan penyesuaian stok buku
                 </p>
               </div>
             </div>
@@ -73,79 +90,7 @@ export default async function EditBukuPage({
             </Link>
           </div>
 
-          <form action={updateBuku.bind(null, buku.id)} className="space-y-6">
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                <BookOpen className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                Judul Buku
-              </label>
-              <input
-                name="judul"
-                defaultValue={buku.judul}
-                required
-                className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all font-medium shadow-xs"
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                <User className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                Nama Penulis / Pengarang
-              </label>
-              <input
-                name="penulis"
-                defaultValue={buku.penulis}
-                required
-                className="w-full h-11 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all shadow-xs"
-              />
-            </div>
-
-            {/* Foto Sampul / Cover Upload */}
-            <CoverUploadField initialCoverUrl={buku.cover_url} />
-
-            <div>
-              <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                <Layers className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                Total Stok Keseluruhan
-              </label>
-              <input
-                name="stok_total"
-                type="number"
-                min="1"
-                defaultValue={buku.stok_total}
-                required
-                className="w-full h-11 font-mono border border-slate-300 dark:border-slate-700/80 rounded-xl px-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 bg-white dark:bg-slate-950/70 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all shadow-xs"
-              />
-              <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-400 mt-2.5 bg-slate-50 dark:bg-slate-950/70 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-                <AlertCircle className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
-                <span>
-                  Stok saat ini tersedia untuk dipinjam: <strong className="text-blue-600 dark:text-blue-400 font-bold">{buku.stok_tersedia}</strong> eksemplar.
-                </span>
-              </div>
-            </div>
-
-            {/* E-Book Digital PDF Upload & Linking */}
-            <EbookUploadField 
-              initialFileUrl={buku.file_url} 
-              initialIsEbook={buku.is_ebook} 
-            />
-
-            <div className="flex items-center gap-3 pt-5 border-t border-slate-200 dark:border-slate-800">
-              <button
-                type="submit"
-                className="h-11 px-6 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
-              >
-                <Save className="w-4 h-4" />
-                Simpan Perubahan
-              </button>
-              <Link
-                href="/admin/buku"
-                className="h-11 px-5 rounded-xl border border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white text-sm font-semibold bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 flex items-center transition-all cursor-pointer shadow-xs"
-              >
-                Batal
-              </Link>
-            </div>
-          </form>
+          <EditBukuFormClient buku={buku} mataPelajaran={MATA_PELAJARAN} />
         </div>
       </div>
     </div>

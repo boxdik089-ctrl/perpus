@@ -106,6 +106,15 @@ export function getJurusanBadgeStyle(jurusan?: JurusanKey | null) {
   }
 }
 
+export function getTingkatFromClassName(name?: string | null): "10" | "11" | "12" | "OTHER" {
+  if (!name) return "OTHER";
+  const n = name.trim().toUpperCase();
+  if (n.startsWith("12") || n.startsWith("XII")) return "12";
+  if (n.startsWith("11") || n.startsWith("XI")) return "11";
+  if (n.startsWith("10") || n.startsWith("X ") || n === "X") return "10";
+  return "OTHER";
+}
+
 const JURUSAN_TABS: {
   key: JurusanKey;
   label: string;
@@ -186,6 +195,7 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
   const [statusFilter, setStatusFilter] = useState<"ALL" | "AKTIF" | "NONAKTIF">("ALL");
   const [jurusanFilter, setJurusanFilter] = useState<JurusanKey>("ALL");
   const [kelasFilter, setKelasFilter] = useState<string>("ALL");
+  const [tingkatFilter, setTingkatFilter] = useState<"ALL" | "10" | "11" | "12">("ALL");
   const [sortBy, setSortBy] = useState<SortKey>("NAMA_ASC");
   const [groupByKelas, setGroupByKelas] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -236,12 +246,33 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
       .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
   }, [anggotaList, jurusanFilter]);
 
-  // Reset kelas & halaman jika jurusan filter berubah
+  // Reset kelas, tingkat, & halaman jika jurusan filter berubah
   const handleSelectJurusan = (key: JurusanKey) => {
     setJurusanFilter(key);
     setKelasFilter("ALL");
+    setTingkatFilter("ALL");
     setCurrentPage(1);
   };
+
+  // Hitung jumlah kelas per tingkat untuk jurusan yang dipilih
+  const tingkatCounts = useMemo(() => {
+    const counts = { ALL: availableClassesForJurusan.length, "10": 0, "11": 0, "12": 0 };
+    for (const c of availableClassesForJurusan) {
+      const t = getTingkatFromClassName(c.name);
+      if (t === "10" || t === "11" || t === "12") {
+        counts[t]++;
+      }
+    }
+    return counts;
+  }, [availableClassesForJurusan]);
+
+  // Daftar kelas yang ditampilkan sesuai filter tingkat
+  const displayedClasses = useMemo(() => {
+    if (tingkatFilter === "ALL") return availableClassesForJurusan;
+    return availableClassesForJurusan.filter(
+      (c) => getTingkatFromClassName(c.name) === tingkatFilter
+    );
+  }, [availableClassesForJurusan, tingkatFilter]);
 
   // Filter & Urutkan
   const filteredAndSortedAnggota = useMemo(() => {
@@ -416,135 +447,144 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
         </div>
       </div>
 
-      {/* Barisan Jurusan (Tabs Jurusan SMKN 1 Beringin) */}
-      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-stone-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-xs">
+      {/* Barisan Jurusan & Kelas (Filter Jurusan SMKN 1 Beringin) */}
+      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-stone-200 dark:border-slate-800/90 rounded-2xl p-4 sm:p-5 space-y-4 shadow-xs">
         <div className="flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
               <Layers className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="font-bold text-sm text-stone-900 dark:text-white">
-                Pilih Barisan Jurusan
+              <h3 className="font-bold text-sm text-stone-900 dark:text-white flex items-center gap-2">
+                Pilih Jurusan &amp; Barisan Kelas
+                {kelasFilter !== "ALL" && (
+                  <span className="text-[11px] px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-bold">
+                    {kelasFilter}
+                  </span>
+                )}
               </h3>
               <p className="text-[11px] text-stone-500 dark:text-slate-400">
-                Klik salah satu jurusan untuk menyaring dan melihat barisan kelasnya secara rapi
+                Klik salah satu jurusan untuk menyaring, atau pilih kelas spesifik di bawahnya
               </p>
             </div>
           </div>
 
-          {jurusanFilter !== "ALL" && (
+          {(jurusanFilter !== "ALL" || kelasFilter !== "ALL") && (
             <button
               type="button"
-              onClick={() => handleSelectJurusan("ALL")}
-              className="text-xs font-semibold text-stone-500 hover:text-stone-900 dark:text-slate-400 dark:hover:text-white px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-slate-800 hover:bg-stone-200 cursor-pointer transition-colors"
+              onClick={() => {
+                handleSelectJurusan("ALL");
+                setKelasFilter("ALL");
+                setTingkatFilter("ALL");
+              }}
+              className="text-xs font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 dark:hover:text-rose-300 px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-950/40 dark:hover:bg-rose-900/50 border border-rose-200 dark:border-rose-900/50 cursor-pointer transition-colors"
             >
-              Reset ke Semua Jurusan
+              Reset Semua Filter
             </button>
           )}
         </div>
 
-        {/* Tab Bar Jurusan */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1.5 scrollbar-thin">
-          {JURUSAN_TABS.map((tab) => {
-            const count = jurusanCounts[tab.key] || 0;
-            const isSelected = jurusanFilter === tab.key;
-            const Icon = tab.icon;
+        {/* Tab Bar Jurusan - Ditampilkan rapi dengan flex-wrap, bebas scrollbar menyamping */}
+        <div className="space-y-1.5">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 dark:text-slate-500 block">
+            Bidang Keahlian / Jurusan:
+          </span>
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+            {JURUSAN_TABS.map((tab) => {
+              const count = jurusanCounts[tab.key] || 0;
+              const isSelected = jurusanFilter === tab.key;
+              const Icon = tab.icon;
 
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => handleSelectJurusan(tab.key)}
-                className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer shrink-0 border ${
-                  isSelected
-                    ? tab.activeColor
-                    : "bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200 dark:bg-slate-950/60 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-800"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5 shrink-0" />
-                <span>{tab.label}</span>
-                <span
-                  className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => handleSelectJurusan(tab.key)}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                     isSelected
-                      ? "bg-white/20 text-white"
-                      : "bg-stone-200 dark:bg-slate-800 text-stone-600 dark:text-slate-400"
+                      ? tab.activeColor
+                      : "bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200 dark:bg-slate-950/60 dark:hover:bg-slate-800 dark:text-slate-300 dark:border-slate-800"
                   }`}
                 >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{tab.label}</span>
+                  <span
+                    className={`px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${
+                      isSelected
+                        ? "bg-white/25 text-white"
+                        : "bg-stone-200 dark:bg-slate-800 text-stone-600 dark:text-slate-400"
+                    }`}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Sub-barisan Kelas yang ada di Jurusan terpilih */}
+        {/* Filter Kelas Simpel & Ringkas - Lewat Dropdown & Status Badge */}
         {availableClassesForJurusan.length > 0 && (
-          <div className="pt-3 border-t border-stone-200 dark:border-slate-800/80 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-[11px] font-bold text-stone-600 dark:text-slate-400 flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-emerald-500" />
-                Barisan Kelas ({availableClassesForJurusan.length} Kelas):
-              </span>
-              {kelasFilter !== "ALL" && (
+          <div className="flex flex-wrap items-center gap-2.5 pt-3 border-t border-stone-200 dark:border-slate-800/80">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-stone-700 dark:text-slate-300 shrink-0">
+              <GraduationCap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <span>Pilih Kelas:</span>
+            </div>
+
+            {/* Dropdown Tingkat */}
+            <select
+              value={tingkatFilter}
+              onChange={(e) => {
+                setTingkatFilter(e.target.value as any);
+                setKelasFilter("ALL");
+                setCurrentPage(1);
+              }}
+              className="h-8.5 px-3 bg-stone-50 dark:bg-slate-950/70 border border-stone-300 dark:border-slate-800 rounded-xl text-xs font-medium text-stone-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-xs"
+            >
+              <option value="ALL">Semua Tingkat ({tingkatCounts.ALL} Kelas)</option>
+              <option value="10">Kelas 10 ({tingkatCounts["10"]} Kelas)</option>
+              <option value="11">Kelas 11 ({tingkatCounts["11"]} Kelas)</option>
+              <option value="12">Kelas 12 ({tingkatCounts["12"]} Kelas)</option>
+            </select>
+
+            {/* Dropdown Kelas */}
+            <select
+              value={kelasFilter}
+              onChange={(e) => {
+                setKelasFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="h-8.5 px-3 bg-stone-50 dark:bg-slate-950/70 border border-stone-300 dark:border-slate-800 rounded-xl text-xs font-medium text-stone-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 cursor-pointer shadow-xs min-w-[210px]"
+            >
+              <option value="ALL">
+                {tingkatFilter !== "ALL"
+                  ? `Semua Kelas Tingkat ${tingkatFilter} (${displayedClasses.length} Kelas)`
+                  : `Semua Rombel Kelas (${availableClassesForJurusan.length} Kelas)`}
+              </option>
+              {displayedClasses.map((c) => (
+                <option key={c.name} value={c.name}>
+                  {c.name} ({c.count} Siswa)
+                </option>
+              ))}
+            </select>
+
+            {/* Status Aktif Filter Kelas */}
+            {kelasFilter !== "ALL" && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30 text-xs font-bold">
+                <span>Kelas: {kelasFilter}</span>
                 <button
                   type="button"
                   onClick={() => {
                     setKelasFilter("ALL");
                     setCurrentPage(1);
                   }}
-                  className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold hover:underline cursor-pointer"
+                  className="hover:text-rose-600 dark:hover:text-rose-400 cursor-pointer ml-1 text-sm font-bold leading-none"
+                  title="Batalkan filter kelas ini"
                 >
-                  Lihat Semua Kelas
+                  ✕
                 </button>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-thin">
-              <button
-                type="button"
-                onClick={() => {
-                  setKelasFilter("ALL");
-                  setCurrentPage(1);
-                }}
-                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
-                  kelasFilter === "ALL"
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-xs"
-                    : "bg-stone-100 hover:bg-stone-200 dark:bg-slate-950/70 dark:hover:bg-slate-800 text-stone-700 dark:text-slate-300 border-stone-200 dark:border-slate-800"
-                }`}
-              >
-                Semua Kelas
-              </button>
-              {availableClassesForJurusan.map((c) => {
-                const isSelected = kelasFilter === c.name;
-                return (
-                  <button
-                    key={c.name}
-                    type="button"
-                    onClick={() => {
-                      setKelasFilter(c.name);
-                      setCurrentPage(1);
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 border ${
-                      isSelected
-                        ? "bg-emerald-600 text-white border-emerald-600 font-bold shadow-xs"
-                        : "bg-white hover:bg-stone-100 dark:bg-slate-950/60 dark:hover:bg-slate-800 text-stone-700 dark:text-slate-300 border-stone-300 dark:border-slate-800"
-                    }`}
-                  >
-                    <span>{c.name}</span>
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
-                        isSelected
-                          ? "bg-white/20 text-white font-bold"
-                          : "bg-stone-100 dark:bg-slate-800 text-stone-500 dark:text-slate-400"
-                      }`}
-                    >
-                      {c.count}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+              </span>
+            )}
           </div>
         )}
       </div>
@@ -554,7 +594,7 @@ export function AnggotaListClient({ initialAnggota = [] }: { initialAnggota?: An
         {/* Row 1: Role Tabs & Action Buttons */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           {/* Role Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-stone-100 dark:bg-slate-950/70 border border-stone-200 dark:border-slate-800 rounded-xl overflow-x-auto">
+          <div className="flex flex-wrap items-center gap-1.5 p-1 bg-stone-100 dark:bg-slate-950/70 border border-stone-200 dark:border-slate-800 rounded-xl">
             <button
               type="button"
               onClick={() => {
