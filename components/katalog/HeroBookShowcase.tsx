@@ -22,8 +22,8 @@ export default function HeroBookShowcase({
       if (!containerRef.current) return;
       const width = containerRef.current.clientWidth;
       if (width <= 0) return;
-      // Intrinsic composition width is 840px
-      const calculatedScale = Math.min(1.0, Math.max(0.35, width / 840));
+      // Intrinsic composition width is 860px
+      const calculatedScale = Math.min(1.0, Math.max(0.35, width / 860));
       setScale(calculatedScale);
     };
 
@@ -39,7 +39,7 @@ export default function HeroBookShowcase({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full aspect-[840/500] max-h-[520px] flex items-center justify-center select-none overflow-visible [--showcase-scale:0.44] xs:[--showcase-scale:0.52] sm:[--showcase-scale:0.7] lg:[--showcase-scale:0.85] xl:[--showcase-scale:0.95] ${
+      className={`relative w-full aspect-[860/500] max-h-[520px] flex items-center justify-center select-none overflow-visible [--showcase-scale:0.44] xs:[--showcase-scale:0.52] sm:[--showcase-scale:0.7] lg:[--showcase-scale:0.85] xl:[--showcase-scale:0.95] ${
         className ? className : "py-16 px-6 bg-[#f8fafc]"
       }`}
     >
@@ -67,7 +67,7 @@ export default function HeroBookShowcase({
       <div
         className="absolute left-1/2 top-1/2 flex items-center justify-center will-change-transform pointer-events-auto"
         style={{
-          width: "840px",
+          width: "860px",
           height: "500px",
           transform: `translate(-50%, -50%) scale(${scaleStyle})`,
           transformOrigin: "center center",
@@ -76,9 +76,9 @@ export default function HeroBookShowcase({
         {/* Container Utama Ilustrasi Buku */}
         <div className="relative flex items-center justify-center w-full h-full">
 
-          {/* BUKU TERBUKA DI BELAKANG (BAB 1 & BAB 2) */}
+          {/* BUKU TERBUKA DI BELAKANG (BAB 1 & BAB 2) - Ukuran proporsional 600px x 450px */}
           <div
-            className={`relative z-10 flex flex-row bg-[#faf8f2] rounded-r-lg border border-stone-200 ml-[205px] sm:ml-[215px] w-[595px] sm:w-[605px] min-h-[425px] overflow-hidden transition-all duration-300 ${
+            className={`relative z-10 flex flex-row bg-[#faf8f2] rounded-r-lg border border-stone-200 ml-[230px] sm:ml-[240px] w-[600px] h-[450px] overflow-hidden transition-all duration-300 ${
               isDark
                 ? "shadow-[0_25px_60px_-10px_rgba(0,0,0,0.85)] border-stone-700/60"
                 : "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
@@ -88,7 +88,7 @@ export default function HeroBookShowcase({
             <div className="absolute inset-y-0 left-1/2 w-8 -ml-4 bg-gradient-to-r from-transparent via-stone-900/10 to-transparent pointer-events-none z-20" />
 
             {/* Halaman Kiri (Halaman 12 - BAB 1) */}
-            <div className="flex-1 p-7 sm:p-9 pl-20 sm:pl-[84px] pr-6 sm:pr-8 flex flex-col justify-between border-r border-stone-200/80 bg-gradient-to-r from-stone-200/40 via-[#faf8f2] to-[#faf8f2]">
+            <div className="flex-1 p-7 sm:p-9 pl-20 sm:pl-[88px] pr-6 sm:pr-7 flex flex-col justify-between border-r border-stone-200/80 bg-gradient-to-r from-stone-200/40 via-[#faf8f2] to-[#faf8f2]">
               <div>
                 <p className="text-[11px] tracking-[0.2em] text-stone-500 font-serif uppercase mb-2">
                   BAB 1
@@ -96,7 +96,7 @@ export default function HeroBookShowcase({
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-3">
                   Tentang <br /> SMKN 1 Beringin
                 </h3>
-                <div className="w-10 h-[2px] bg-slate-800 mb-5" />
+                <div className="w-10 h-[2px] bg-slate-800 mb-4" />
                 <p className="font-serif text-[11px] sm:text-xs text-slate-700 leading-relaxed text-left hyphens-auto">
                   SMKN 1 Beringin adalah sekolah menengah kejuruan yang berkomitmen
                   mencetak generasi muda yang berilmu, berkarakter, dan siap
@@ -104,11 +104,11 @@ export default function HeroBookShowcase({
                 </p>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-4">
                 <p className="font-serif italic text-sm text-slate-800 leading-snug">
                   &ldquo;Berilmu, <br /> Berkarakter, <br /> Berdaya Saing&rdquo;
                 </p>
-                <div className="w-8 h-[3px] bg-blue-600 mt-2 mb-4 rounded-full" />
+                <div className="w-8 h-[3px] bg-blue-600 mt-2 mb-3 rounded-full" />
                 <p className="text-center font-serif text-[11px] text-stone-500">
                   12
                 </p>
@@ -124,7 +124,7 @@ export default function HeroBookShowcase({
                 <h3 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 leading-snug mb-3">
                   Semangat Vokasi
                 </h3>
-                <div className="w-10 h-[2px] bg-slate-800 mb-5" />
+                <div className="w-10 h-[2px] bg-slate-800 mb-4" />
                 <p className="font-serif text-[11px] sm:text-xs text-slate-700 leading-relaxed text-left hyphens-auto">
                   Berlandaskan semboyan &ldquo;SMK Bisa, SMK Hebat&rdquo;,
                   pendidikan vokasi berfokus mencetak talenta muda yang terampil,
@@ -134,7 +134,7 @@ export default function HeroBookShowcase({
               </div>
 
               {/* Ornamen Bawah Halaman 13 */}
-              <div className="mt-6 flex flex-col items-center text-center">
+              <div className="mt-4 flex flex-col items-center text-center">
                 {/* Ikon Toga & Buku */}
                 <svg
                   className="w-8 h-8 text-slate-700 mb-2"
@@ -155,13 +155,13 @@ export default function HeroBookShowcase({
                   />
                 </svg>
 
-                <div className="flex items-center gap-1.5 mb-2">
+                <div className="flex items-center gap-1.5 mb-1.5">
                   <span className="w-3 h-[1.5px] bg-blue-600" />
                   <span className="w-1.5 h-1.5 rounded-full bg-slate-800" />
                   <span className="w-3 h-[1.5px] bg-blue-600" />
                 </div>
 
-                <p className="font-serif italic font-semibold text-[10.5px] text-slate-800 leading-tight mb-4">
+                <p className="font-serif italic font-semibold text-[10.5px] text-slate-800 leading-tight mb-3">
                   SMK Bisa, SMK Hebat, <br />
                   Vokasi Kuat Menguatkan Indonesia
                 </p>
@@ -174,9 +174,9 @@ export default function HeroBookShowcase({
             <div className="absolute bottom-0 inset-x-0 h-1 bg-[#0b3168]" />
           </div>
 
-          {/* SAMPUL DEPAN BUKU (MIRING KE KIRI & MENUMPUK DI DEPAN) */}
+          {/* SAMPUL DEPAN BUKU - Ukuran persis sama: 300px (1 halaman) x 450px */}
           <div
-            className={`absolute left-2 sm:left-3 z-30 w-[265px] sm:w-[275px] h-[415px] sm:h-[425px] bg-white rounded-r-md rounded-l-sm transform -rotate-[7.5deg] origin-bottom-left overflow-hidden flex flex-col border-l-[6px] border-[#09254e] transition-transform duration-500 hover:-rotate-[5deg] hover:scale-[1.02] ${
+            className={`absolute left-2 sm:left-3 z-30 w-[300px] h-[450px] bg-white rounded-r-md rounded-l-sm transform -rotate-[7deg] origin-bottom-left overflow-hidden flex flex-col border-l-[6px] border-[#09254e] transition-transform duration-500 hover:-rotate-[4.5deg] hover:scale-[1.01] ${
               isDark
                 ? "shadow-[-15px_25px_45px_rgba(0,0,0,0.85)] border-t border-r border-sky-500/20"
                 : "shadow-[-15px_25px_35px_rgba(0,0,0,0.32)]"
