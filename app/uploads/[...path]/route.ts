@@ -16,6 +16,7 @@ const MIME_MAP: Record<string, string> = {
   ".m4a": "audio/mp4",
   ".webm": "video/webm",
   ".mp4": "video/mp4",
+  ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 };
 
 export async function GET(
