@@ -213,7 +213,7 @@ export default function HeroBookShowcase({
                 style={{ filter: "url(#hd-sharpen) contrast(1.06) saturate(1.12)" }}
                 className="w-full h-full object-cover object-center scale-105 transition-transform duration-700 hover:scale-110"
                 onError={(e) => {
-                  e.currentTarget.src = "/assets/gedung-smk.jpg";
+                  e.currentTarget.src = "/assets/gedung-smk-user.jpg";
                 }}
               />
               {/* Gradasi halus di bagian bawah foto agar menyatu dengan banner biru */}
