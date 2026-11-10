@@ -107,24 +107,19 @@ export default function HeroShowcaseSection({
               Ribuan koleksi buku tersedia di Kurikulum Merdeka, modul kejuruan, dan novel populer untuk mendukung belajar dan menambah wawasan.
             </p>
 
-            {/* Mobile Stats Counter Glassmorphism Card */}
-            <div className={`grid grid-cols-3 divide-x rounded-2xl px-3 sm:px-5 py-3 shadow-xs my-2 w-full max-w-sm backdrop-blur-md border ${
-              isDark
-                ? "divide-white/10 bg-white/[0.04] border-white/10 shadow-black/30"
-                : "divide-slate-200/80 bg-white/70 border-slate-200/80 shadow-slate-100"
-            }`}>
+            <div className="flex items-center gap-6 sm:gap-8">
               {[
                 { num: "500+", label: "Koleksi Buku" },
                 { num: "7 Jurusan", label: "Referensi Lengkap" },
                 { num: "24/7", label: "Akses Online" },
               ].map(({ num, label }) => (
-                <div key={label} className="px-2 text-center flex flex-col items-center justify-center">
-                  <p className={`text-lg sm:text-xl font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
+                <div key={label} className="flex flex-col gap-0.5">
+                  <span className={`text-xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
                     {num}
-                  </p>
-                  <p className={`text-[10px] sm:text-[11px] font-medium mt-0.5 leading-tight ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  </span>
+                  <span className={`text-[11px] font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     {label}
-                  </p>
+                  </span>
                 </div>
               ))}
             </div>
@@ -207,24 +202,20 @@ export default function HeroShowcaseSection({
               Ribuan koleksi buku tersedia di Kurikulum Merdeka, modul kejuruan, dan novel populer untuk mendukung belajar dan menambah wawasan.
             </p>
 
-            {/* Stats Counter Glassmorphism Card */}
-            <div className={`inline-grid grid-cols-3 divide-x rounded-2xl px-6 py-3.5 shadow-sm my-1 backdrop-blur-md border ${
-              isDark
-                ? "divide-white/10 bg-white/[0.04] border-white/10 shadow-black/40"
-                : "divide-slate-200/80 bg-white/70 border-slate-200/80 shadow-slate-100/80"
-            }`}>
+            {/* Stats */}
+            <div className="flex items-center gap-6 xl:gap-8">
               {[
                 { num: "500+", label: "Koleksi Buku" },
                 { num: "7 Jurusan", label: "Referensi Lengkap" },
                 { num: "24/7", label: "Akses Online" },
               ].map(({ num, label }) => (
-                <div key={label} className="px-4 text-center">
-                  <p className={`text-2xl xl:text-3xl font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
+                <div key={label} className="flex flex-col gap-0.5">
+                  <span className={`text-2xl xl:text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
                     {num}
-                  </p>
-                  <p className={`text-xs font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  </span>
+                  <span className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     {label}
-                  </p>
+                  </span>
                 </div>
               ))}
             </div>
