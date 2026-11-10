@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { ArrowUpRight, BookOpen } from "lucide-react";
-import Book3DMockup from "./Book3DMockup";
+import HeroBookShowcase from "./HeroBookShowcase";
 
 interface HeroShowcaseSectionProps {
   isDark: boolean;
@@ -85,9 +85,9 @@ export default function HeroShowcaseSection({
 
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
-          {/* Mobile Open Book Preview - Vector Crisp 3D Mockup */}
-          <div className="w-full max-w-[420px] sm:max-w-[460px] my-1">
-            <Book3DMockup isDark={isDark} />
+          {/* Mobile Open Book Preview */}
+          <div className="w-full max-w-[440px] sm:max-w-[480px] my-1">
+            <HeroBookShowcase isDark={isDark} className="!bg-transparent !py-0 !px-0" />
           </div>
 
           {/* Typography */}
@@ -170,14 +170,13 @@ export default function HeroShowcaseSection({
                 style={{
                   transformStyle: "preserve-3d",
                   animation: mounted ? "openBookFloat 6s ease-in-out infinite" : "none",
+                  transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
                 }}
               >
-                {/* Vector Crisp 3D Open Book Mockup */}
-                <Book3DMockup
+                {/* Book Showcase Mockup */}
+                <HeroBookShowcase
                   isDark={isDark}
-                  rotateX={rotateX}
-                  rotateY={rotateY}
-                  isHovered={isHovered}
+                  className="!bg-transparent !py-0 !px-0"
                 />
               </div>
             </div>
