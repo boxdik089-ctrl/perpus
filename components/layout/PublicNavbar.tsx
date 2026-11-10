@@ -47,20 +47,20 @@ export function PublicNavbar({
         isNavVisible ? "translate-y-0 opacity-100" : "-translate-y-20 opacity-0"
       } ${className}`}
     >
-      <nav className="pointer-events-auto rounded-full backdrop-blur-2xl border px-3 sm:px-4 py-1.5 sm:py-2 flex items-center gap-2.5 sm:gap-3.5 shadow-xl bg-white/95 dark:bg-[#0c0d12]/95 border-slate-200/90 dark:border-white/10 text-slate-800 dark:text-slate-200 shadow-slate-200/50 dark:shadow-black/60 transition-all duration-300 max-w-[96vw] overflow-x-auto no-scrollbar">
+      <nav className="pointer-events-auto rounded-full backdrop-blur-2xl border px-3.5 sm:px-4 py-1.5 sm:py-2 flex items-center gap-3 sm:gap-4 shadow-xl bg-white/95 dark:bg-[#0c0d12]/95 border-slate-200/90 dark:border-white/10 text-slate-800 dark:text-slate-200 shadow-slate-200/50 dark:shadow-black/60 transition-all duration-300 max-w-[96vw] overflow-x-auto no-scrollbar">
         
-        {/* Brand: Logo & Title (Clean Natural Typography - No Spaced Out Gaps) */}
-        <Link href="/" className="flex items-center gap-2 sm:gap-2.5 shrink-0 group select-none pr-1">
-          <div className="flex items-center gap-1.5 shrink-0">
+        {/* Brand: Logo & Title (Consistent gap-3 and uniform h-8 height) */}
+        <Link href="/" className="flex items-center gap-3 shrink-0 group select-none pr-0.5">
+          <div className="flex items-center gap-2 shrink-0">
             <img
               src="/assets/logo.png"
               alt="Logo SMKN 1 Beringin"
-              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-contain p-0.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/15 shadow-xs shrink-0 group-hover:scale-105 transition-transform"
+              className="h-8 w-8 rounded-full object-contain p-0.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/15 shadow-xs shrink-0 group-hover:scale-105 transition-transform"
             />
             <img
               src="/assets/logo-kolaborasi.png"
               alt="Logo Kolaborasi Sumut Berkah"
-              className="h-5 sm:h-6 w-auto object-contain shrink-0 opacity-90 hidden md:block"
+              className="h-8 w-auto object-contain shrink-0 opacity-90 hidden md:block"
             />
           </div>
           <div className="flex flex-col min-w-0">

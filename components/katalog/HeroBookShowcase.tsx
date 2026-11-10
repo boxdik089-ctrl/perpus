@@ -97,7 +97,7 @@ export default function HeroBookShowcase({
                   Tentang <br /> SMKN 1 Beringin
                 </h3>
                 <div className="w-10 h-[2px] bg-slate-800 mb-5" />
-                <p className="font-serif text-xs sm:text-[13px] text-slate-700 leading-relaxed text-justify">
+                <p className="font-serif text-[11px] sm:text-xs text-slate-700 leading-relaxed text-left hyphens-auto">
                   SMKN 1 Beringin adalah sekolah menengah kejuruan yang berkomitmen
                   mencetak generasi muda yang berilmu, berkarakter, dan siap
                   bersaing di dunia kerja maupun melanjutkan pendidikan.
@@ -125,7 +125,7 @@ export default function HeroBookShowcase({
                   Semangat Vokasi
                 </h3>
                 <div className="w-10 h-[2px] bg-slate-800 mb-5" />
-                <p className="font-serif text-xs sm:text-[13px] text-slate-700 leading-relaxed text-justify">
+                <p className="font-serif text-[11px] sm:text-xs text-slate-700 leading-relaxed text-left hyphens-auto">
                   Berlandaskan semboyan &ldquo;SMK Bisa, SMK Hebat&rdquo;,
                   pendidikan vokasi berfokus mencetak talenta muda yang terampil,
                   mandiri, dan berkarakter unggul—siap bekerja, berwirausaha,

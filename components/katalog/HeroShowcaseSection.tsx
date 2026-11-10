@@ -42,7 +42,7 @@ export default function HeroShowcaseSection({
   };
 
   return (
-    <section className="relative w-full min-h-[580px] sm:min-h-[640px] lg:min-h-[680px] xl:min-h-[720px] flex items-center overflow-hidden select-none">
+    <section className="relative w-full min-h-[640px] sm:min-h-[700px] lg:min-h-[740px] xl:min-h-[780px] flex items-center overflow-hidden select-none pt-28 sm:pt-32 lg:pt-36 pb-12 sm:pb-16">
 
       {/* ─── BACKGROUND ─────────────────────────────────────── */}
       <div className="absolute inset-0 -z-10 pointer-events-none" aria-hidden="true">
@@ -81,7 +81,7 @@ export default function HeroShowcaseSection({
       </div>
 
       {/* ─── MAIN CONTENT ───────────────────────────────────── */}
-      <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-14 relative z-10 pt-12 sm:pt-16 lg:pt-8 pb-10 lg:pb-8">
+      <div className="w-full max-w-[1480px] mx-auto px-4 sm:px-6 lg:px-10 xl:px-14 relative z-10 pb-6 lg:pb-8">
 
         {/* ─── MOBILE LAYOUT (<1024px) ─── */}
         <div className="lg:hidden flex flex-col items-center gap-5 w-full">
@@ -107,24 +107,29 @@ export default function HeroShowcaseSection({
               Ribuan koleksi buku tersedia di Kurikulum Merdeka, modul kejuruan, dan novel populer untuk mendukung belajar dan menambah wawasan.
             </p>
 
-            <div className="flex items-center gap-6 sm:gap-8">
+            {/* Mobile Stats Counter Glassmorphism Card */}
+            <div className={`grid grid-cols-3 divide-x rounded-2xl px-3 sm:px-5 py-3 shadow-xs my-2 w-full max-w-sm backdrop-blur-md border ${
+              isDark
+                ? "divide-white/10 bg-white/[0.04] border-white/10 shadow-black/30"
+                : "divide-slate-200/80 bg-white/70 border-slate-200/80 shadow-slate-100"
+            }`}>
               {[
                 { num: "500+", label: "Koleksi Buku" },
                 { num: "7 Jurusan", label: "Referensi Lengkap" },
                 { num: "24/7", label: "Akses Online" },
               ].map(({ num, label }) => (
-                <div key={label} className="flex flex-col gap-0.5">
-                  <span className={`text-xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                <div key={label} className="px-2 text-center flex flex-col items-center justify-center">
+                  <p className={`text-lg sm:text-xl font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
                     {num}
-                  </span>
-                  <span className={`text-[11px] font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  </p>
+                  <p className={`text-[10px] sm:text-[11px] font-medium mt-0.5 leading-tight ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     {label}
-                  </span>
+                  </p>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-1">
               <a
                 href="#katalog-section"
                 onClick={(e) => {
@@ -139,10 +144,10 @@ export default function HeroShowcaseSection({
               </a>
               <Link
                 href="/kartu"
-                className={`inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm border transition-all active:scale-95 ${
+                className={`inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm border transition-all active:scale-95 shadow-sm ${
                   isDark
-                    ? "bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 border-white/10"
-                    : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm"
+                    ? "bg-slate-900/80 hover:bg-slate-800 text-slate-200 border-white/15 shadow-black/20"
+                    : "border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 <span>Cek Kartu</span>
@@ -202,20 +207,24 @@ export default function HeroShowcaseSection({
               Ribuan koleksi buku tersedia di Kurikulum Merdeka, modul kejuruan, dan novel populer untuk mendukung belajar dan menambah wawasan.
             </p>
 
-            {/* Stats */}
-            <div className="flex items-center gap-6 xl:gap-8">
+            {/* Stats Counter Glassmorphism Card */}
+            <div className={`inline-grid grid-cols-3 divide-x rounded-2xl px-6 py-3.5 shadow-sm my-1 backdrop-blur-md border ${
+              isDark
+                ? "divide-white/10 bg-white/[0.04] border-white/10 shadow-black/40"
+                : "divide-slate-200/80 bg-white/70 border-slate-200/80 shadow-slate-100/80"
+            }`}>
               {[
                 { num: "500+", label: "Koleksi Buku" },
                 { num: "7 Jurusan", label: "Referensi Lengkap" },
                 { num: "24/7", label: "Akses Online" },
               ].map(({ num, label }) => (
-                <div key={label} className="flex flex-col gap-0.5">
-                  <span className={`text-2xl xl:text-3xl font-black ${isDark ? "text-white" : "text-slate-900"}`}>
+                <div key={label} className="px-4 text-center">
+                  <p className={`text-2xl xl:text-3xl font-extrabold ${isDark ? "text-white" : "text-slate-900"}`}>
                     {num}
-                  </span>
-                  <span className={`text-xs font-medium ${isDark ? "text-slate-400" : "text-slate-500"}`}>
+                  </p>
+                  <p className={`text-xs font-medium mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}>
                     {label}
-                  </span>
+                  </p>
                 </div>
               ))}
             </div>
@@ -236,10 +245,10 @@ export default function HeroShowcaseSection({
               </a>
               <Link
                 href="/kartu"
-                className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm border transition-all active:scale-95 hover:scale-[1.02] ${
+                className={`inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm border transition-all active:scale-95 hover:scale-[1.02] shadow-sm ${
                   isDark
-                    ? "bg-white/[0.06] hover:bg-white/[0.12] text-slate-200 border-white/10"
-                    : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-sm"
+                    ? "bg-slate-900/80 hover:bg-slate-800 text-slate-200 border-white/15 shadow-black/20"
+                    : "border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700 hover:border-slate-300"
                 }`}
               >
                 <span>Cek Kartu Siswa</span>
