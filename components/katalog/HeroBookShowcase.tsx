@@ -22,8 +22,8 @@ export default function HeroBookShowcase({
       if (!containerRef.current) return;
       const width = containerRef.current.clientWidth;
       if (width <= 0) return;
-      // Intrinsic composition width is 800px
-      const calculatedScale = Math.min(1.0, Math.max(0.36, width / 800));
+      // Intrinsic composition width is 840px
+      const calculatedScale = Math.min(1.0, Math.max(0.35, width / 840));
       setScale(calculatedScale);
     };
 
@@ -39,7 +39,7 @@ export default function HeroBookShowcase({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full aspect-[800/500] max-h-[520px] flex items-center justify-center select-none overflow-visible [--showcase-scale:0.46] xs:[--showcase-scale:0.54] sm:[--showcase-scale:0.72] lg:[--showcase-scale:0.86] xl:[--showcase-scale:0.95] ${
+      className={`relative w-full aspect-[840/500] max-h-[520px] flex items-center justify-center select-none overflow-visible [--showcase-scale:0.44] xs:[--showcase-scale:0.52] sm:[--showcase-scale:0.7] lg:[--showcase-scale:0.85] xl:[--showcase-scale:0.95] ${
         className ? className : "py-16 px-6 bg-[#f8fafc]"
       }`}
     >
@@ -67,7 +67,7 @@ export default function HeroBookShowcase({
       <div
         className="absolute left-1/2 top-1/2 flex items-center justify-center will-change-transform pointer-events-auto"
         style={{
-          width: "800px",
+          width: "840px",
           height: "500px",
           transform: `translate(-50%, -50%) scale(${scaleStyle})`,
           transformOrigin: "center center",
@@ -78,7 +78,7 @@ export default function HeroBookShowcase({
 
           {/* BUKU TERBUKA DI BELAKANG (BAB 1 & BAB 2) */}
           <div
-            className={`relative z-10 flex flex-row bg-[#faf8f2] rounded-r-lg border border-stone-200 ml-40 sm:ml-44 w-[620px] min-h-[430px] overflow-hidden transition-all duration-300 ${
+            className={`relative z-10 flex flex-row bg-[#faf8f2] rounded-r-lg border border-stone-200 ml-[205px] sm:ml-[215px] w-[595px] sm:w-[605px] min-h-[425px] overflow-hidden transition-all duration-300 ${
               isDark
                 ? "shadow-[0_25px_60px_-10px_rgba(0,0,0,0.85)] border-stone-700/60"
                 : "shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]"
@@ -88,7 +88,7 @@ export default function HeroBookShowcase({
             <div className="absolute inset-y-0 left-1/2 w-8 -ml-4 bg-gradient-to-r from-transparent via-stone-900/10 to-transparent pointer-events-none z-20" />
 
             {/* Halaman Kiri (Halaman 12 - BAB 1) */}
-            <div className="flex-1 p-7 sm:p-9 pl-12 sm:pl-16 flex flex-col justify-between border-r border-stone-200/80 bg-gradient-to-r from-stone-200/40 via-[#faf8f2] to-[#faf8f2]">
+            <div className="flex-1 p-7 sm:p-9 pl-20 sm:pl-[84px] pr-6 sm:pr-8 flex flex-col justify-between border-r border-stone-200/80 bg-gradient-to-r from-stone-200/40 via-[#faf8f2] to-[#faf8f2]">
               <div>
                 <p className="text-[11px] tracking-[0.2em] text-stone-500 font-serif uppercase mb-2">
                   BAB 1
@@ -176,17 +176,17 @@ export default function HeroBookShowcase({
 
           {/* SAMPUL DEPAN BUKU (MIRING KE KIRI & MENUMPUK DI DEPAN) */}
           <div
-            className={`absolute left-4 sm:left-6 z-30 w-[280px] sm:w-[310px] h-[430px] sm:h-[460px] bg-white rounded-r-md rounded-l-sm transform -rotate-[9deg] origin-bottom-left overflow-hidden flex flex-col border-l-[6px] border-[#09254e] transition-transform duration-500 hover:-rotate-[6deg] hover:scale-[1.02] ${
+            className={`absolute left-2 sm:left-3 z-30 w-[265px] sm:w-[275px] h-[415px] sm:h-[425px] bg-white rounded-r-md rounded-l-sm transform -rotate-[7.5deg] origin-bottom-left overflow-hidden flex flex-col border-l-[6px] border-[#09254e] transition-transform duration-500 hover:-rotate-[5deg] hover:scale-[1.02] ${
               isDark
                 ? "shadow-[-15px_25px_45px_rgba(0,0,0,0.85)] border-t border-r border-sky-500/20"
-                : "shadow-[-15px_25px_35px_rgba(0,0,0,0.35)]"
+                : "shadow-[-15px_25px_35px_rgba(0,0,0,0.32)]"
             }`}
           >
             {/* Efek Kilau Lipatan Engsel Sampul Buku */}
             <div className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/25 via-white/20 to-transparent z-30 pointer-events-none" />
 
             {/* Header Sampul Putih */}
-            <div className="bg-white px-4 py-3.5 flex items-center gap-2.5 z-20 shadow-sm">
+            <div className="bg-white px-4 py-3 flex items-center gap-2.5 z-20 shadow-sm">
               <img
                 src="/images/logo-sumut.png"
                 alt="Logo SMKN 1 Beringin"
@@ -221,11 +221,11 @@ export default function HeroBookShowcase({
             </div>
 
             {/* Footer Sampul Biru Tua */}
-            <div className="relative bg-[#083470] text-white px-6 pt-6 pb-6 z-20">
+            <div className="relative bg-[#083470] text-white px-5 sm:px-6 pt-5 pb-5 z-20">
               {/* Lengkungan Halus Pembatas Foto & Banner Biru */}
-              <div className="absolute -top-4 left-0 right-0 h-8 bg-[#083470] rounded-t-[100%] scale-x-110 -z-10" />
+              <div className="absolute -top-3.5 left-0 right-0 h-7 bg-[#083470] rounded-t-[100%] scale-x-110 -z-10" />
 
-              <h2 className="font-extrabold text-2xl sm:text-[26px] leading-[1.15] tracking-tight mb-2">
+              <h2 className="font-extrabold text-2xl sm:text-[25px] leading-[1.15] tracking-tight mb-1.5">
                 Baca. Jelajahi. <br />
                 Berkembang.
               </h2>
