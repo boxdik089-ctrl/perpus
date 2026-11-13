@@ -5,7 +5,7 @@ import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useState, useEffect } from "react";
 
 export interface PublicNavbarProps {
-  currentPage?: "katalog" | "kartu" | "kios" | "login" | "admin" | "presentasi" | "other";
+  currentPage?: "katalog" | "kartu" | "kios" | "login" | "admin" | "other";
   className?: string;
   autoHideOnScroll?: boolean;
 }
@@ -39,7 +39,6 @@ export function PublicNavbar({
   const navItems = [
     { id: "katalog", label: "Katalog", href: "/" },
     { id: "kartu", label: "Kartu", href: "/kartu" },
-    { id: "presentasi", label: "Presentasi", href: "/presentasi" },
   ];
 
   return (
