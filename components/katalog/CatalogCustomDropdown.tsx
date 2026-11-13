@@ -18,6 +18,8 @@ export interface CatalogCustomDropdownProps {
   leadIcon: any;
   placeholder?: string;
   colorScheme?: "sky" | "emerald" | "indigo";
+  align?: "left" | "right";
+  className?: string;
 }
 
 export function CatalogCustomDropdown({
@@ -27,6 +29,8 @@ export function CatalogCustomDropdown({
   leadIcon: LeadIcon,
   placeholder = "Pilih opsi",
   colorScheme = "sky",
+  align = "left",
+  className = "",
 }: CatalogCustomDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -86,12 +90,12 @@ export function CatalogCustomDropdown({
   }[colorScheme];
 
   return (
-    <div className="relative min-w-[190px] sm:min-w-[220px]" ref={containerRef}>
+    <div className={`relative w-full md:w-auto md:min-w-[210px] ${className}`} ref={containerRef}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full flex items-center justify-between gap-2 pl-3.5 pr-3 py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer select-none ${
+        className={`w-full min-h-[42px] flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer select-none active:scale-[0.99] ${
           isFiltered
             ? `${colorClasses.activeBorder} shadow-xs`
             : "bg-slate-50 dark:bg-white/[0.04] border-slate-200/90 dark:border-white/10 text-slate-800 dark:text-slate-200 hover:border-slate-300 dark:hover:border-white/20"
@@ -105,7 +109,7 @@ export function CatalogCustomDropdown({
             {selectedOption ? selectedOption.label : placeholder}
           </span>
           {typeof selectedOption?.count === "number" && (
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/5 dark:bg-white/10 opacity-75 shrink-0">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-black/5 dark:bg-white/10 opacity-75 shrink-0">
               {selectedOption.count}
             </span>
           )}
@@ -118,9 +122,15 @@ export function CatalogCustomDropdown({
         />
       </button>
 
-      {/* Floating Popover Menu */}
+      {/* Floating Popover Menu with Full-Width Accessibility on Small Screens */}
       {isOpen && (
-        <div className="absolute left-0 right-0 sm:right-auto sm:min-w-[270px] top-full mt-1.5 z-50 bg-white/95 dark:bg-[#111218]/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/12 shadow-2xl rounded-2xl p-1.5 max-h-[340px] overflow-y-auto no-scrollbar animate-in fade-in-0 zoom-in-95 duration-150">
+        <div
+          className={`absolute top-full mt-1.5 z-50 bg-white/95 dark:bg-[#111218]/95 backdrop-blur-2xl border border-slate-200/90 dark:border-white/12 shadow-2xl rounded-2xl p-1.5 max-h-[320px] overflow-y-auto no-scrollbar animate-in fade-in-0 zoom-in-95 duration-150 ${
+            align === "right"
+              ? "right-0 w-[calc(200%+0.5rem)] md:w-auto md:min-w-[270px] max-w-[92vw]"
+              : "left-0 w-[calc(200%+0.5rem)] md:w-auto md:min-w-[270px] max-w-[92vw]"
+          }`}
+        >
           {hasMultipleGroups ? (
             groupKeys.map((group) => (
               <div key={group} className="mb-2 last:mb-0">
@@ -140,7 +150,7 @@ export function CatalogCustomDropdown({
                           onChange(opt.id);
                           setIsOpen(false);
                         }}
-                        className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl text-xs transition-all text-left cursor-pointer ${
+                        className={`w-full min-h-[42px] flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-[13px] transition-all text-left cursor-pointer active:scale-[0.99] ${
                           isSelected
                             ? colorClasses.activeItem
                             : "text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white"
@@ -181,7 +191,7 @@ export function CatalogCustomDropdown({
                       onChange(opt.id);
                       setIsOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between gap-2 px-2.5 py-2 rounded-xl text-xs transition-all text-left cursor-pointer ${
+                    className={`w-full min-h-[42px] flex items-center justify-between gap-2 px-3 py-2.5 rounded-xl text-xs sm:text-[13px] transition-all text-left cursor-pointer active:scale-[0.99] ${
                       isSelected
                         ? colorClasses.activeItem
                         : "text-slate-700 dark:text-slate-300 hover:bg-slate-100/80 dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white"

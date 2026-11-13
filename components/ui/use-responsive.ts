@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 export interface ResponsiveProp<T> {
+  xs?: T;
   sm?: T;
   md?: T;
   lg?: T;
@@ -15,7 +16,7 @@ export function useResponsive<T>(val: T | ResponsiveProp<T> | undefined, fallbac
     return fallback;
   }
 
-  if (typeof val !== "object" || !("sm" in val || "md" in val || "lg" in val || "xl" in val)) {
+  if (typeof val !== "object" || !("xs" in val || "sm" in val || "md" in val || "lg" in val || "xl" in val)) {
     return val as T;
   }
 
@@ -23,7 +24,7 @@ export function useResponsive<T>(val: T | ResponsiveProp<T> | undefined, fallbac
 
   // Initial SSR / safe value
   const [current, setCurrent] = useState<T>(() => {
-    return responsive.xl ?? responsive.lg ?? responsive.md ?? responsive.sm ?? fallback;
+    return responsive.xl ?? responsive.lg ?? responsive.md ?? responsive.sm ?? responsive.xs ?? fallback;
   });
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export function useResponsive<T>(val: T | ResponsiveProp<T> | undefined, fallbac
       else if (w >= 1024 && responsive.lg !== undefined) setCurrent(responsive.lg);
       else if (w >= 768 && responsive.md !== undefined) setCurrent(responsive.md);
       else if (w >= 640 && responsive.sm !== undefined) setCurrent(responsive.sm);
+      else if (responsive.xs !== undefined) setCurrent(responsive.xs);
       else setCurrent(responsive.sm ?? responsive.md ?? responsive.lg ?? responsive.xl ?? fallback);
     };
 

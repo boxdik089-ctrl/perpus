@@ -532,7 +532,7 @@ export default function KatalogBukuClient({
       />
 
       {/* Main Catalog Section */}
-      <main id="katalog-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full relative z-10 scroll-mt-20">
+      <main id="katalog-section" className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 flex-1 w-full relative z-10 scroll-mt-20">
 
         {/* Section Header: Bold, Proportional, and Single-Line */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 mb-5">
@@ -546,15 +546,15 @@ export default function KatalogBukuClient({
           </div>
         </div>
 
-        {/* Unified Search & Dropdown Filter Bar: Sticky & Floating on scroll */}
-        <div className={`sticky top-3 sm:top-4 z-30 rounded-2xl border p-2 sm:p-2.5 mb-8 shadow-md backdrop-blur-xl transition-all duration-200 ${
+        {/* Unified Search & Dropdown Filter Bar: Sticky & Floating on scroll with Accessible Mobile Layout */}
+        <div className={`sticky top-2 sm:top-4 z-30 rounded-2xl border p-2 sm:p-2.5 mb-6 sm:mb-8 shadow-md backdrop-blur-xl transition-all duration-200 ${
           isDark
             ? "bg-[#111218]/95 border-white/10 shadow-black/50"
             : "bg-white/95 border-slate-200/90 shadow-slate-900/10"
         }`}>
           <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 sm:gap-2.5">
             {/* 1. Main Search Bar */}
-            <div className={`relative flex-1 flex items-center rounded-xl border transition-all ${
+            <div className={`relative flex-1 flex items-center min-h-[42px] sm:min-h-[44px] rounded-xl border transition-all ${
               isDark
                 ? "bg-white/[0.04] border-white/10 focus-within:border-sky-400 focus-within:ring-2 focus-within:ring-sky-500/20"
                 : "bg-slate-50 border-slate-200 focus-within:border-sky-600 focus-within:ring-2 focus-within:ring-sky-500/15"
@@ -568,13 +568,13 @@ export default function KatalogBukuClient({
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Cari judul buku, penulis, jurusan (PPLG, TJKT)..."
-                className="w-full px-3 py-2.5 text-xs sm:text-sm font-medium focus:outline-none bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
+                className="w-full px-3 py-2 text-xs sm:text-sm font-medium focus:outline-none bg-transparent text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
               />
               <div className="flex items-center gap-1 pr-2 shrink-0">
                 {searchTerm ? (
                   <button
                     onClick={() => setSearchTerm("")}
-                    className="p-1 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                    className="p-1.5 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                     title="Hapus pencarian"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
@@ -599,25 +599,28 @@ export default function KatalogBukuClient({
               </div>
             </div>
 
-            {/* 2. Custom Styled Dropdown Filter: Kategori / Jurusan */}
-            <CatalogCustomDropdown
-              value={activeCategory}
-              options={categoryDropdownOptions}
-              onChange={setActiveCategory}
-              leadIcon={Filter}
-              colorScheme="sky"
-              placeholder="Pilih Kategori"
-            />
+            {/* 2. Responsive Filter Controls Grid: 2 columns on mobile, inline on desktop */}
+            <div className="grid grid-cols-2 md:flex items-center gap-2 w-full md:w-auto">
+              <CatalogCustomDropdown
+                value={activeCategory}
+                options={categoryDropdownOptions}
+                onChange={setActiveCategory}
+                leadIcon={Filter}
+                colorScheme="sky"
+                placeholder="Pilih Kategori"
+                align="left"
+              />
 
-            {/* 3. Custom Styled Dropdown Filter: Format (Buku Fisik / E-Book) */}
-            <CatalogCustomDropdown
-              value={activeFormat}
-              options={formatDropdownOptions}
-              onChange={setActiveFormat}
-              leadIcon={Layers}
-              colorScheme="emerald"
-              placeholder="Pilih Format"
-            />
+              <CatalogCustomDropdown
+                value={activeFormat}
+                options={formatDropdownOptions}
+                onChange={setActiveFormat}
+                leadIcon={Layers}
+                colorScheme="emerald"
+                placeholder="Pilih Format"
+                align="right"
+              />
+            </div>
 
             {/* Reset Filter Button */}
             {(searchTerm || activeCategory !== "ALL" || activeFormat !== "ALL") && (
@@ -628,11 +631,11 @@ export default function KatalogBukuClient({
                   setActiveCategory("ALL");
                   setActiveFormat("ALL");
                 }}
-                className="inline-flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all cursor-pointer shrink-0"
+                className="inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 min-h-[42px] rounded-xl text-xs font-bold text-rose-600 dark:text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 transition-all cursor-pointer shrink-0 active:scale-95"
                 title="Reset semua filter"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Reset</span>
+                <span>Reset Filter</span>
               </button>
             )}
           </div>
@@ -642,21 +645,21 @@ export default function KatalogBukuClient({
             <div className="flex flex-wrap items-center gap-2 pt-2.5 mt-2.5 border-t border-slate-100 dark:border-white/5 text-[11px]">
               <span className="text-slate-400 font-medium">Filter aktif:</span>
               {searchTerm && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-semibold border border-sky-500/20">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 font-semibold border border-sky-500/20">
                   Cari: "{searchTerm}"
-                  <button onClick={() => setSearchTerm("")} className="hover:text-rose-500 ml-0.5 cursor-pointer">×</button>
+                  <button onClick={() => setSearchTerm("")} className="hover:text-rose-500 ml-1 p-0.5 cursor-pointer">×</button>
                 </span>
               )}
               {activeCategory !== "ALL" && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-500/20">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold border border-indigo-500/20">
                   Kategori: {activeCategory}
-                  <button onClick={() => setActiveCategory("ALL")} className="hover:text-rose-500 ml-0.5 cursor-pointer">×</button>
+                  <button onClick={() => setActiveCategory("ALL")} className="hover:text-rose-500 ml-1 p-0.5 cursor-pointer">×</button>
                 </span>
               )}
               {activeFormat !== "ALL" && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
                   Format: {activeFormat === "EBOOK" ? "E-Book Online" : "Buku Fisik"}
-                  <button onClick={() => setActiveFormat("ALL")} className="hover:text-rose-500 ml-0.5 cursor-pointer">×</button>
+                  <button onClick={() => setActiveFormat("ALL")} className="hover:text-rose-500 ml-1 p-0.5 cursor-pointer">×</button>
                 </span>
               )}
               <span className="text-slate-400 font-mono text-[10px] ml-auto">
@@ -666,8 +669,8 @@ export default function KatalogBukuClient({
           )}
         </div>
 
-        {/* Luxury Book Grid: Celebrating Genuine Covers, Rich 3D Hardcover Finish, and Clear Status */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 sm:gap-5 lg:gap-6">
+        {/* Luxury Book Grid: Accessible Spacing, Proportional 3D Book Scale on Mobile */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2.5 sm:gap-4 lg:gap-6">
           {paginatedBuku.map((book) => {
             const hasEbook = Boolean(book.is_ebook || book.file_url);
             const isReady = book.stok_tersedia > 0;
@@ -682,15 +685,15 @@ export default function KatalogBukuClient({
                   setSelectedBook(book);
                   setActiveModalTab("INFO");
                 }}
-                className="group cursor-pointer flex flex-col h-full bg-white dark:bg-white/[0.02] hover:bg-slate-50/90 dark:hover:bg-white/[0.04] p-3 sm:p-3.5 rounded-2xl border border-slate-200/80 dark:border-white/10 hover:border-sky-500/40 dark:hover:border-sky-500/40 shadow-xs hover:shadow-lg transition-all duration-300"
+                className="group cursor-pointer flex flex-col h-full bg-white dark:bg-white/[0.02] hover:bg-slate-50/90 dark:hover:bg-white/[0.04] p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl border border-slate-200/80 dark:border-white/10 hover:border-sky-500/40 dark:hover:border-sky-500/40 shadow-xs hover:shadow-lg transition-all duration-300 active:scale-[0.98]"
               >
-                {/* 3D Realistic Physical Book Component */}
-                <div className="w-full flex justify-center py-2 sm:py-3 relative select-none">
+                {/* 3D Realistic Physical Book Component with Screen-Responsive Width */}
+                <div className="w-full flex justify-center py-1.5 sm:py-3 relative select-none">
                   <Book
                     title={book.judul}
                     author={book.penulis}
                     coverUrl={hasValidCover ? book.cover_url : null}
-                    width={{ sm: 135, md: 155, lg: 172 }}
+                    width={{ xs: 112, sm: 135, md: 155, lg: 172 }}
                     category={book.kategori}
                     textured={true}
                     onError={() => setFailedImages((prev) => ({ ...prev, [book.id]: true }))}
@@ -701,49 +704,49 @@ export default function KatalogBukuClient({
                 <div className="pt-2 flex-1 flex flex-col justify-between">
                   <div>
                     {/* Category & Format Tags */}
-                    <div className="flex items-center justify-between gap-1 mb-1.5">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate max-w-[105px]">
+                    <div className="flex items-center justify-between gap-1 mb-1 sm:mb-1.5">
+                      <span className="text-[9px] sm:text-[9.5px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate flex-1">
                         {book.kategori || "Umum"}
                       </span>
                       {hasEbook ? (
-                        <span className="inline-flex items-center gap-1 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                        <span className="inline-flex items-center gap-0.5 sm:gap-1 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-[8.5px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
                           <Laptop className="w-2.5 h-2.5" />
                           <span>E-Book</span>
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold px-1.5 py-0.5 rounded">
+                        <span className="inline-flex items-center gap-0.5 sm:gap-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[8.5px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded shrink-0">
                           <Library className="w-2.5 h-2.5" />
                           <span>Fisik</span>
                         </span>
                       )}
                     </div>
 
-                    <h3 className="font-bold text-xs sm:text-[14px] leading-snug line-clamp-2 text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                    <h3 className="font-bold text-[12.5px] sm:text-[14px] leading-snug line-clamp-2 text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                       {book.judul}
                     </h3>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 truncate flex items-center gap-1.5 font-medium">
-                      <User className="w-3 h-3 text-sky-500 shrink-0" />
-                      <span>{book.penulis}</span>
+                    <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 sm:mt-1 truncate flex items-center gap-1 font-medium">
+                      <User className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-sky-500 shrink-0" />
+                      <span className="truncate">{book.penulis}</span>
                     </p>
                   </div>
 
-                  <div className="pt-2 flex items-center justify-between text-[11px] border-t border-slate-100 dark:border-white/5 mt-2">
+                  <div className="pt-1.5 sm:pt-2 flex items-center justify-between text-[10px] sm:text-[11px] border-t border-slate-100 dark:border-white/5 mt-2">
                     {hasEbook ? (
-                      <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 font-semibold text-[10px]">
-                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500" />
-                        <span>Online Instan</span>
+                      <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400 font-semibold text-[9.5px] sm:text-[10px]">
+                        <span className="w-1.5 h-1.5 rounded-full bg-sky-500 shrink-0" />
+                        <span className="truncate">Online</span>
                       </span>
                     ) : (
-                      <span className={`inline-flex items-center gap-1 font-semibold text-[10px] ${
+                      <span className={`inline-flex items-center gap-1 font-semibold text-[9.5px] sm:text-[10px] ${
                         isReady ? "text-emerald-600 dark:text-emerald-400" : "text-rose-500"
                       }`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${isReady ? "bg-emerald-500" : "bg-rose-500"}`} />
-                        <span>{isReady ? `${book.stok_tersedia} Siap` : "Dipinjam"}</span>
+                        <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${isReady ? "bg-emerald-500" : "bg-rose-500"}`} />
+                        <span className="truncate">{isReady ? `${book.stok_tersedia} Siap` : "Dipinjam"}</span>
                       </span>
                     )}
 
-                    <span className="inline-flex items-center gap-1 text-amber-500 font-bold text-[10px]">
-                      <Star className="w-2.5 h-2.5 fill-amber-400" />
+                    <span className="inline-flex items-center gap-0.5 sm:gap-1 text-amber-500 font-bold text-[9.5px] sm:text-[10px] shrink-0">
+                      <Star className="w-2.5 h-2.5 fill-amber-400 shrink-0" />
                       <span>{avg}</span>
                     </span>
                   </div>
