@@ -51,3 +51,4 @@ prisma/dev.db
 /*.mp4
 *.save
 public/video/
+public/uploads/*.pptx
