@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Audio upload error:", error);
     return NextResponse.json(
-      { error: "Gagal mengunggah audio: " + (error?.message || "Unknown error") },
+      { error: "Gagal memproses unggahan file audio. Silakan coba kembali." },
       { status: 500 }
     );
   }

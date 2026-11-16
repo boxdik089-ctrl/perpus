@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { findRakIdForKlasifikasi } from "@/lib/rak";
-import { requireAdminSession } from "@/lib/security";
+import { requireAdminSession, sanitizeInput } from "@/lib/security";
 
 export async function createBuku(formData: FormData) {
   await requireAdminSession();
@@ -16,15 +16,25 @@ export async function createBuku(formData: FormData) {
   if (!kode_buku && isbn) {
     kode_buku = isbn;
   }
-
-  const judul = (formData.get("judul") as string)?.trim();
-  if (!judul) {
-    throw new Error("Judul buku wajib diisi");
+  if (kode_buku) {
+    kode_buku = sanitizeInput(kode_buku, 50);
   }
 
-  const penulis = (formData.get("penulis") as string)?.trim() || "Penulis Tidak Diketahui";
-  const kategori = (formData.get("kategori") as string)?.trim() || null;
-  const tahun_ajaran = (formData.get("tahun_ajaran") as string)?.trim() || null;
+  const rawJudul = (formData.get("judul") as string)?.trim();
+  if (!rawJudul) {
+    throw new Error("Judul buku wajib diisi");
+  }
+  const judul = sanitizeInput(rawJudul, 300);
+
+  const rawPenulis = (formData.get("penulis") as string)?.trim() || "Penulis Tidak Diketahui";
+  const penulis = sanitizeInput(rawPenulis, 200);
+
+  const rawKategori = (formData.get("kategori") as string)?.trim();
+  const kategori = rawKategori ? sanitizeInput(rawKategori, 100) : null;
+
+  const rawTahunAjaran = (formData.get("tahun_ajaran") as string)?.trim();
+  const tahun_ajaran = rawTahunAjaran ? sanitizeInput(rawTahunAjaran, 30) : null;
+
   const cover_url = (formData.get("cover_url") as string)?.trim() || null;
   const stok_total = Math.max(1, parseInt(formData.get("stok_total") as string) || 1);
   const klasifikasiRaw = (formData.get("klasifikasi") as string)?.trim() || "";
@@ -32,7 +42,8 @@ export async function createBuku(formData: FormData) {
   // Awalan R = Koleksi Referensi (hanya baca di tempat)
   const is_referensi = /^R\s/i.test(klasifikasiRaw);
   // Simpan klasifikasi tanpa awalan R, mis. "R 370.1" -> "370.1"
-  const klasifikasi = klasifikasiRaw.replace(/^R\s+/i, "") || null;
+  const rawKlasifikasi = klasifikasiRaw.replace(/^R\s+/i, "");
+  const klasifikasi = rawKlasifikasi ? sanitizeInput(rawKlasifikasi, 50) : null;
 
   const file_url = (formData.get("file_url") as string)?.trim() || null;
   const is_ebook_form = formData.get("is_ebook") === "on" || formData.get("is_ebook") === "true";
@@ -113,21 +124,32 @@ export async function updateBuku(id: string, formData: FormData) {
   if (!kode_buku && isbn) {
     kode_buku = isbn;
   }
-
-  const judul = (formData.get("judul") as string)?.trim();
-  if (!judul) {
-    throw new Error("Judul buku wajib diisi");
+  if (kode_buku) {
+    kode_buku = sanitizeInput(kode_buku, 50);
   }
 
-  const penulis = (formData.get("penulis") as string)?.trim() || "Penulis Tidak Diketahui";
-  const kategori = (formData.get("kategori") as string)?.trim() || null;
-  const tahun_ajaran = (formData.get("tahun_ajaran") as string)?.trim() || null;
+  const rawJudul = (formData.get("judul") as string)?.trim();
+  if (!rawJudul) {
+    throw new Error("Judul buku wajib diisi");
+  }
+  const judul = sanitizeInput(rawJudul, 300);
+
+  const rawPenulis = (formData.get("penulis") as string)?.trim() || "Penulis Tidak Diketahui";
+  const penulis = sanitizeInput(rawPenulis, 200);
+
+  const rawKategori = (formData.get("kategori") as string)?.trim();
+  const kategori = rawKategori ? sanitizeInput(rawKategori, 100) : null;
+
+  const rawTahunAjaran = (formData.get("tahun_ajaran") as string)?.trim();
+  const tahun_ajaran = rawTahunAjaran ? sanitizeInput(rawTahunAjaran, 30) : null;
+
   const cover_url = (formData.get("cover_url") as string)?.trim() || null;
   const stok_total = Math.max(1, parseInt(formData.get("stok_total") as string) || 1);
   const klasifikasiRaw = (formData.get("klasifikasi") as string)?.trim() || "";
 
   const is_referensi = /^R\s/i.test(klasifikasiRaw);
-  const klasifikasi = klasifikasiRaw.replace(/^R\s+/i, "") || null;
+  const rawKlasifikasi = klasifikasiRaw.replace(/^R\s+/i, "");
+  const klasifikasi = rawKlasifikasi ? sanitizeInput(rawKlasifikasi, 50) : null;
 
   const file_url = (formData.get("file_url") as string)?.trim() || null;
   const is_ebook_form = formData.get("is_ebook") === "on" || formData.get("is_ebook") === "true";

@@ -216,11 +216,15 @@ export async function getKioskStats() {
 
 export async function createKunjungan(formData: FormData) {
   await requireAdminSession();
-  const nama = (formData.get("nama") as string)?.trim();
+  const nama = sanitizeInput((formData.get("nama") as string)?.trim() || "", 100);
   if (!nama) throw new Error("Nama pengunjung wajib diisi");
 
-  const kelas = (formData.get("kelas") as string)?.trim() || null;
-  const keperluan = (formData.get("keperluan") as string)?.trim() || null;
+  const rawKelas = (formData.get("kelas") as string)?.trim();
+  const kelas = rawKelas ? sanitizeInput(rawKelas, 50) : null;
+
+  const rawKeperluan = (formData.get("keperluan") as string)?.trim();
+  const keperluan = rawKeperluan ? sanitizeInput(rawKeperluan, 150) : null;
+
   const tanggalRaw = formData.get("tanggal") as string;
 
   // Default: waktu sekarang (bisa di-backdate petugas)

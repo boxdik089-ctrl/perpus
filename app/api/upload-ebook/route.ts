@@ -63,6 +63,9 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     console.error("Ebook upload error:", error);
-    return NextResponse.json({ error: "Gagal mengunggah file PDF: " + (error?.message || "Unknown error") }, { status: 500 });
+    return NextResponse.json(
+      { error: "Gagal memproses unggahan dokumen e-book PDF. Silakan coba kembali." },
+      { status: 500 }
+    );
   }
 }

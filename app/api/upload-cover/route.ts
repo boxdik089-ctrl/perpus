@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error("Cover upload error:", error);
     return NextResponse.json(
-      { error: "Gagal mengunggah gambar sampul: " + (error?.message || "Unknown error") },
+      { error: "Gagal memproses unggahan gambar sampul buku. Silakan coba kembali." },
       { status: 500 }
     );
   }
