@@ -113,15 +113,36 @@ export function clearRateLimit(key: string): void {
 }
 
 /**
- * Ambil Client IP secara aman dari request headers.
+ * Ambil Client IP secara aman dari request headers (mendukung Cloudflare & Reverse Proxy).
  */
-export function getClientIp(req: Request): string {
-  const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) {
-    // Ambil IP pertama jika melalui multi-proxy
-    return forwarded.split(",")[0].trim();
+export function getClientIp(
+  req?: Request | { headers?: Record<string, string | string[] | undefined> | Headers } | null
+): string {
+  if (!req || !("headers" in req) || !req.headers) return "127.0.0.1";
+
+  let cfIp: string | null = null;
+  let forwarded: string | null = null;
+  let realIp: string | null = null;
+
+  if (typeof (req.headers as any).get === "function") {
+    cfIp = (req.headers as Headers).get("cf-connecting-ip");
+    forwarded = (req.headers as Headers).get("x-forwarded-for");
+    realIp = (req.headers as Headers).get("x-real-ip");
+  } else {
+    const h = req.headers as Record<string, string | string[] | undefined>;
+    const getHeader = (name: string) => {
+      const val = h[name] ?? h[name.toLowerCase()];
+      return Array.isArray(val) ? val[0] : val ?? null;
+    };
+    cfIp = getHeader("cf-connecting-ip");
+    forwarded = getHeader("x-forwarded-for");
+    realIp = getHeader("x-real-ip");
   }
-  return req.headers.get("x-real-ip") || "127.0.0.1";
+
+  if (cfIp && typeof cfIp === "string") return cfIp.trim();
+  if (forwarded && typeof forwarded === "string") return forwarded.split(",")[0].trim();
+  if (realIp && typeof realIp === "string") return realIp.trim();
+  return "127.0.0.1";
 }
 
 /**

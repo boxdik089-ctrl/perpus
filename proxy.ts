@@ -2,11 +2,11 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-export default withAuth(
-  function middleware(req) {
+const authProxy = withAuth(
+  function proxy(req) {
     const response = NextResponse.next();
 
-    // Security Headers di level middleware
+    // Security Headers di level proxy/middleware
     response.headers.set("X-Frame-Options", "SAMEORIGIN");
     response.headers.set("X-Content-Type-Options", "nosniff");
     response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
@@ -44,6 +44,9 @@ export default withAuth(
     },
   }
 );
+
+export default authProxy;
+export const proxy = authProxy;
 
 export const config = {
   matcher: [

@@ -121,6 +121,7 @@ export async function getEksemplarForLabels(params?: {
 }
 
 export async function getLabelFilterOptions() {
+  await requireAdminSession();
   const [kategoriList, rakList, totalEksemplar, totalBuku] = await Promise.all([
     prisma.buku.findMany({
       where: { kategori: { not: null } },

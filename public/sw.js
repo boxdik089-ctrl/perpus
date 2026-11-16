@@ -1,5 +1,5 @@
 // Service Worker Perpustakaan Digital SMKN 1 Beringin
-const CACHE_NAME = "perpus-beringin-v8-nocache";
+const CACHE_NAME = "perpus-beringin-v10-nocache";
 const ASSETS_TO_CACHE = [
   "/manifest.json",
   "/assets/logo.png",

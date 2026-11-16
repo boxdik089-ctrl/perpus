@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 
-import { isRateLimited, recordFailedAttempt, clearRateLimit, sanitizeInput } from "@/lib/security";
+import { isRateLimited, recordFailedAttempt, clearRateLimit, sanitizeInput, getClientIp } from "@/lib/security";
 
 const isHttps = process.env.NEXTAUTH_URL?.startsWith("https://") || process.env.NODE_ENV === "production";
 
@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         username: { label: "Username", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         if (!credentials?.username || !credentials?.password) {
           throw new Error("Username dan password harus diisi");
         }
@@ -26,13 +26,23 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Username tidak valid");
         }
 
-        const rateLimitKey = `login:${username.toLowerCase()}`;
+        const clientIp = getClientIp(req as any);
+        const ipRateLimitKey = `login_ip:${clientIp}`;
+        const userRateLimitKey = `login_user:${username.toLowerCase()}`;
 
-        // Perlindungan terhadap Brute-Force: Cek apakah akun sedang dibatasi
-        const rateCheck = isRateLimited(rateLimitKey, 5, 5 * 60 * 1000);
-        if (rateCheck.limited) {
+        // 1. Cek rate limiting per IP (maksimal 15 percobaan gagal per 10 menit)
+        const ipRateCheck = isRateLimited(ipRateLimitKey, 15, 10 * 60 * 1000);
+        if (ipRateCheck.limited) {
           throw new Error(
-            `Terlalu banyak percobaan login yang gagal. Akun dibatasi sementara. Silakan coba lagi dalam ${rateCheck.retryAfterSeconds} detik.`
+            `Terlalu banyak percobaan login gagal dari jaringan Anda. Akses dibatasi sementara selama ${ipRateCheck.retryAfterSeconds} detik.`
+          );
+        }
+
+        // 2. Cek rate limiting per Username (maksimal 5 percobaan gagal per 5 menit)
+        const userRateCheck = isRateLimited(userRateLimitKey, 5, 5 * 60 * 1000);
+        if (userRateCheck.limited) {
+          throw new Error(
+            `Terlalu banyak percobaan login yang gagal. Akun dibatasi sementara. Silakan coba lagi dalam ${userRateCheck.retryAfterSeconds} detik.`
           );
         }
 
@@ -41,7 +51,8 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!admin) {
-          recordFailedAttempt(rateLimitKey);
+          recordFailedAttempt(userRateLimitKey);
+          recordFailedAttempt(ipRateLimitKey);
           throw new Error("Username atau password salah");
         }
 
@@ -67,12 +78,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         if (!isPasswordValid) {
-          recordFailedAttempt(rateLimitKey);
+          recordFailedAttempt(userRateLimitKey);
+          recordFailedAttempt(ipRateLimitKey);
           throw new Error("Username atau password salah");
         }
 
         // Bersihkan rate limit saat login sukses
-        clearRateLimit(rateLimitKey);
+        clearRateLimit(userRateLimitKey);
+        clearRateLimit(ipRateLimitKey);
 
         return {
           id: admin.id,
