@@ -22,11 +22,6 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ||
-      process.env.NEXTAUTH_URL ||
-      "https://perpustakaan.smknegeri1beringin.sch.id"
-  ),
   title: "Perpustakaan Digital - SMK Negeri 1 Beringin",
   description: "Sistem informasi perpustakaan digital resmi dan katalog e-book SMK Negeri 1 Beringin",
   authors: [{ name: "Dika Armadana (@dprxz_)", url: "https://instagram.com/dprxz_" }],

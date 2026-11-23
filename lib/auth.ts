@@ -103,21 +103,6 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async redirect({ url, baseUrl }) {
-      const allowedOrigins = new Set([
-        baseUrl,
-        "https://perpustakaan.smknegeri1beringin.sch.id",
-        "https://perpustakaan.tiksmkn1beringin.my.id",
-      ]);
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      try {
-        const parsed = new URL(url);
-        if (allowedOrigins.has(parsed.origin)) return url;
-      } catch {
-        return baseUrl;
-      }
-      return baseUrl;
-    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;

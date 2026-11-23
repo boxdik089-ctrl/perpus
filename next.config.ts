@@ -69,8 +69,8 @@ const nextConfig: NextConfig = {
     },
   },
   allowedDevOrigins: [
-    "perpustakaan.smknegeri1beringin.sch.id",
     "perpustakaan.tiksmkn1beringin.my.id",
+    "perpustakaan.smknegeri1beringin.sch.id",
     "localhost",
     "localhost:3000",
     "localhost:3001",
