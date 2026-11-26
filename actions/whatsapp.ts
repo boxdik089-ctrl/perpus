@@ -4,18 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { hitungDenda } from "@/lib/utils";
 import { requireAdminSession } from "@/lib/security";
 import {
-  formatNomorWhatsApp,
-  generatePinjamMessage,
-  generatePengingatMessage,
   generateTerlambatMessage,
-  generateKembaliMessage,
   createWhatsAppWebUrl,
   sendViaWhatsAppGateway,
-  WhatsAppPayloadPinjam,
-  WhatsAppPayloadPengingat,
-  WhatsAppPayloadTerlambat,
-  WhatsAppPayloadKembali,
+  getFonnteDeviceStatus,
+  type FonnteDeviceStatus,
 } from "@/lib/whatsapp";
+import { runWeeklyWhatsAppBroadcast } from "@/lib/whatsapp-server";
 
 /**
  * Ambil daftar peminjam terlambat lengkap dengan info kontak siswa/anggota
@@ -33,10 +28,29 @@ export async function getDaftarPeminjamTerlambat() {
       siswa: true,
       buku: true,
       anggota: true,
-      eksemplar: true,
+      eksemplar: { include: { buku: true } },
     },
     orderBy: { batas_kembali: "asc" },
   });
+
+  // Lookup fallback telepon dari Anggota berdasarkan NISN bila transaksi hanya menautkan siswaId
+  const missingNisns = Array.from(
+    new Set(
+      transaksiList
+        .filter((t) => !t.anggota?.telepon && t.siswa?.nisn)
+        .map((t) => t.siswa!.nisn)
+    )
+  );
+  const nisnPhoneMap = new Map<string, string>();
+  if (missingNisns.length > 0) {
+    const matched = await prisma.anggota.findMany({
+      where: { nisn: { in: missingNisns }, telepon: { not: null } },
+      select: { nisn: true, telepon: true },
+    });
+    for (const m of matched) {
+      if (m.nisn && m.telepon) nisnPhoneMap.set(m.nisn, m.telepon);
+    }
+  }
 
   return transaksiList.map((t) => {
     const hariTerlambat = Math.max(
@@ -47,10 +61,10 @@ export async function getDaftarPeminjamTerlambat() {
 
     const nama = t.anggota?.nama || t.siswa?.nama || "Peminjam";
     const kelas = t.siswa?.kelas || (t.anggota?.jenis === "GURU" ? "GURU" : t.anggota?.jenis === "STAF" ? "STAF" : null);
-    const telepon = t.anggota?.telepon || null;
+    const telepon = t.anggota?.telepon || (t.siswa?.nisn ? nisnPhoneMap.get(t.siswa.nisn) ?? null : null);
     const nisn = t.siswa?.nisn || t.anggota?.nisn || null;
     const no_anggota = t.anggota?.no_anggota || null;
-    const judul = t.buku?.judul || "Buku Perpustakaan";
+    const judul = t.buku?.judul || t.eksemplar?.buku?.judul || "Buku Perpustakaan";
     const kode = t.eksemplar?.kode || t.buku?.kode_buku || "";
 
     const message = generateTerlambatMessage({
@@ -88,14 +102,30 @@ export async function getDaftarPeminjamTerlambat() {
 }
 
 /**
+ * Cek status live perangkat Fonnte dari panel admin.
+ */
+export async function cekStatusFonnteAction(): Promise<FonnteDeviceStatus> {
+  await requireAdminSession();
+  return await getFonnteDeviceStatus();
+}
+
+/**
  * Kirim pesan notifikasi WhatsApp via Gateway API
  */
 export async function kirimWhatsAppAction(
   targetPhone: string,
   message: string
-): Promise<{ ok: boolean; message: string; response?: any }> {
+): Promise<{ ok: boolean; message: string; response?: Record<string, unknown> }> {
   await requireAdminSession();
-  return await sendViaWhatsAppGateway(targetPhone, message);
+  return await sendViaWhatsAppGateway(targetPhone, message, { delay: "3-8", timeoutMs: 8000 });
+}
+
+/**
+ * Jalankan broadcast pengingat mingguan dari tombol panel admin (dikelompokkan per nomor & berjeda aman).
+ */
+export async function jalankanCronMingguanAction(force = false) {
+  await requireAdminSession();
+  return await runWeeklyWhatsAppBroadcast({ force, onlyOverdue: false });
 }
 
 /**
@@ -103,37 +133,16 @@ export async function kirimWhatsAppAction(
  */
 export async function broadcastPengingatTerlambatAction(transaksiIds?: string[]) {
   await requireAdminSession();
-  const list = await getDaftarPeminjamTerlambat();
-  const targetList = transaksiIds && transaksiIds.length > 0
-    ? list.filter((item) => transaksiIds.includes(item.id))
-    : list;
-
-  const validTargets = targetList.filter((item) => !!item.telepon);
-
-  if (validTargets.length === 0) {
-    return {
-      ok: false,
-      message: "Tidak ada data peminjam terlambat yang memiliki nomor WhatsApp terdaftar.",
-      totalSent: 0,
-      totalSuccess: 0,
-    };
-  }
-
-  let successCount = 0;
-  let failCount = 0;
-
-  for (const item of validTargets) {
-    if (item.telepon) {
-      const res = await sendViaWhatsAppGateway(item.telepon, item.defaultMessage);
-      if (res.ok) successCount++;
-      else failCount++;
-    }
-  }
+  const res = await runWeeklyWhatsAppBroadcast({
+    force: true,
+    onlyOverdue: true,
+    transaksiIds,
+  });
 
   return {
-    ok: successCount > 0,
-    message: `Berhasil mengirim ke ${successCount} nomor. Gagal: ${failCount}.`,
-    totalSent: validTargets.length,
-    totalSuccess: successCount,
+    ok: res.sentCount > 0,
+    message: res.message,
+    totalSent: res.sentCount + res.failedCount,
+    totalSuccess: res.sentCount,
   };
 }

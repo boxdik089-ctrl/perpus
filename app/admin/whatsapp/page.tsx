@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MessageCircle, Send } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import { WhatsAppCenterClient } from "@/components/admin/WhatsAppCenterClient";
+import { getFonnteDeviceStatus } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -19,42 +20,63 @@ export default async function WhatsAppPage() {
   const session = await getServerSession(authOptions);
   if (!session) redirect("/login");
 
-  // Query all active and recent transactions
-  const transaksiList = await prisma.transaksi.findMany({
-    where: {
-      status: "DIPINJAM",
-    },
-    include: {
-      siswa: { select: { id: true, nama: true, nisn: true, kelas: true } },
-      buku: { select: { id: true, judul: true, penulis: true, kode_buku: true, tipe_buku: true } },
-      anggota: {
-        select: {
-          id: true,
-          nama: true,
-          nisn: true,
-          jenis: true,
-          no_anggota: true,
-          telepon: true,
-          kelasRef: { select: { nama_kelas: true } },
+  const [transaksiList, fonnteStatus] = await Promise.all([
+    prisma.transaksi.findMany({
+      where: {
+        status: "DIPINJAM",
+      },
+      include: {
+        siswa: { select: { id: true, nama: true, nisn: true, kelas: true } },
+        buku: { select: { id: true, judul: true, penulis: true, kode_buku: true, tipe_buku: true } },
+        anggota: {
+          select: {
+            id: true,
+            nama: true,
+            nisn: true,
+            jenis: true,
+            no_anggota: true,
+            telepon: true,
+            kelasRef: { select: { nama_kelas: true } },
+          },
+        },
+        eksemplar: {
+          select: {
+            id: true,
+            kode: true,
+            buku: { select: { id: true, judul: true, penulis: true, kode_buku: true, tipe_buku: true } },
+          },
         },
       },
-      eksemplar: {
-        select: {
-          id: true,
-          kode: true,
-          buku: { select: { id: true, judul: true, penulis: true, kode_buku: true, tipe_buku: true } },
-        },
-      },
-    },
-    orderBy: { batas_kembali: "asc" },
-  });
+      orderBy: { batas_kembali: "asc" },
+    }),
+    getFonnteDeviceStatus(),
+  ]);
+
+  // Fallback nomor telepon via NISN anggota bila transaksi legacy hanya memiliki siswaId
+  const missingPhoneNisns = Array.from(
+    new Set(
+      transaksiList
+        .filter((t) => !t.anggota?.telepon && t.siswa?.nisn)
+        .map((t) => t.siswa!.nisn)
+    )
+  );
+  const nisnPhoneMap = new Map<string, string>();
+  if (missingPhoneNisns.length > 0) {
+    const matchedAnggota = await prisma.anggota.findMany({
+      where: { nisn: { in: missingPhoneNisns }, telepon: { not: null } },
+      select: { nisn: true, telepon: true },
+    });
+    for (const a of matchedAnggota) {
+      if (a.nisn && a.telepon) nisnPhoneMap.set(a.nisn, a.telepon);
+    }
+  }
 
   const formattedPinjaman = transaksiList.map((t) => ({
     id: t.id,
     nama: t.anggota?.nama || t.siswa?.nama || "Peminjam",
     kelas: t.siswa?.kelas || t.anggota?.kelasRef?.nama_kelas || (t.anggota?.jenis === "GURU" ? "GURU" : t.anggota?.jenis === "STAF" ? "STAF" : null),
     nisn: t.siswa?.nisn || t.anggota?.nisn || null,
-    telepon: t.anggota?.telepon || null,
+    telepon: t.anggota?.telepon || (t.siswa?.nisn ? nisnPhoneMap.get(t.siswa.nisn) ?? null : null),
     no_anggota: t.anggota?.no_anggota || null,
     judul_buku: t.buku?.judul || t.eksemplar?.buku?.judul || "Buku Perpustakaan",
     kode_eksemplar: t.eksemplar?.kode || t.buku?.kode_buku || null,
@@ -94,7 +116,10 @@ export default async function WhatsAppPage() {
 
       {/* Main Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        <WhatsAppCenterClient pinjamanList={formattedPinjaman} />
+        <WhatsAppCenterClient
+          pinjamanList={formattedPinjaman}
+          initialFonnteStatus={fonnteStatus}
+        />
       </div>
     </div>
   );

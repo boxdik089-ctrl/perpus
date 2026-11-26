@@ -144,20 +144,166 @@ export function createWhatsAppWebUrl(phone: string, message: string): string {
   return `https://wa.me/${cleanPhone}?text=${encodedText}`;
 }
 
+export type FonnteDeviceStatus = {
+  configured: boolean;
+  connected: boolean;
+  deviceStatus: string;
+  name?: string;
+  packageName?: string;
+  quota?: string;
+  expired?: string;
+  messagesCount?: number;
+  reason?: string;
+};
+
+export type WeeklyDigestBookItem = {
+  judul: string;
+  batasKembali: string;
+  terlambatHari: number;
+  denda: number;
+};
+
 /**
- * Kirim via Gateway API (Fonnte / Wabot / Generic REST)
+ * 1b. Pesan Peminjaman Kolektif (beberapa buku sekaligus dalam 1 pesan)
+ */
+export function generateBatchPinjamMessage(data: {
+  nama: string;
+  kelas?: string | null;
+  no_anggota?: string;
+  judul_list: string[];
+  tgl_pinjam: string;
+  batas_kembali: string;
+}): string {
+  if (data.judul_list.length <= 1) {
+    return generatePinjamMessage({
+      nama: data.nama,
+      kelas: data.kelas,
+      no_anggota: data.no_anggota,
+      judul_buku: data.judul_list[0] || "Buku Perpustakaan",
+      tgl_pinjam: data.tgl_pinjam,
+      batas_kembali: data.batas_kembali,
+    });
+  }
+
+  const identitas = data.kelas ? `${data.nama} (${data.kelas})` : data.nama;
+  const daftar = data.judul_list.map((j, idx) => `${idx + 1}. ${j}`).join("\n");
+  return `📚 *PERPUSTAKAAN SMK NEGERI 1 BERINGIN*
+Halo *${identitas}*,
+
+Peminjaman ${data.judul_list.length} buku Anda telah berhasil dicatat:
+${daftar}${data.no_anggota ? `\n💳 *No. Anggota:* ${data.no_anggota}` : ""}
+📅 *Tanggal Pinjam:* ${data.tgl_pinjam}
+⏳ *Batas Pengembalian:* ${data.batas_kembali}
+
+_Mohon menjaga kondisi buku dengan baik dan mengembalikan tepat waktu. Terima kasih dan selamat membaca!_`;
+}
+
+/**
+ * 2b. Pesan Rekap Mingguan Otomatis (1 pesan per peminjam untuk semua buku aktif/terlambat)
+ */
+export function generateWeeklyDigestMessage(data: {
+  nama: string;
+  kelas?: string | null;
+  items: WeeklyDigestBookItem[];
+}): string {
+  const identitas = data.kelas ? `${data.nama} (${data.kelas})` : data.nama;
+  const totalDenda = data.items.reduce((sum, item) => sum + item.denda, 0);
+  const hasOverdue = data.items.some((item) => item.terlambatHari > 0);
+
+  const lines = data.items.map((item, idx) => {
+    const statusText =
+      item.terlambatHari > 0
+        ? `⚠️ Terlambat ${item.terlambatHari} hari (Denda Rp ${item.denda.toLocaleString("id-ID")})`
+        : `⏳ Batas kembali: ${item.batasKembali}`;
+    return `${idx + 1}. *${item.judul}*\n   ${statusText}`;
+  });
+
+  const header = hasOverdue
+    ? "⚠️ *PENGINGAT MINGGUAN & KETERLAMBATAN BUKU*"
+    : "🔔 *PENGINGAT MINGGUAN PEMINJAMAN BUKU*";
+
+  const footerNote = hasOverdue
+    ? `💰 *Total Akumulasi Denda:* Rp ${totalDenda.toLocaleString("id-ID")}\nMohon segera mengembalikan buku ke meja sirkulasi Perpustakaan SMKN 1 Beringin agar denda harian tidak terus bertambah.`
+    : "Mohon menjaga kondisi buku dengan baik dan mengembalikan sebelum tanggal jatuh tempo di Kiosk / meja sirkulasi Perpustakaan SMKN 1 Beringin.";
+
+  return `${header}
+*Perpustakaan SMK Negeri 1 Beringin*
+
+Halo *${identitas}*,
+Berikut rincian buku perpustakaan yang masih tercatat dipinjam atas nama Anda:
+
+${lines.join("\n")}
+
+${footerNote}
+
+_Pesan otomatis mingguan Sistem Perpustakaan SMKN 1 Beringin._`;
+}
+
+/**
+ * Cek status koneksi perangkat WhatsApp di Fonnte Gateway (non-throwing, timeout 5 detik).
+ */
+export async function getFonnteDeviceStatus(): Promise<FonnteDeviceStatus> {
+  const fonnteToken = process.env.FONNTE_TOKEN?.trim();
+  if (!fonnteToken) {
+    return {
+      configured: false,
+      connected: false,
+      deviceStatus: "unconfigured",
+      reason: "FONNTE_TOKEN belum dikonfigurasi di .env",
+    };
+  }
+
+  try {
+    const res = await fetch("https://api.fonnte.com/device", {
+      method: "POST",
+      headers: {
+        Authorization: fonnteToken,
+      },
+      signal: AbortSignal.timeout(5000),
+    });
+    const data = await res.json();
+    const deviceStatus = String(data?.device_status || (data?.status ? "connect" : "disconnect"));
+    const connected = Boolean(data?.status) && deviceStatus.toLowerCase() === "connect";
+
+    return {
+      configured: true,
+      connected,
+      deviceStatus,
+      name: data?.name ? String(data.name) : undefined,
+      packageName: data?.package ? String(data.package) : undefined,
+      quota: data?.quota !== undefined ? String(data.quota) : undefined,
+      expired: data?.expired ? String(data.expired) : undefined,
+      messagesCount: typeof data?.messages === "number" ? data.messages : undefined,
+      reason: data?.reason ? String(data.reason) : undefined,
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Timeout koneksi Fonnte";
+    return {
+      configured: true,
+      connected: false,
+      deviceStatus: "unreachable",
+      reason: msg,
+    };
+  }
+}
+
+/**
+ * Kirim via Gateway API (Fonnte / Wabot / Generic REST) dengan timeout & anti-ban delay.
  */
 export async function sendViaWhatsAppGateway(
   targetPhone: string,
-  message: string
-): Promise<{ ok: boolean; message: string; response?: any }> {
+  message: string,
+  options?: { delay?: string; timeoutMs?: number }
+): Promise<{ ok: boolean; message: string; response?: Record<string, unknown> }> {
   const cleanPhone = formatNomorWhatsApp(targetPhone);
   if (!cleanPhone) {
     return { ok: false, message: "Nomor WhatsApp tidak valid atau belum diisi." };
   }
 
+  const timeoutMs = options?.timeoutMs ?? 8000;
+
   // 1. Cek konfigurasi Fonnte
-  const fonnteToken = process.env.FONNTE_TOKEN;
+  const fonnteToken = process.env.FONNTE_TOKEN?.trim();
   if (fonnteToken) {
     try {
       const res = await fetch("https://api.fonnte.com/send", {
@@ -168,17 +314,24 @@ export async function sendViaWhatsAppGateway(
         },
         body: JSON.stringify({
           target: cleanPhone,
-          message: message,
+          message,
           countryCode: "62",
+          delay: options?.delay ?? "5-12",
         }),
+        signal: AbortSignal.timeout(timeoutMs),
       });
-      const resData = await res.json();
+      const resData = (await res.json()) as Record<string, unknown>;
       if (resData.status === true || resData.status === "true") {
         return { ok: true, message: "Pesan WhatsApp berhasil dikirim via Fonnte Gateway.", response: resData };
       }
-      return { ok: false, message: resData.reason || resData.message || "Gagal mengirim pesan via Fonnte.", response: resData };
-    } catch (err: any) {
-      return { ok: false, message: `Error koneksi Gateway: ${err.message}` };
+      return {
+        ok: false,
+        message: String(resData.reason || resData.message || "Gagal mengirim pesan via Fonnte."),
+        response: resData,
+      };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Koneksi ke Fonnte timeout";
+      return { ok: false, message: `Error koneksi Gateway: ${msg}` };
     }
   }
 
@@ -195,13 +348,15 @@ export async function sendViaWhatsAppGateway(
         },
         body: JSON.stringify({
           phone: cleanPhone,
-          message: message,
+          message,
         }),
+        signal: AbortSignal.timeout(timeoutMs),
       });
-      const resData = await res.json();
+      const resData = (await res.json()) as Record<string, unknown>;
       return { ok: res.ok, message: "Permintaan kirim WhatsApp telah diteruskan ke gateway.", response: resData };
-    } catch (err: any) {
-      return { ok: false, message: `Error koneksi custom gateway: ${err.message}` };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Timeout gateway";
+      return { ok: false, message: `Error koneksi custom gateway: ${msg}` };
     }
   }
 

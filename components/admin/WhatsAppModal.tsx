@@ -48,19 +48,32 @@ export type WhatsAppModalProps = {
 };
 
 export function WhatsAppModal({ isOpen, onClose, data }: WhatsAppModalProps) {
-  if (!isOpen || !data) return null;
+  const resolveDefaultType = (d: WhatsAppModalProps["data"]): "TERLAMBAT" | "PENGINGAT" | "PINJAM" | "KEMBALI" => {
+    if (!d) return "PENGINGAT";
+    if (d.defaultType) return d.defaultType;
+    return d.hari_terlambat && d.hari_terlambat > 0 ? "TERLAMBAT" : "PENGINGAT";
+  };
 
-  const [activeType, setActiveType] = useState<"TERLAMBAT" | "PENGINGAT" | "PINJAM" | "KEMBALI">(
-    data.defaultType || (data.hari_terlambat && data.hari_terlambat > 0 ? "TERLAMBAT" : "PENGINGAT")
+  const [activeType, setActiveType] = useState<"TERLAMBAT" | "PENGINGAT" | "PINJAM" | "KEMBALI">(() =>
+    resolveDefaultType(data)
   );
-  const [phoneNumber, setPhoneNumber] = useState(data.telepon || "");
+  const [phoneNumber, setPhoneNumber] = useState(() => data?.telepon || "");
   const [customMessage, setCustomMessage] = useState("");
   const [copied, setCopied] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [sendResult, setSendResult] = useState<{ ok: boolean; message: string } | null>(null);
 
+  // Sinkronkan nomor & tipe template tiap kali modal dibuka untuk penerima baru
+  useEffect(() => {
+    if (!isOpen || !data) return;
+    setActiveType(resolveDefaultType(data));
+    setPhoneNumber(data.telepon || "");
+    setSendResult(null);
+  }, [isOpen, data]);
+
   // Generate initial message based on active template
   useEffect(() => {
+    if (!isOpen || !data) return;
     let msg = "";
     const tglPinjamFormatted = data.tgl_pinjam
       ? new Date(data.tgl_pinjam).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
@@ -106,7 +119,9 @@ export function WhatsAppModal({ isOpen, onClose, data }: WhatsAppModalProps) {
       });
     }
     setCustomMessage(msg);
-  }, [activeType, data]);
+  }, [isOpen, activeType, data]);
+
+  if (!isOpen || !data) return null;
 
   const cleanPhone = formatNomorWhatsApp(phoneNumber);
   const waWebUrl = createWhatsAppWebUrl(phoneNumber, customMessage);

@@ -131,6 +131,7 @@ model Transaksi {
   denda             Int              @default(0)
   perpanjangan_count Int             @default(0) // maksimal 1x perpanjangan
   groupId           String?
+  waLastSentAt      DateTime?
   createdAt         DateTime         @default(now())
 
   @@index([groupId])

@@ -21,7 +21,12 @@ import {
   Plus,
 } from "lucide-react";
 import { WhatsAppModal } from "@/components/admin/WhatsAppModal";
-import { broadcastPengingatTerlambatAction } from "@/actions/whatsapp";
+import {
+  broadcastPengingatTerlambatAction,
+  cekStatusFonnteAction,
+  jalankanCronMingguanAction,
+} from "@/actions/whatsapp";
+import type { FonnteDeviceStatus } from "@/lib/whatsapp";
 import { formatRupiah, getRemainingDays } from "@/lib/utils";
 
 export type WhatsAppPinjamanItem = {
@@ -41,14 +46,19 @@ export type WhatsAppPinjamanItem = {
 
 export function WhatsAppCenterClient({
   pinjamanList,
+  initialFonnteStatus,
 }: {
   pinjamanList: WhatsAppPinjamanItem[];
+  initialFonnteStatus: FonnteDeviceStatus;
 }) {
   const [activeTab, setActiveTab] = useState<"ALL" | "DUE_SOON" | "LATE">("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBroadcasting, setIsBroadcasting] = useState(false);
+  const [isRunningWeekly, setIsRunningWeekly] = useState(false);
+  const [isCheckingDevice, setIsCheckingDevice] = useState(false);
+  const [fonnteStatus, setFonnteStatus] = useState<FonnteDeviceStatus>(initialFonnteStatus);
   const [broadcastResult, setBroadcastResult] = useState<{ ok: boolean; message: string } | null>(null);
 
   // Manual Quick Send State
@@ -132,15 +142,105 @@ export function WhatsAppCenterClient({
       const lateIds = processedList.filter((i) => i.isLate).map((i) => i.id);
       const res = await broadcastPengingatTerlambatAction(lateIds);
       setBroadcastResult(res);
-    } catch (err: any) {
-      setBroadcastResult({ ok: false, message: err?.message || "Gagal melakukan broadcast." });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal melakukan broadcast.";
+      setBroadcastResult({ ok: false, message: msg });
     } finally {
       setIsBroadcasting(false);
     }
   };
 
+  const handleRefreshFonnte = async () => {
+    setIsCheckingDevice(true);
+    try {
+      const next = await cekStatusFonnteAction();
+      setFonnteStatus(next);
+    } catch {
+      // Abaikan agar UI tetap responsif
+    } finally {
+      setIsCheckingDevice(false);
+    }
+  };
+
+  const handleRunWeeklyDigest = async () => {
+    setIsRunningWeekly(true);
+    setBroadcastResult(null);
+    try {
+      const res = await jalankanCronMingguanAction(false);
+      setBroadcastResult({ ok: res.ok, message: res.message });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Gagal memproses pengingat mingguan.";
+      setBroadcastResult({ ok: false, message: msg });
+    } finally {
+      setIsRunningWeekly(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
+      {/* Fonnte Device Health & Weekly Schedule Banner */}
+      <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-3.5 min-w-0">
+          <div
+            className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${
+              fonnteStatus.connected
+                ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                : "bg-rose-500/15 border-rose-500/30 text-rose-600 dark:text-rose-400"
+            }`}
+          >
+            <Phone className="w-5 h-5" />
+          </div>
+          <div className="min-w-0 space-y-0.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                Fonnte Gateway ({fonnteStatus.name || "Perangkat Sekolah"})
+              </h2>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${
+                  fonnteStatus.connected
+                    ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    : "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                }`}
+              >
+                {fonnteStatus.connected ? "Terhubung" : `Terputus (${fonnteStatus.deviceStatus})`}
+              </span>
+              {fonnteStatus.quota && (
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                  Kuota: {fonnteStatus.quota} {fonnteStatus.expired ? `• Exp ${fonnteStatus.expired}` : ""}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Pengingat otomatis aktif <strong>1x seminggu (Senin 08:00 WIB)</strong> jika ada peminjam aktif + bukti otomatis non-blocking saat pinjam buku.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
+          <button
+            type="button"
+            onClick={handleRefreshFonnte}
+            disabled={isCheckingDevice}
+            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isCheckingDevice ? "animate-spin" : ""}`} />
+            <span>{isCheckingDevice ? "Mengecek..." : "Cek Koneksi Fonnte"}</span>
+          </button>
+
+          {totalAktif > 0 && (
+            <button
+              type="button"
+              onClick={handleRunWeeklyDigest}
+              disabled={isRunningWeekly}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs transition-colors cursor-pointer disabled:opacity-50"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span>{isRunningWeekly ? "Mengirim..." : "Kirim Rekap Mingguan"}</span>
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Top Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 animate-fade-up">
         <div className="bg-white/90 dark:bg-slate-900/80 backdrop-blur-md p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
@@ -256,7 +356,11 @@ export function WhatsAppCenterClient({
               : "bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300"
           }`}
         >
-          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+          {broadcastResult.ok ? (
+            <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-600" />
+          ) : (
+            <AlertTriangle className="w-5 h-5 shrink-0 text-amber-600" />
+          )}
           <span className="font-semibold">{broadcastResult.message}</span>
         </div>
       )}

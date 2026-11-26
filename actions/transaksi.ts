@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { DURASI_PINJAM_HARI, DENDA_PER_HARI } from "@/lib/constants";
 import { hitungDenda } from "@/lib/utils";
 import { requireAdminSession } from "@/lib/security";
+import { notifyBorrowNonBlocking } from "@/lib/whatsapp-server";
 
 export async function createTransaksi(formData: FormData) {
   await requireAdminSession();
@@ -70,11 +71,24 @@ export async function createTransaksi(formData: FormData) {
   // Satu transaksi per buku, berbagi groupId agar tampil sebagai 1 grup peminjaman
   const groupId = [...bukuIds].sort().join("|");
 
-  await prisma.$transaction([
+  // Cari data siswa & anggota terkait agar nomor WhatsApp ikut tertaut
+  const siswa = await prisma.siswa.findUnique({
+    where: { id: siswaId },
+    include: { kelasRef: { select: { nama_kelas: true } } },
+  });
+  const matchedAnggota = siswa
+    ? await prisma.anggota.findFirst({
+        where: { nisn: siswa.nisn },
+        select: { id: true, telepon: true, no_anggota: true },
+      })
+    : null;
+
+  const txResults = await prisma.$transaction([
     ...bukus.map((buku) =>
       prisma.transaksi.create({
         data: {
           siswaId,
+          anggotaId: matchedAnggota?.id ?? null,
           bukuId: buku.id,
           tgl_pinjam,
           batas_kembali,
@@ -92,6 +106,23 @@ export async function createTransaksi(formData: FormData) {
       })
     ),
   ]);
+
+  // Kirim bukti pinjam otomatis via WhatsApp secara non-blocking agar form tetap responsif
+  if (siswa) {
+    const createdIds = txResults.slice(0, bukus.length).map((t) => t.id);
+    notifyBorrowNonBlocking({
+      transaksiIds: createdIds,
+      anggotaId: matchedAnggota?.id ?? null,
+      siswaNisn: siswa.nisn,
+      telepon: matchedAnggota?.telepon ?? null,
+      nama: siswa.nama,
+      kelas: siswa.kelasRef?.nama_kelas || siswa.kelas,
+      noAnggota: matchedAnggota?.no_anggota ?? null,
+      judulList: bukus.map((b) => b.judul),
+      tglPinjam: tgl_pinjam,
+      batasKembali: batas_kembali,
+    });
+  }
 
   revalidatePath("/admin/transaksi");
   revalidatePath("/admin/laporan");

@@ -10,6 +10,7 @@ import {
 } from "@/lib/constants";
 import { hitungDenda } from "@/lib/utils";
 import { requireAdminSession } from "@/lib/security";
+import { notifyBorrowNonBlocking } from "@/lib/whatsapp-server";
 
 /**
  * Generate N eksemplar untuk 1 buku. Kode 8-digit sequential, rak auto-assign
@@ -194,6 +195,7 @@ export async function scanEksemplar(
 
   const anggota = await prisma.anggota.findUnique({
     where: { id: anggotaId },
+    include: { kelasRef: { select: { nama_kelas: true } } },
   });
   if (!anggota || !anggota.status_aktif) {
     return { ok: false, pesan: "Anggota tidak valid" };
@@ -328,7 +330,7 @@ export async function scanEksemplar(
     batas_kembali.setDate(batas_kembali.getDate() + DURASI_PINJAM_HARI);
   }
 
-  await prisma.$transaction([
+  const [createdTx] = await prisma.$transaction([
     prisma.transaksi.create({
       data: {
         anggotaId,
@@ -350,6 +352,20 @@ export async function scanEksemplar(
       data: { stok_tersedia: { decrement: 1 } },
     }),
   ]);
+
+  // Kirim bukti pinjam otomatis via WhatsApp secara asinkron (non-blocking)
+  notifyBorrowNonBlocking({
+    transaksiIds: [createdTx.id],
+    anggotaId: anggota.id,
+    siswaNisn: anggota.nisn,
+    telepon: anggota.telepon,
+    nama: anggota.nama,
+    kelas: anggota.kelasRef?.nama_kelas ?? null,
+    noAnggota: anggota.no_anggota,
+    judulList: [eks.buku.judul],
+    tglPinjam: tgl_pinjam,
+    batasKembali: batas_kembali,
+  });
 
   revalidatePath("/admin/sirkulasi");
   revalidatePath("/admin/transaksi");
